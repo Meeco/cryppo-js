@@ -36,7 +36,7 @@ You can do so using `encryptWithGeneratedKey`. This will return the generated ke
 
 ```ts
 async function encryptData() {
-  const result = await encryptWithKeyDerivedFromString({
+  const result = await encryptWithGeneratedKey({
     data: 'My Secret Data',
     strategy: CipherStrategy.AES_GCM
   });
