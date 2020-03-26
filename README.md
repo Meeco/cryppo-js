@@ -1,6 +1,6 @@
 # Cryppo JS
 
-TypeScript version of [Cryppo](https://github.com/Meeco/cryppo) allowing encryption/decryption in the browser
+TypeScript version of [Cryppo](https://github.com/Meeco/cryppo) allowing easy encryption/decryption for [Meeco](https://dev.meeco.me) in the browser or node.
 
 ## Run the demo page
 
@@ -133,7 +133,7 @@ There are two serialization formats:
 
 A string containing 3 parts concatenated with a `.`.
 
-1. Encryption Strategy Name: The stategy name as defined by EncryptionStrategy#strategy_name
+1. Encryption Strategy Name: The strategy name as defined by EncryptionStrategy#strategy_name
 2. Encoded Encrypted Data: Encrypted Data is encoded with Base64.urlsafe_encode64
 3. Encoded Encryption Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact, converted to YAML, then encoded with Base64.urlsafe_encode64
 
@@ -141,5 +141,5 @@ A string containing 3 parts concatenated with a `.`.
 
 A string containing 5 parts concatenated with a `.`. The first 3 parts are the same as above.
 
-4. Key Derivation Strategy Name: The stategy name as defined by EncryptionStrategy#strategy_name
+4. Key Derivation Strategy Name: The strategy name as defined by EncryptionStrategy#strategy_name
 5. Encoded Key Derivation Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact, converted to YAML, then encoded with Base64.urlsafe_encode64
