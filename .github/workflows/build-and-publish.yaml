@@ -27,8 +27,6 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 13.x
-          registry-url: https://registry.npmjs.org/
-          scope: '@meeco'
       - run: npm config set package-lock false
       - run: npm install
       - name: Get the version
@@ -37,5 +35,6 @@ jobs:
           api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/releases\///g')
           echo ::set-output name=VERSION::$api_version
       - run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
-      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.npm_token }}" > ~/.npmrc
       - run: npm publish
+        env:
+          NPM_TOKEN: ${{ secrets.npm_token }}
