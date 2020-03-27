@@ -13,6 +13,9 @@
     "start": "parcel serve demo/index.html",
     "test": "jest"
   },
+  "publishConfig": {
+    "registry":"https://registry.npmjs.org/@meeco"
+  },
   "source": "src/index.ts",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
