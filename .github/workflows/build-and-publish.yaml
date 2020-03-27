@@ -37,6 +37,5 @@ jobs:
           api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/releases\///g')
           echo ::set-output name=VERSION::$api_version
       - run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.npm_token }}" > ~/.npmrc
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
