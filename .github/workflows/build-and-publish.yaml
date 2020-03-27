@@ -1,0 +1,41 @@
+name: Build and Publish Release
+
+on:
+ push:
+   tags:
+     - 'releases/*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: 13.x
+      - run: npm install
+      - run: npm test
+        env:
+          CI: true
+      - run: npm run browser
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 13.x
+          registry-url: https://npm.pkg.github.com/
+      - run: npm config set package-lock false
+      - run: npm install
+      - name: Get the version
+        id: get_version
+        run: |
+          api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/releases\///g')
+          echo ::set-output name=VERSION::$api_version
+      - run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
