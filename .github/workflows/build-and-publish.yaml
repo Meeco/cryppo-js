@@ -30,7 +30,12 @@ jobs:
           registry-url: https://npm.pkg.github.com/
       - run: npm config set package-lock false
       - run: npm install
-      - run: npm version --no-git-tag-version
+      - name: Get the version
+        id: get_version
+        run: |
+          api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/v//g')
+          echo ::set-output name=VERSION::$api_version
+      - run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
       - run: npm publish --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
