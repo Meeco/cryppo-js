@@ -36,6 +36,6 @@ jobs:
           api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/v//g')
           echo ::set-output name=VERSION::$api_version
       - run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
-      - run: npm publish --dry-run
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
