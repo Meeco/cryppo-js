@@ -1,6 +1,9 @@
 name: Test
 
-on: [push]
+on:
+ push:
+   tags:
+     - 'v*'
 
 jobs:
   test:
@@ -21,4 +24,14 @@ jobs:
         env:
           CI: true
       - run: npm run browser
-      - run: npm pack
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - run: npm version ${{ steps.get_version.outputs.VERSION }}
+      - run: npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
