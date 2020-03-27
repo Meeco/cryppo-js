@@ -27,7 +27,6 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 13.x
-          registry-url: https://npm.pkg.github.com/
       - run: npm config set package-lock false
       - run: npm install
       - name: Get the version
