@@ -42,11 +42,11 @@ module.exports = function(config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     // browsers: ['Chrome', 'Safari', 'Edge', 'IE'],
-    browsers: ['Chrome'],
+    browsers: ['ChromeHeadlessNoSandbox'],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous
@@ -57,7 +57,7 @@ module.exports = function(config) {
         base: 'ChromeHeadless',
         flags: [
           '--no-sandbox', // required to run without privileges in docker
-          '--user-data-dir=/tmp/chrome-test-profile',
+          '--disable-gpu',
           '--disable-web-security'
         ]
       }
