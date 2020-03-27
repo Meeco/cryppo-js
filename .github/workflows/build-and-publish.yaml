@@ -3,7 +3,7 @@ name: Build and Publish Release
 on:
  push:
    tags:
-     - 'v*'
+     - 'releases/*'
 
 jobs:
   test:
@@ -33,7 +33,7 @@ jobs:
       - name: Get the version
         id: get_version
         run: |
-          api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/v//g')
+          api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/releases\///g')
           echo ::set-output name=VERSION::$api_version
       - run: npm version --no-git-tag-version ${{ steps.get_version.outputs.VERSION }}
       - run: npm publish
