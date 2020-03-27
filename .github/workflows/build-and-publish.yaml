@@ -8,17 +8,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [13.x]
-
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 13.x
       - run: npm install
       - run: npm test
         env:
@@ -28,9 +23,17 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 13.x
+          registry-url: https://npm.pkg.github.com/
+      - run: npm install
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: |
+          api_version=$(echo ${GITHUB_REF/refs\/tags\//} | sed 's/v//g')
+          echo ::set-output name=VERSION::$api_version
       - run: npm version ${{ steps.get_version.outputs.VERSION }}
       - run: npm publish --dry-run
         env:
