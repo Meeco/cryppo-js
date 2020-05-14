@@ -14,5 +14,6 @@ export {
   generateEncryptionVerificationArtifacts,
   generateRandomKey,
   encodeSafe64,
-  decodeSafe64
+  decodeSafe64,
+  deSerializeDerivedKeyOptions
 } from './util';
