@@ -17,10 +17,10 @@
     "test": "jest"
   },
   "publishConfig": {
-    "registry":"https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/"
   },
   "source": "src/index.ts",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/src/index.d.ts",
   "repository": {
