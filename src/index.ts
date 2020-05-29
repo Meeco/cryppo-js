@@ -5,15 +5,16 @@ export * from './encryption/encryption';
 export * from './key-derivation/derived-key';
 export * from './key-derivation/pbkdf2-hmac';
 export * from './key-pairs/rsa';
-export * from './strategies';
 export * from './signing/rsa-signature';
-
+export * from './strategies';
 export {
+  binaryBufferToString,
   decodeDerivationArtifacts,
+  decodeSafe64,
+  deSerializeDerivedKeyOptions,
   encodeDerivationArtifacts,
+  encodeSafe64,
   generateEncryptionVerificationArtifacts,
   generateRandomKey,
-  encodeSafe64,
-  decodeSafe64,
-  deSerializeDerivedKeyOptions
+  stringAsBinaryBuffer,
 } from './util';
