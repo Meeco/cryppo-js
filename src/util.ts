@@ -35,7 +35,7 @@ export function deSerializeDerivedKeyOptions(
   const serializationArtifacts = decodeArtifactData(yamlArtifacts);
   return {
     derivationStrategy,
-    serializationArtifacts
+    serializationArtifacts,
   };
 }
 
@@ -91,7 +91,7 @@ export function deSerialize(serialized: string): IDecoded {
 
   return {
     encryptionStrategy,
-    decodedPairs
+    decodedPairs,
   };
 }
 
@@ -99,7 +99,7 @@ function decodeArtifactData(text: string) {
   return YAML.parse(text.replace(/ !binary/g, ' !!binary'));
 }
 
-export function stringAsBinaryBuffer(val: string): Uint8Array {
+export function stringAsBinaryBuffer(val: string): Buffer | Uint8Array {
   if (typeof Buffer !== 'undefined') {
     return Buffer.from(val, 'binary');
   }
@@ -111,7 +111,7 @@ export function stringAsBinaryBuffer(val: string): Uint8Array {
   return bufView;
 }
 
-export function binaryBufferToString(val: any): string {
+export function binaryBufferToString(val: Buffer | Uint8Array | ArrayBuffer): string {
   return util.createBuffer(val).data;
 }
 
@@ -154,7 +154,7 @@ export function generateEncryptionVerificationArtifacts() {
   const salt = random.getBytesSync(16);
   return {
     token: encodeSafe64(token),
-    salt: encodeSafe64(salt)
+    salt: encodeSafe64(salt),
   };
 }
 
