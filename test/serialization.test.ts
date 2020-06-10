@@ -20,50 +20,32 @@ describe('Serialize/Deserialize', () => {
   const encryptionStrategy = 'Aes256Gcm';
 
   // tslint:disable-next-line
-  const testSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.LS0tCml2OiAhYmluYXJ5IHwtCiAgTDI0cjlMQVJGTUxqMGk5SwphdDogIWJpbmFyeSB8LQogIDlWdDJwQk5zd2EwaGs2N3JPNEswdUE9PQphZDogbm9uZQo=`;
+  const testLegacySerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.LS0tCml2OiAhYmluYXJ5IHwtCiAgTDI0cjlMQVJGTUxqMGk5SwphdDogIWJpbmFyeSB8LQogIDlWdDJwQk5zd2EwaGs2N3JPNEswdUE9PQphZDogbm9uZQo=`;
+  // tslint:disable-next-line: max-line-length
   const testBsonSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.QUAAAAAFaXYADAAAAAAvbiv0sBEUwuPSL0oFYXQAEAAAAAD1W3akE2zBrSGTrus7grS4AmFkAAUAAABub25lAAA=`;
-  it('serializes encrypted data with legacy serialization version', () => {
-    expect(
-      serialize(encryptionStrategy, decode64(b64EncryptedData), {
+
+  Object.values(SerializationVersion).forEach(version => {
+   const testSerialized =  version === SerializationVersion.legacy ? testLegacySerialized : testBsonSerialized;
+   it(`serializes encrypted data with ${version} serialization version`, () => {
+      expect(
+        serialize(encryptionStrategy, decode64(b64EncryptedData), {
+          iv: stringAsBinaryBuffer(iv),
+          at: stringAsBinaryBuffer(at),
+          ad
+        }, version)
+      ).toEqual(testSerialized);
+    });
+
+   it(`deserializes encrypted data with ${version}`, () => {
+      const deserialized = deSerialize(testSerialized, version);
+      expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
+      expect(deserialized.decodedPairs.length).toEqual(2);
+      expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
+      expect(deserialized.decodedPairs[1]).toEqual({
         iv: stringAsBinaryBuffer(iv),
         at: stringAsBinaryBuffer(at),
         ad
-      }, SerializationVersion.legacy)
-    ).toEqual(testSerialized);
-  });
-
-  it('serializes encrypted data with latest serialization version', () => {
-    const serializedBson = serialize(encryptionStrategy, decode64(b64EncryptedData), {
-      iv: stringAsBinaryBuffer(iv),
-      at: stringAsBinaryBuffer(at),
-      ad
-    }, SerializationVersion.latest);
-    expect(
-      serializedBson
-    ).toEqual(encodeSafe64Bson(testBsonSerialized));
-  });
-
-  it('deserializes encrypted data', () => {
-    const deserialized = deSerialize(testSerialized, SerializationVersion.legacy);
-    expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
-    expect(deserialized.decodedPairs.length).toEqual(2);
-    expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
-    expect(deserialized.decodedPairs[1]).toEqual({
-      iv: stringAsBinaryBuffer(iv),
-      at: stringAsBinaryBuffer(at),
-      ad
-    });
-  });
-
-  it('deserializes encrypted data bson', () => {
-    const deserialized = deSerialize(testBsonSerialized, SerializationVersion.latest);
-    expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
-    expect(deserialized.decodedPairs.length).toEqual(2);
-    expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
-    expect(deserialized.decodedPairs[1]).toEqual({
-      iv: stringAsBinaryBuffer(iv),
-      at: stringAsBinaryBuffer(at),
-      ad
+      });
     });
   });
 
