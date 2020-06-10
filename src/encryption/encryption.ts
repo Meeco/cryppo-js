@@ -1,11 +1,11 @@
 import { cipher as forgeCipher, random, util } from 'node-forge';
 import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
+import { SerializationVersion } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
 import { generateRandomKey, serialize, stringAsBinaryBuffer } from '../util';
 
 export interface IEncryptionOptionsWithoutKey {
-  key: string;
   /***
    * Data to encrypt
    */
@@ -18,6 +18,7 @@ export interface IEncryptionOptionsWithoutKey {
    * Defaults to 32 - length to use for generated key
    */
   keyLength?: number;
+
   /**
    * @deprecated Primarily for testing purposes.
    */
@@ -43,13 +44,13 @@ export interface IEncryptionResult {
  * Similar to `encryptWithKey` but generates random bytes to use as the key. This will be returned with the result.
  */
 export async function encryptWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey
+  options: IEncryptionOptionsWithoutKey, serializtionVersion: SerializationVersion
 ): Promise<IEncryptionResult & { generatedKey: string }> {
   const key = generateRandomKey(options.keyLength || 32);
   const result = await encryptWithKey({
     ...options,
     key
-  });
+  }, serializtionVersion);
   return {
     ...result,
     generatedKey: key
@@ -61,20 +62,21 @@ export async function encryptWithGeneratedKey(
  * be used to derive a key that will be used in encryption. The derived key will be returned with the results.
  */
 export async function encryptWithKeyDerivedFromString(
-  options: IEncryptionOptions
+  options: IEncryptionOptions, serializtionVersion: SerializationVersion
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
   const derived = await generateDerivedKey({ key: options.key });
   const result = await encryptWithKey({
     ...options,
     key: derived.key
-  });
-  const serializedKey = derived.options.serialize();
+  }, serializtionVersion);
+  const serializedKey = derived.options.serialize(serializtionVersion);
   result.serialized = `${result.serialized}.${serializedKey}`;
   return {
     ...result,
     ...derived
   };
 }
+
 
 /**
  * Encrypt data with the provided key.
@@ -92,12 +94,12 @@ export async function encryptWithKey({
   data,
   strategy,
   iv
-}: IEncryptionOptions): Promise<IEncryptionResult> {
-  const output = _encryptWithKey(key, data, strategy, iv);
+}: IEncryptionOptions,               serializtionVersion: SerializationVersion): Promise<IEncryptionResult> {
+  const output = _encryptWithKey(key, data, strategy, serializtionVersion, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
-  const serialized = serialize(`${cipher}${keyLengthBits}${mode}`, encrypted, artifacts);
+  const serialized = serialize(`${cipher}${keyLengthBits}${mode}`, encrypted, artifacts, serializtionVersion);
   return {
     encrypted,
     serialized
@@ -113,6 +115,7 @@ function _encryptWithKey(
   key: string,
   data: string,
   strategy: CipherStrategy,
+  serializtionVersion: SerializationVersion,
   iv?: string
 ): {
   encrypted: string;
@@ -124,10 +127,10 @@ function _encryptWithKey(
   cipher.update(util.createBuffer(data));
   cipher.finish();
   const artifacts: any = {
-    iv: stringAsBinaryBuffer(iv)
+    iv: serializtionVersion === SerializationVersion.legacy ? stringAsBinaryBuffer(iv) : iv
   };
   if (cipher.mode.tag) {
-    artifacts.at = stringAsBinaryBuffer(cipher.mode.tag.data);
+    artifacts.at = serializtionVersion === SerializationVersion.legacy ? stringAsBinaryBuffer(cipher.mode.tag.data) : cipher.mode.tag.data;
   }
   artifacts.ad = 'none';
   return {

@@ -1,6 +1,16 @@
 <!-- index.html -->
 <html>
   <body>
+    <div style="text-align: right;padding: 2rem;">
+      <p>
+            <label for="serializationVersionSelection">Version:</label>
+      
+            <select name="serializationVersionSelection" id="serializationVersionSelection">
+              <option value="latest">Latest</option>
+              <option value="legacy">Legacy</option>               
+            </select>
+          </p>
+      </div>   
     <fieldset>
       <legend>Encrypt a File:</legend>
       <input id="encryptFileInput" type="file" />

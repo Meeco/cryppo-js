@@ -2,10 +2,12 @@ import { decryptWithKey, encryptWithKeyDerivedFromString } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import { encode64 } from '../src/util';
 import './styles.scss';
+import { SerializationVersion } from '../src/serialization-versions';
 
 const $ = document.getElementById.bind(document);
 const $get = (id: string) => ($(id) as HTMLInputElement)!.value;
 const $set = (id: string, value: string) => (($(id) as HTMLInputElement)!.value = value);
+var $serializationVersion = SerializationVersion.latest;
 
 const types = [
   { name: 'encryptFile', handler: encryptFile },
@@ -25,6 +27,22 @@ types.map(type => {
   );
 });
 
+$(`serializationVersionSelection`)!.addEventListener(
+  'change',
+  (event) => {   
+    switch(event.target.value) {
+      case "legacy":
+        $serializationVersion = SerializationVersion.legacy
+        break;    
+      default:
+        $serializationVersion = SerializationVersion.latest
+        // code block
+    }
+    console.log("$serializationVersion : " + $serializationVersion)
+  },
+  false
+);
+
 $(`downloadDecrypted`)!.addEventListener('click', () => {
   $set(`downloadDecrypted`, '');
   decryptFile(true);
@@ -39,7 +57,7 @@ function encryptFile() {
       data: reader.result as string,
       key: password,
       strategy: CipherStrategy.AES_GCM
-    });
+    }, $serializationVersion);
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
   };
@@ -57,7 +75,7 @@ async function decryptFile(download?: boolean) {
     const decrypted = await decryptWithKey({
       key: password,
       serialized: inText
-    });
+    }, $serializationVersion);
 
     if (download) {
       const base64 = encode64(decrypted);
@@ -94,7 +112,7 @@ async function encryptText() {
     data: inText,
     key: password,
     strategy: CipherStrategy.AES_GCM
-  });
+  },$serializationVersion);
 
   $set('encryptTextOutput', encryptionResult.serialized);
 }
@@ -107,7 +125,7 @@ async function decryptText() {
     const decrypted = await decryptWithKey({
       key: password,
       serialized: inText
-    });
+    },$serializationVersion);
 
     $set('decryptTextOutput', decrypted);
   } catch (ex) {

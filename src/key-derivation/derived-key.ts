@@ -1,7 +1,8 @@
 import { md, pkcs5, random } from 'node-forge';
+import { SerializationVersion } from '../serialization-versions';
 import {
   binaryBufferToString,
-  deSerializeDerivedKeyOptions,
+  deSerializeDerivedKeyOptions, 
   serializeDerivedKeyOptions,
   stringAsBinaryBuffer
 } from '../util';
@@ -74,9 +75,9 @@ export class DerivedKeyOptions implements IDerivedKey {
     });
   }
 
-  public static fromSerialized(serialized: string): DerivedKeyOptions {
-    const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized);
-    const salt = binaryBufferToString(serializationArtifacts.iv);
+  public static fromSerialized(serialized: string,  forVersion: SerializationVersion): DerivedKeyOptions {
+    const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized, forVersion);
+    const salt = forVersion === SerializationVersion.legacy ? binaryBufferToString(serializationArtifacts.iv) : serializationArtifacts.iv;
     return new DerivedKeyOptions({
       // keys taken from ruby lib
       strategy: derivationStrategy,
@@ -102,14 +103,14 @@ export class DerivedKeyOptions implements IDerivedKey {
     this.hash = options.hash || 'SHA256';
   }
 
-  public serialize(): string {
+  public serialize(serializtionVersion: SerializationVersion): string {
     // keys taken from ruby lib
     return serializeDerivedKeyOptions(this.strategy, {
-      iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
+      iv: serializtionVersion === SerializationVersion.legacy ? stringAsBinaryBuffer(this.salt) : this.salt , // ensures proper yaml serialization
       i: this.iterations,
       l: this.length,
       hash: this.hash
-    });
+    }, serializtionVersion);
   }
 
   public deriveKey(key: string): Promise<string> {
