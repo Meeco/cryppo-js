@@ -1,0 +1,66 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles.scss">
+  </head>
+  <body>
+    <div style="text-align: right;padding: 2rem; display: none;">
+      <p>
+            <label for="serializationVersionSelection">Serialization Format:</label>
+      
+            <select name="serializationVersionSelection" id="serializationVersionSelection">
+              <option value="latest">Latest</option>
+              <option value="legacy">Legacy</option>               
+            </select>
+          </p>
+      </div>  
+      <ul class="nav">
+        <li><a href="/">Derived Key</a></li>
+        <!-- <li><a href="/encryption_with_key.html">Key</a></li> -->
+        <li><a href="/encryption_with_generated_key.html">Generated Key</a></li>
+        <li><a href="/encryption_with_signature.html">RSA Signature</a></li>        
+      </ul> 
+     <h1 class="center"> Encryption With Generated Key </h1> 
+    <fieldset>
+      <legend>Encrypt a File:</legend>
+      <input id="encryptFileInput" type="file" />    
+      <button id="encryptFileAction">Encrypt</button>
+      <textarea
+        id="encryptFileOutput"
+        placeholder="Serialized encrypted file contents will output here"
+      ></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Decrypt a File:</legend>
+      <textarea id="decryptFileInput" placeholder="Serialized encrypted file contents"></textarea>
+      <input id="decryptFileGeneratedKey" type="password" placeholder="decrypt File Generated Key" />
+      <button id="decryptFileAction">Decrypt and Output</button>
+      <button id="downloadDecrypted">Download Decrypted</button>
+      <textarea
+        id="decryptFileOutput"
+        placeholder="Decrypted file contents will output here"
+      ></textarea>
+      <img id="imgOutput" />
+    </fieldset>
+
+    <fieldset>
+      <legend>Encrypt some text:</legend>
+      <textarea id="encryptTextInput" placeholder="Text to encrypt"></textarea>     
+      <button id="encryptTextAction">Encrypt</button>
+      <textarea
+        id="encryptTextOutput"
+        placeholder="Serialized encrypted will output here"
+      ></textarea>    
+    </fieldset>
+
+    <fieldset>
+      <legend>Decrypt some text:</legend>
+      <textarea id="decryptTextInput" placeholder="Serialized encrypted"></textarea>
+      <input id="decryptGeneratedKey" type="password" placeholder="Generated Key" />
+      <button id="decryptTextAction">Decrypt</button>
+      <textarea id="decryptTextOutput" placeholder="Decrypted text will output here"></textarea>
+    </fieldset>
+
+    <script src="./encryption_with_generated_key.ts"></script>
+  </body>
+</html>

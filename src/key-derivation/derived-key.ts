@@ -2,7 +2,7 @@ import { md, pkcs5, random } from 'node-forge';
 import { SerializationVersion } from '../serialization-versions';
 import {
   binaryBufferToString,
-  deSerializeDerivedKeyOptions, 
+  deSerializeDerivedKeyOptions,
   serializeDerivedKeyOptions,
   stringAsBinaryBuffer
 } from '../util';
@@ -77,11 +77,11 @@ export class DerivedKeyOptions implements IDerivedKey {
 
   public static fromSerialized(serialized: string,  forVersion: SerializationVersion): DerivedKeyOptions {
     const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized, forVersion);
-    const salt = forVersion === SerializationVersion.legacy ? binaryBufferToString(serializationArtifacts.iv) : serializationArtifacts.iv;
+    
     return new DerivedKeyOptions({
       // keys taken from ruby lib
       strategy: derivationStrategy,
-      salt,
+      salt: binaryBufferToString(serializationArtifacts.iv),
       iterations: (<any>serializationArtifacts).i,
       length: (<any>serializationArtifacts).l,
       hash: (<any>serializationArtifacts).hash,
@@ -106,7 +106,7 @@ export class DerivedKeyOptions implements IDerivedKey {
   public serialize(serializtionVersion: SerializationVersion): string {
     // keys taken from ruby lib
     return serializeDerivedKeyOptions(this.strategy, {
-      iv: serializtionVersion === SerializationVersion.legacy ? stringAsBinaryBuffer(this.salt) : this.salt , // ensures proper yaml serialization
+      iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
       i: this.iterations,
       l: this.length,
       hash: this.hash

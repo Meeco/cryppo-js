@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles.scss">
+  </head>
+  <body>
+    <div style="text-align: right;padding: 2rem; display: none;">
+      <p>
+            <label for="serializationVersionSelection">Serialization Format:</label>
+      
+            <select name="serializationVersionSelection" id="serializationVersionSelection">
+              <option value="latest">Latest</option>
+              <option value="legacy">Legacy</option>               
+            </select>
+          </p>
+      </div>
+      
+      <ul class="nav">
+        <li><a href="/">Derived Key</a></li>
+        <!-- <li><a href="/encryption_with_key.html">Key</a></li> -->
+        <li><a href="/encryption_with_generated_key.html">Generated Key</a></li>
+        <li><a href="/encryption_with_signature.html">RSA Signature</a></li>        
+      </ul> 
+
+      <h1 class="center"> Encryption With RSA Signature </h1> 
+
+    <fieldset>
+      <legend>Sign some text:</legend>
+      <textarea id="encryptTextInput" placeholder="Text to Sign"></textarea>
+      <input id="encryptTextPrivateKeyPem" type="password" placeholder="Private Key Pem" />
+      <button id="encryptTextAction">Sign</button>
+      <textarea
+        id="encryptTextOutput"
+        placeholder="Serialized encrypted will output here"
+      ></textarea>
+    </fieldset>
+
+    <fieldset>
+      <legend>Verify some text:</legend>
+      <textarea id="decryptTextInput" placeholder="Serialized encrypted"></textarea>
+      <input id="decryptTextPublicKeyPem" type="password" placeholder="Public Key" />
+      <button id="decryptTextAction">Verify</button>
+      <textarea id="decryptTextOutput" placeholder="Decrypted text will output here"></textarea>
+    </fieldset>
+
+    <script src="./encryption_with_signature.ts"></script>
+  </body>
+</html>

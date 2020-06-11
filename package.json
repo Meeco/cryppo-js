@@ -13,7 +13,7 @@
     "prebuild": "npm run lint",
     "prepack": "npm run build",
     "prepublishOnly": "npm run build",
-    "start": "parcel serve demo/index.html",
+    "start": "parcel serve demo/encryption_with_derived_key.html",
     "test": "jest"
   },
   "publishConfig": {

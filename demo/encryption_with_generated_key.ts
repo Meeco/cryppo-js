@@ -1,7 +1,6 @@
-import { decryptWithKey, encryptWithKeyDerivedFromString } from '../src/index';
+import { decryptWithKey, encryptWithKeyDerivedFromString, encryptWithGeneratedKey } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import { encode64 } from '../src/util';
-import './styles.scss';
 import { SerializationVersion } from '../src/serialization-versions';
 
 const $ = document.getElementById.bind(document);
@@ -35,8 +34,7 @@ $(`serializationVersionSelection`)!.addEventListener(
         $serializationVersion = SerializationVersion.legacy
         break;    
       default:
-        $serializationVersion = SerializationVersion.latest
-        // code block
+        $serializationVersion = SerializationVersion.latest    
     }
     console.log("$serializationVersion : " + $serializationVersion)
   },
@@ -50,16 +48,15 @@ $(`downloadDecrypted`)!.addEventListener('click', () => {
 
 function encryptFile() {
   const file = $('encryptFileInput') as HTMLInputElement;
-  const reader = new FileReader();
-  const password = $get('encryptFilePassword');
+  const reader = new FileReader();  
   reader.onload = async result => {
-    const encryptionResult = await encryptWithKeyDerivedFromString({
-      data: reader.result as string,
-      key: password,
+    const encryptionResult = await encryptWithGeneratedKey({
+      data: reader.result as string,     
       strategy: CipherStrategy.AES_GCM
     }, $serializationVersion);
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
+    $set('decryptFileGeneratedKey', encryptionResult.generatedKey)
   };
   if (!file.files!.length) {
     return alert('Select a file first');
@@ -69,7 +66,7 @@ function encryptFile() {
 
 async function decryptFile(download?: boolean) {
   const inText = $get('decryptFileInput');
-  const password = $get('decryptFilePassword');
+  const password = $get('decryptFileGeneratedKey');
 
   try {
     const decrypted = await decryptWithKey({
@@ -106,24 +103,23 @@ function str2blob(str: string, contentType?: string) {
 
 async function encryptText() {
   const inText = $get('encryptTextInput');
-  const password = $get('encryptTextPassword');
-
-  const encryptionResult = await encryptWithKeyDerivedFromString({
-    data: inText,
-    key: password,
+  
+  const encryptionResult = await encryptWithGeneratedKey({
+    data: inText,    
     strategy: CipherStrategy.AES_GCM
   },$serializationVersion);
 
   $set('encryptTextOutput', encryptionResult.serialized);
+  $set('decryptGeneratedKey', encryptionResult.generatedKey);
 }
 
 async function decryptText() {
   const inText = $get('decryptTextInput');
-  const password = $get('decryptTextPassword');
+  const generatedKey = $get('decryptGeneratedKey');
 
   try {
     const decrypted = await decryptWithKey({
-      key: password,
+      key: generatedKey,
       serialized: inText
     },$serializationVersion);
 

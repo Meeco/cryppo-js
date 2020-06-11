@@ -127,10 +127,10 @@ function _encryptWithKey(
   cipher.update(util.createBuffer(data));
   cipher.finish();
   const artifacts: any = {
-    iv: serializtionVersion === SerializationVersion.legacy ? stringAsBinaryBuffer(iv) : iv
+    iv: stringAsBinaryBuffer(iv)
   };
   if (cipher.mode.tag) {
-    artifacts.at = serializtionVersion === SerializationVersion.legacy ? stringAsBinaryBuffer(cipher.mode.tag.data) : cipher.mode.tag.data;
+    artifacts.at = stringAsBinaryBuffer(cipher.mode.tag.data);
   }
   artifacts.ad = 'none';
   return {
