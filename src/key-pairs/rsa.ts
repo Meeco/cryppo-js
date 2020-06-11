@@ -40,12 +40,12 @@ export async function encryptWithPublicKey({
   publicKeyPem: string;
   data: string;
   scheme?: RsaEncryptionScheme;
-},                                         SerializationFormat: SerializationFormat) {
+},                                         serializationFormat: SerializationFormat) {
   const pk = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
   const encrypted = pk.encrypt(data, scheme);
 
   const bitLength = keyLengthFromPublicKeyPem(publicKeyPem);
-  const serialized = serialize(`Rsa${bitLength}`, encrypted, <any>{}, SerializationFormat);
+  const serialized = serialize(`Rsa${bitLength}`, encrypted, <any>{}, serializationFormat);
   return {
     encrypted,
     serialized
@@ -70,8 +70,8 @@ export async function decryptSerializedWithPrivateKey({
   privateKeyPem: string;
   serialized: string;
   scheme?: RsaEncryptionScheme;
-},                                                    SerializationFormat: SerializationFormat) {
-  const encrypted = deSerialize(serialized, SerializationFormat).decodedPairs[0];
+},                                                    serializationFormat: SerializationFormat) {
+  const encrypted = deSerialize(serialized, serializationFormat).decodedPairs[0];
   return decryptWithPrivateKey({
     password,
     privateKeyPem,

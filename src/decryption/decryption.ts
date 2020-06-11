@@ -16,8 +16,8 @@ export async function decryptWithKey({
 }: {
   serialized: string;
   key: string;
-},                                   SerializationFormat: SerializationFormat): Promise<string> {
-  const deSerialized = deSerialize(serialized, SerializationFormat);
+},                                   serializationFormat: SerializationFormat): Promise<string> {
+  const deSerialized = deSerialize(serialized, serializationFormat);
   const { encryptionStrategy } = deSerialized;
   let { decodedPairs } = deSerialized;
   let output: string = '';
@@ -28,7 +28,7 @@ export async function decryptWithKey({
    */
   if (DerivedKeyOptions.usesDerivedKey(serialized)) {
     // Key will now be one derived with Pbkdf
-    key = await _deriveKeyWithOptions(key, serialized, SerializationFormat);
+    key = await _deriveKeyWithOptions(key, serialized, serializationFormat);
     // Can chop off the last two parts now as they were key data
     decodedPairs = decodedPairs.slice(0, decodedPairs.length - 2);
   }
@@ -46,8 +46,8 @@ export async function decryptWithKey({
  * Determine if we need to use a derived key or not based on whether or not
  * we have key derivation options in the serialized payload.
  */
-function _deriveKeyWithOptions(key: string, serializedOptions: string, SerializationFormat: SerializationFormat) {
-  const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions, SerializationFormat);
+function _deriveKeyWithOptions(key: string, serializedOptions: string, serializationFormat: SerializationFormat) {
+  const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions, serializationFormat);
   return derivedKeyOptions.deriveKey(key);
 }
 

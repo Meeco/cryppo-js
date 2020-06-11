@@ -95,7 +95,7 @@ export async function encryptWithKey({
   strategy,
   iv
 }: IEncryptionOptions,               serializtionVersion: SerializationFormat): Promise<IEncryptionResult> {
-  const output = _encryptWithKey(key, data, strategy, serializtionVersion, iv);
+  const output = _encryptWithKey(key, data, strategy, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
@@ -115,7 +115,6 @@ function _encryptWithKey(
   key: string,
   data: string,
   strategy: CipherStrategy,
-  serializtionVersion: SerializationFormat,
   iv?: string
 ): {
   encrypted: string;

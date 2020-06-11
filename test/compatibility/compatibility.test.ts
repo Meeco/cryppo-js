@@ -1,4 +1,4 @@
-import { decryptWithKey, loadRsaSignature, verifyWithPublicKey } from '../../src';
+import { decryptSerializedWithPrivateKey, decryptWithKey, loadRsaSignature, verifyWithPublicKey } from '../../src';
 import Compat from './compat.json';
 
 describe('compatiblity test for all cryppo port', () => {
@@ -31,5 +31,22 @@ describe('compatiblity test for all cryppo port', () => {
         done(err);
       }
     });
+  });
+
+  Object.values(Compat.encryption_with_key).forEach( (objToValidate: any, index) => {
+    if (objToValidate.encryption_strategy === 'Rsa4096') {
+      it(`${index}. can successfully decrypt using private key pem RSA 4096`, async done => {
+        try {
+
+          const encryptionResult = await decryptSerializedWithPrivateKey(
+            {privateKeyPem: objToValidate.key, serialized: objToValidate.serialized},
+            objToValidate.format);
+          expect(encryptionResult).toEqual(objToValidate.expected_decryption_result);
+          done();
+        } catch (err) {
+          done(err);
+        }
+      });
+    }
   });
 });

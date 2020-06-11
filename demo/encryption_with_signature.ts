@@ -1,11 +1,14 @@
-import { signWithPrivateKey, verifyWithPublicKey, loadRsaSignature } from '../src/index';
+import { signWithPrivateKey, verifyWithPublicKey, loadRsaSignature, decryptSerializedWithPrivateKey } from '../src/index';
+import { SerializationFormat } from '../src/serialization-versions';
 
 const $ = document.getElementById.bind(document);
 const $get = (id: string) => ($(id) as HTMLInputElement)!.value;
 const $set = (id: string, value: string) => (($(id) as HTMLInputElement)!.value = value);
+var $SerializationFormat = SerializationFormat.latest_version;
 
 const types = [
   { name: 'encryptText', handler: encryptText },
+  { name: 'verifyText', handler: verifyText },
   { name: 'decryptText', handler: decryptText }
 ];
 
@@ -20,6 +23,21 @@ types.map(type => {
   );
 });
 
+$(`serializationVersionSelection`)!.addEventListener(
+  'change',
+  (event) => {   
+    switch(event.target.value) {
+      case "legacy":
+        $SerializationFormat = SerializationFormat.legacy
+        break;    
+      default:
+        $SerializationFormat = SerializationFormat.latest_version
+    }
+    console.log("$SerializationFormat : " + $SerializationFormat)
+  },
+  false
+);
+
 async function encryptText() {
   const inText = $get('encryptTextInput');
   const privateKeyPem = $get('encryptTextPrivateKeyPem');
@@ -30,14 +48,25 @@ async function encryptText() {
   
 }
 
-async function decryptText() {  
-  const publicKeyPem = $get('decryptTextPublicKeyPem'); 
-  const serializedPayload = $get('decryptTextInput'); 
+async function verifyText() {  
+  const publicKeyPem = $get('verifyTextPublicKeyPem'); 
+  const serializedPayload = $get('verifyTextInput'); 
   const encryptionResult = await loadRsaSignature(serializedPayload)
   try {
-    const decrypted = await verifyWithPublicKey(publicKeyPem, encryptionResult);
-    $set('decryptTextOutput', decrypted? 'Successfully Verified' : 'Unsuccessful Verification');
+    const verifyed = await verifyWithPublicKey(publicKeyPem, encryptionResult);
+    $set('verifyTextOutput', verifyed? 'Successfully Verified' : 'Unsuccessful Verification');
   } catch (ex) {
-    $set('decryptTextOutput', `[Verification FAILED]`);
+    $set('verifyTextOutput', `[Verification FAILED]`);
+  }
+}
+
+async function decryptText() {  
+  const privateKeyPem = $get('decryptTextPublicKeyPem'); 
+  const decryptTextInput = $get('decryptTextInput'); 
+  try {
+    const decrypted = await decryptSerializedWithPrivateKey( {privateKeyPem: privateKeyPem, serialized: decryptTextInput}, $SerializationFormat);
+    $set('decryptTextOutput', decrypted);
+  } catch (ex) {
+    $set('decryptTextOutput', `[Decription FAILED]`);
   }
 }

@@ -2,18 +2,7 @@
   <head>
     <link rel="stylesheet" href="./styles.scss">
   </head>
-  <body>
-    <div style="text-align: right;padding: 2rem; display: none;">
-      <p>
-            <label for="serializationVersionSelection">Serialization Format:</label>
-      
-            <select name="serializationVersionSelection" id="serializationVersionSelection">
-              <option value="latest">Latest</option>
-              <option value="legacy">Legacy</option>               
-            </select>
-          </p>
-      </div>
-      
+  <body>      
       <ul class="nav">
         <li><a href="/">Derived Key</a></li>
         <!-- <li><a href="/encryption_with_key.html">Key</a></li> -->
@@ -63,6 +52,17 @@
       <button id="decryptTextAction">Decrypt</button>
       <textarea id="decryptTextOutput" placeholder="Decrypted text will output here"></textarea>
     </fieldset>
+
+    <div style="text-align: right;padding: 2rem;">
+      <p>
+            <label for="serializationVersionSelection">Serialization Format:</label>
+      
+            <select name="serializationVersionSelection" id="serializationVersionSelection">
+              <option value="latest">Latest</option>
+              <option value="legacy">Legacy</option>               
+            </select>
+          </p>
+      </div>
 
     <script src="./encryption_with_derived_key.ts"></script>
   </body>
