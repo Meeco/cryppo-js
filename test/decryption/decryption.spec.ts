@@ -1,5 +1,5 @@
 import { decryptWithKey } from '../../src/decryption/decryption';
-import { SerializationVersion } from '../../src/serialization-versions';
+import { SerializationFormat } from '../../src/serialization-versions';
 describe('decryption', () => {
   it('can decrypt a serialized payload that includes key derivation artifacts', async done => {
     try {
@@ -14,7 +14,7 @@ describe('decryption', () => {
       const decrypted = await decryptWithKey({
         serialized,
         key
-      }, SerializationVersion.legacy);
+      }, SerializationFormat.legacy);
       expect(decrypted).toEqual('some data to encrypt');
       done();
     } catch (err) {

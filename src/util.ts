@@ -3,7 +3,7 @@ import { pki, random, util } from 'node-forge';
 import * as YAML from 'yaml';
 import { IEncryptionArtifacts } from './encryption/encryption';
 import { ICryppoSerializationArtifacts, IDerivedKey } from './key-derivation/derived-key';
-import { SerializationVersion } from './serialization-versions';
+import { SerializationFormat } from './serialization-versions';
 
 // Adds support for binary types
 YAML.defaultOptions.schema = 'yaml-1.1';
@@ -19,10 +19,10 @@ export const generateRandomKey = (length = 32) => random.getBytesSync(length);
 export function serializeDerivedKeyOptions(
   strategy: string,
   artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts,
-  forVersion: SerializationVersion
+  forVersion: SerializationFormat
 ) {
     switch (forVersion) {
-      case SerializationVersion.legacy: {
+      case SerializationFormat.legacy: {
         const yaml = encodeYaml(artifacts);
         return `${strategy}.${encodeSafe64(yaml)}`;
       }
@@ -34,7 +34,7 @@ export function serializeDerivedKeyOptions(
 }
 
 export function deSerializeDerivedKeyOptions(
-  serialized: string, forVersion: SerializationVersion
+  serialized: string, forVersion: SerializationFormat
 ): { derivationStrategy: string; serializationArtifacts: IEncryptionArtifacts } {
   let items = serialized.split('.');
   // We might get passed an entire encrypted string in which case we just want the key and strategy
@@ -42,7 +42,7 @@ export function deSerializeDerivedKeyOptions(
     items = items.slice(-2);
   }
   const [derivationStrategy, artifacts] = items;
-  const artifactsToDecode = forVersion === SerializationVersion.legacy ? decodeSafe64(artifacts) : artifacts;
+  const artifactsToDecode = forVersion === SerializationFormat.legacy ? decodeSafe64(artifacts) : artifacts;
   const serializationArtifacts = decodeArtifactData(artifactsToDecode, forVersion);
   return {
     derivationStrategy,
@@ -54,10 +54,10 @@ export function serialize(
   strategy: string,
   data: string,
   artifacts: IDerivedKey | IEncryptionArtifacts,
-  forVersion: SerializationVersion
+  forVersion: SerializationFormat
 ) {
   switch (forVersion) {
-    case SerializationVersion.legacy: {
+    case SerializationFormat.legacy: {
       const yaml = encodeYaml(artifacts);
       return `${strategy}.${encodeSafe64(data)}.${encodeSafe64(yaml)}`;
     }
@@ -83,7 +83,7 @@ export interface IDecoded {
   decodedPairs: any[];
 }
 
-export function deSerialize(serialized: string,  forVersion: SerializationVersion): IDecoded {
+export function deSerialize(serialized: string,  forVersion: SerializationFormat): IDecoded {
   const items = serialized.split('.');
   if (items.length < 2) {
     throw new Error('String is not a serialized encrypted string');
@@ -99,7 +99,7 @@ export function deSerialize(serialized: string,  forVersion: SerializationVersio
       // Base64 encoded encrypted data
       return decodeSafe64(item);
     } else {
-      const artifactsToDecode = forVersion === SerializationVersion.legacy ? decodeSafe64(item) : item;
+      const artifactsToDecode = forVersion === SerializationFormat.legacy ? decodeSafe64(item) : item;
       return decodeArtifactData(artifactsToDecode, forVersion);
     }
   });
@@ -114,9 +114,9 @@ export function deSerialize(serialized: string,  forVersion: SerializationVersio
   };
 }
 
-function decodeArtifactData(text: string, forSerializtionVersion: SerializationVersion) {
+function decodeArtifactData(text: string, forSerializtionVersion: SerializationFormat) {
   switch (forSerializtionVersion) {
-    case SerializationVersion.legacy: {
+    case SerializationFormat.legacy: {
       return YAML.parse(text.replace(/ !binary/g, ' !!binary'));
     }
     default: {

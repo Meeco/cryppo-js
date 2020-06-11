@@ -1,5 +1,5 @@
 import { CipherStrategy, DerivedKeyOptions, encryptWithKey } from '../src';
-import { SerializationVersion } from '../src/serialization-versions';
+import { SerializationFormat } from '../src/serialization-versions';
 import {
   decode64,
   decodeSafe64,
@@ -24,8 +24,8 @@ describe('Serialize/Deserialize', () => {
   // tslint:disable-next-line: max-line-length
   const testBsonSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.QUAAAAAFaXYADAAAAAAvbiv0sBEUwuPSL0oFYXQAEAAAAAD1W3akE2zBrSGTrus7grS4AmFkAAUAAABub25lAAA=`;
 
-  Object.values(SerializationVersion).forEach(version => {
-   const testSerialized =  version === SerializationVersion.legacy ? testLegacySerialized : testBsonSerialized;
+  Object.values(SerializationFormat).forEach(version => {
+   const testSerialized =  version === SerializationFormat.legacy ? testLegacySerialized : testBsonSerialized;
    it(`serializes encrypted data with ${version} serialization version`, () => {
       expect(
         serialize(encryptionStrategy, decode64(b64EncryptedData), {
@@ -61,7 +61,7 @@ describe('Serialize/Deserialize', () => {
       };
 
       const derived = DerivedKeyOptions.randomFromOptions({});
-      const encodedSerialized = derived.serialize(SerializationVersion.legacy);
+      const encodedSerialized = derived.serialize(SerializationFormat.legacy);
       const [_, artifacts] = encodedSerialized.split('.');
 
       const yaml = decodeSafe64(artifacts);
@@ -71,7 +71,7 @@ describe('Serialize/Deserialize', () => {
         key: generateRandomKey(),
         data: 'This is some test data that will be encrypted',
         strategy: CipherStrategy.AES_GCM
-      }, SerializationVersion.legacy);
+      }, SerializationFormat.legacy);
       const { serialized } = encrypted;
       const [__, ___, encoded] = serialized.split('.');
       const parsed = decodeSafe64(encoded);

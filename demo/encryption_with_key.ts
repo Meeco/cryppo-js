@@ -1,12 +1,12 @@
 import { decryptWithKey, encryptWithKeyDerivedFromString, encryptWithKey } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import { encode64 } from '../src/util';
-import { SerializationVersion } from '../src/serialization-versions';
+import { SerializationFormat } from '../src/serialization-versions';
 
 const $ = document.getElementById.bind(document);
 const $get = (id: string) => ($(id) as HTMLInputElement)!.value;
 const $set = (id: string, value: string) => (($(id) as HTMLInputElement)!.value = value);
-var $serializationVersion = SerializationVersion.latest;
+var $SerializationFormat = SerializationFormat.latest_version;
 
 const types = [
   { name: 'encryptFile', handler: encryptFile },
@@ -31,12 +31,12 @@ $(`serializationVersionSelection`)!.addEventListener(
   (event) => {   
     switch(event.target.value) {
       case "legacy":
-        $serializationVersion = SerializationVersion.legacy
+        $SerializationFormat = SerializationFormat.legacy
         break;    
       default:
-        $serializationVersion = SerializationVersion.latest
+        $SerializationFormat = SerializationFormat.latest_version
     }
-    console.log("$serializationVersion : " + $serializationVersion)
+    console.log("$SerializationFormat : " + $SerializationFormat)
   },
   false
 );
@@ -55,7 +55,7 @@ function encryptFile() {
       data: reader.result as string,
       key: Key,
       strategy: CipherStrategy.AES_GCM
-    }, $serializationVersion);
+    }, $SerializationFormat);
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
   };
@@ -73,7 +73,7 @@ async function decryptFile(download?: boolean) {
     const decrypted = await decryptWithKey({
       key: Key,
       serialized: inText
-    }, $serializationVersion);
+    }, $SerializationFormat);
 
     if (download) {
       const base64 = encode64(decrypted);
@@ -110,7 +110,7 @@ async function encryptText() {
     data: inText,
     key: Key,
     strategy: CipherStrategy.AES_GCM
-  },$serializationVersion);
+  },$SerializationFormat);
 
   $set('encryptTextOutput', encryptionResult.serialized);
 }
@@ -123,7 +123,7 @@ async function decryptText() {
     const decrypted = await decryptWithKey({
       key: Key,
       serialized: inText
-    },$serializationVersion);
+    },$SerializationFormat);
 
     $set('decryptTextOutput', decrypted);
   } catch (ex) {

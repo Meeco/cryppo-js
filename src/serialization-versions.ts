@@ -1,4 +1,4 @@
-export enum SerializationVersion {
+export enum SerializationFormat {
     legacy = 'legacy',
-    latest = 'latest'
+    latest_version = 'latest_version'
   }

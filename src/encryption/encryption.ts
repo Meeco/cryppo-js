@@ -1,7 +1,7 @@
 import { cipher as forgeCipher, random, util } from 'node-forge';
 import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
-import { SerializationVersion } from '../serialization-versions';
+import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
 import { generateRandomKey, serialize, stringAsBinaryBuffer } from '../util';
 
@@ -44,7 +44,7 @@ export interface IEncryptionResult {
  * Similar to `encryptWithKey` but generates random bytes to use as the key. This will be returned with the result.
  */
 export async function encryptWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey, serializtionVersion: SerializationVersion
+  options: IEncryptionOptionsWithoutKey, serializtionVersion: SerializationFormat
 ): Promise<IEncryptionResult & { generatedKey: string }> {
   const key = generateRandomKey(options.keyLength || 32);
   const result = await encryptWithKey({
@@ -62,7 +62,7 @@ export async function encryptWithGeneratedKey(
  * be used to derive a key that will be used in encryption. The derived key will be returned with the results.
  */
 export async function encryptWithKeyDerivedFromString(
-  options: IEncryptionOptions, serializtionVersion: SerializationVersion
+  options: IEncryptionOptions, serializtionVersion: SerializationFormat
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
   const derived = await generateDerivedKey({ key: options.key });
   const result = await encryptWithKey({
@@ -94,7 +94,7 @@ export async function encryptWithKey({
   data,
   strategy,
   iv
-}: IEncryptionOptions,               serializtionVersion: SerializationVersion): Promise<IEncryptionResult> {
+}: IEncryptionOptions,               serializtionVersion: SerializationFormat): Promise<IEncryptionResult> {
   const output = _encryptWithKey(key, data, strategy, serializtionVersion, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
@@ -115,7 +115,7 @@ function _encryptWithKey(
   key: string,
   data: string,
   strategy: CipherStrategy,
-  serializtionVersion: SerializationVersion,
+  serializtionVersion: SerializationFormat,
   iv?: string
 ): {
   encrypted: string;

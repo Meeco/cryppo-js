@@ -4,7 +4,7 @@ import {
   encryptWithPublicKey,
   generateRSAKeyPair
 } from '../../src/key-pairs/rsa';
-import { SerializationVersion } from '../../src/serialization-versions';
+import { SerializationFormat } from '../../src/serialization-versions';
 
 describe('RSA Keypair Generation', () => {
   it('generates RSA Keypairs', async done => {
@@ -92,7 +92,7 @@ describe('RSA Keypair Generation', () => {
       const encrypted = await encryptWithPublicKey({
         publicKeyPem: PUBLIC_KEY,
         data: SECRET
-      }, SerializationVersion.legacy);
+      }, SerializationFormat.legacy);
       expect(encrypted).not.toEqual(SECRET);
       done();
     } catch (ex) {
@@ -105,7 +105,7 @@ describe('RSA Keypair Generation', () => {
       const result = await encryptWithPublicKey({
         publicKeyPem: PUBLIC_KEY,
         data: SECRET
-      }, SerializationVersion.legacy);
+      }, SerializationFormat.legacy);
       const { encrypted } = result;
       const decrypted = await decryptWithPrivateKey({
         encrypted,
@@ -128,7 +128,7 @@ describe('RSA Keypair Generation', () => {
       const result = await encryptWithPublicKey({
         publicKeyPem: PUBLIC_KEY,
         data: SECRET
-      }, SerializationVersion.legacy);
+      }, SerializationFormat.legacy);
       const { encrypted } = result;
       const decrypted = await decryptWithPrivateKey({
         encrypted,

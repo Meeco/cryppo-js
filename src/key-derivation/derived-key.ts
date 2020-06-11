@@ -1,5 +1,5 @@
 import { md, pkcs5, random } from 'node-forge';
-import { SerializationVersion } from '../serialization-versions';
+import { SerializationFormat } from '../serialization-versions';
 import {
   binaryBufferToString,
   deSerializeDerivedKeyOptions,
@@ -75,7 +75,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     });
   }
 
-  public static fromSerialized(serialized: string,  forVersion: SerializationVersion): DerivedKeyOptions {
+  public static fromSerialized(serialized: string,  forVersion: SerializationFormat): DerivedKeyOptions {
     const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized, forVersion);
     
     return new DerivedKeyOptions({
@@ -103,7 +103,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     this.hash = options.hash || 'SHA256';
   }
 
-  public serialize(serializtionVersion: SerializationVersion): string {
+  public serialize(serializtionVersion: SerializationFormat): string {
     // keys taken from ruby lib
     return serializeDerivedKeyOptions(this.strategy, {
       iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization

@@ -1,6 +1,6 @@
 import { decryptWithKey } from '../src';
 import { encryptWithKeyDerivedFromString } from '../src/encryption/encryption';
-import { SerializationVersion } from '../src/serialization-versions';
+import { SerializationFormat } from '../src/serialization-versions';
 import { CipherStrategy } from '../src/strategies';
 
 describe('aes-256-gcm', () => {
@@ -9,11 +9,11 @@ describe('aes-256-gcm', () => {
       const key = 'correct horse battery staple';
       const data = 'some secret data';
       const strategy = CipherStrategy.AES_GCM;
-      const result = await encryptWithKeyDerivedFromString({ key, data, strategy }, SerializationVersion.latest);
+      const result = await encryptWithKeyDerivedFromString({ key, data, strategy }, SerializationFormat.latest_version);
       const decryptedWithSourceKey = await decryptWithKey({
         serialized: result.serialized,
         key
-      }, SerializationVersion.latest);
+      }, SerializationFormat.latest_version);
       const decryptedWithDerivedKey = await decryptWithKey({
         // Slice off the key derivation data so it does not try to derive a new key
         serialized: result.serialized
@@ -21,7 +21,7 @@ describe('aes-256-gcm', () => {
           .slice(0, -2)
           .join('.'),
         key: result.key
-      }, SerializationVersion.latest);
+      }, SerializationFormat.latest_version);
 
       expect(decryptedWithSourceKey).toEqual(data);
       expect(decryptedWithDerivedKey).toEqual(data);
@@ -33,7 +33,7 @@ describe('aes-256-gcm', () => {
   });
 
   Object.values(CipherStrategy).forEach(strategy => {
-    Object.values(SerializationVersion).forEach(version => {
+    Object.values(SerializationFormat).forEach(version => {
       it(`can successfully encrypt and decrypt with ${strategy}
          Encryption and ${version} serialization version`, async done => {
         try {

@@ -33,11 +33,7 @@ async function encryptText() {
 async function decryptText() {  
   const publicKeyPem = $get('decryptTextPublicKeyPem'); 
   const serializedPayload = $get('decryptTextInput'); 
-  
-  console.log("serialize Payload: "+ serializedPayload)
-
   const encryptionResult = await loadRsaSignature(serializedPayload)
-  console.log("encyption Result: " + encryptionResult)
   try {
     const decrypted = await verifyWithPublicKey(publicKeyPem, encryptionResult);
     $set('decryptTextOutput', decrypted? 'Successfully Verified' : 'Unsuccessful Verification');

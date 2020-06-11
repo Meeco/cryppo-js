@@ -1,7 +1,7 @@
 import { cipher, util } from 'node-forge';
 import { deSerialize } from '../../src/util';
 import { DerivedKeyOptions } from '../key-derivation/derived-key';
-import { SerializationVersion } from '../serialization-versions';
+import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies';
 
 interface IEncryptionOptions {
@@ -16,8 +16,8 @@ export async function decryptWithKey({
 }: {
   serialized: string;
   key: string;
-},                                   serializationVersion: SerializationVersion): Promise<string> {
-  const deSerialized = deSerialize(serialized, serializationVersion);
+},                                   SerializationFormat: SerializationFormat): Promise<string> {
+  const deSerialized = deSerialize(serialized, SerializationFormat);
   const { encryptionStrategy } = deSerialized;
   let { decodedPairs } = deSerialized;
   let output: string = '';
@@ -28,7 +28,7 @@ export async function decryptWithKey({
    */
   if (DerivedKeyOptions.usesDerivedKey(serialized)) {
     // Key will now be one derived with Pbkdf
-    key = await _deriveKeyWithOptions(key, serialized, serializationVersion);
+    key = await _deriveKeyWithOptions(key, serialized, SerializationFormat);
     // Can chop off the last two parts now as they were key data
     decodedPairs = decodedPairs.slice(0, decodedPairs.length - 2);
   }
@@ -46,8 +46,8 @@ export async function decryptWithKey({
  * Determine if we need to use a derived key or not based on whether or not
  * we have key derivation options in the serialized payload.
  */
-function _deriveKeyWithOptions(key: string, serializedOptions: string, serializationVersion: SerializationVersion) {
-  const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions, serializationVersion);
+function _deriveKeyWithOptions(key: string, serializedOptions: string, SerializationFormat: SerializationFormat) {
+  const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions, SerializationFormat);
   return derivedKeyOptions.deriveKey(key);
 }
 
