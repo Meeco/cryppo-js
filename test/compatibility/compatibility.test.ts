@@ -42,8 +42,7 @@ describe('compatiblity test for all cryppo port', () => {
           switch (objToValidate.encryption_strategy) {
             case 'Rsa4096':
               encryptionResult = await decryptSerializedWithPrivateKey(
-                {privateKeyPem: objToValidate.key, serialized: objToValidate.serialized},
-                objToValidate.format);
+                {privateKeyPem: objToValidate.key, serialized: objToValidate.serialized});
               break;
             case 'Aes256Gcm':
               const key = decodeSafe64(objToValidate.key);

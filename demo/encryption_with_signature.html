@@ -4,10 +4,9 @@
   </head>
   <body>      
       <ul class="nav">
-        <li><a href="/">Derived Key</a></li>
-        <!-- <li><a href="/encryption_with_key.html">Key</a></li> -->
-        <li><a href="/encryption_with_generated_key.html">Generated Key</a></li>
-        <li><a href="/encryption_with_signature.html">RSA Signature</a></li>        
+        <li><a href="/">Passphrase</a></li>        
+        <li><a href="/encryption_with_generated_key.html">Key</a></li>
+        <li><a href="/encryption_with_signature.html">RSA</a></li>        
       </ul> 
 
       <h1 class="center"> Encryption With RSA Signature </h1> 
@@ -15,7 +14,7 @@
     <fieldset>
       <legend>Sign some text:</legend>
       <textarea id="encryptTextInput" placeholder="Text to Sign"></textarea>
-      <input id="encryptTextPrivateKeyPem" type="password" placeholder="Private Key Pem" />
+      <textarea id="encryptTextPrivateKeyPem" type="password" placeholder="Private Key Pem" ></textarea>
       <button id="encryptTextAction">Sign</button>
       <textarea
         id="encryptTextOutput"
@@ -26,7 +25,7 @@
     <fieldset>
       <legend>Verify some text:</legend>
       <textarea id="verifyTextInput" placeholder="Serialized encrypted"></textarea>
-      <input id="verifyTextPublicKeyPem" type="password" placeholder="Public Key" />
+      <textarea id="verifyTextPublicKeyPem" type="password" placeholder="Public Key" ></textarea>
       <button id="verifyTextAction">Verify</button>
       <textarea id="verifyTextOutput" placeholder="verifyed text will output here"></textarea>
     </fieldset>
@@ -34,12 +33,12 @@
     <fieldset>
       <legend>Decrypt some text using pk:</legend>
       <textarea id="decryptTextInput" placeholder="Serialized encrypted"></textarea>
-      <input id="decryptTextPublicKeyPem" type="password" placeholder="Key" />
+      <textarea id="decryptTextPublicKeyPem" type="password" placeholder="Key" ></textarea>
       <button id="decryptTextAction">Decrypt</button>
       <textarea id="decryptTextOutput" placeholder="Decrypted text will output here"></textarea>
     </fieldset>
 
-    <div style="text-align: right;padding: 2rem;">
+    <div style="text-align: right;padding: 2rem; display: none;">
       <p>
             <label for="serializationVersionSelection">Serialization Format:</label>
       

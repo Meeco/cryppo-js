@@ -1,6 +1,6 @@
-import { decryptWithKey, encryptWithKeyDerivedFromString, encryptWithGeneratedKey } from '../src/index';
+import { decryptWithKey, encryptWithKeyDerivedFromString, encryptWithGeneratedKey, encryptWithKey } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
-import { encode64 } from '../src/util';
+import { encode64, encodeSafe64, decodeSafe64, decodeSafe64Bson } from '../src/util';
 import { SerializationFormat } from '../src/serialization-versions';
 
 const $ = document.getElementById.bind(document);
@@ -10,9 +10,11 @@ var $SerializationFormat = SerializationFormat.latest_version;
 
 const types = [
   { name: 'encryptFile', handler: encryptFile },
+  { name: 'encryptFileWithKey', handler: encryptFileWithKey},
   { name: 'decryptFile', handler: decryptFile },
   { name: 'encryptText', handler: encryptText },
-  { name: 'decryptText', handler: decryptText }
+  { name: 'decryptText', handler: decryptText },
+  { name: 'encryptWithKeyText', handler: encryptWithKeyText}
 ];
 
 types.map(type => {
@@ -56,7 +58,25 @@ function encryptFile() {
     }, $SerializationFormat);
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
-    $set('decryptFileGeneratedKey', encryptionResult.generatedKey)
+    $set('encryptFileGeneratedKey', encodeSafe64(encryptionResult.generatedKey));
+  };
+  if (!file.files!.length) {
+    return alert('Select a file first');
+  }
+  reader.readAsBinaryString(file.files![0]);
+}
+
+function encryptFileWithKey() {
+  const file = $('encryptFileWithKeyInput') as HTMLInputElement;
+  const reader = new FileReader();  
+  reader.onload = async result => {
+    const encryptionResult = await encryptWithGeneratedKey({
+      data: reader.result as string,     
+      strategy: CipherStrategy.AES_GCM
+    }, $SerializationFormat);
+    $set('encryptFileWithKeyOutput', encryptionResult.serialized);
+    $set('decryptFileInput', encryptionResult.serialized);
+    $set('encryptFileWithKey', encodeSafe64(encryptionResult.generatedKey));
   };
   if (!file.files!.length) {
     return alert('Select a file first');
@@ -66,7 +86,7 @@ function encryptFile() {
 
 async function decryptFile(download?: boolean) {
   const inText = $get('decryptFileInput');
-  const password = $get('decryptFileGeneratedKey');
+  const password = decodeSafe64($get('decryptFileKey'));
 
   try {
     const decrypted = await decryptWithKey({
@@ -110,12 +130,27 @@ async function encryptText() {
   },$SerializationFormat);
 
   $set('encryptTextOutput', encryptionResult.serialized);
-  $set('decryptGeneratedKey', encryptionResult.generatedKey);
+  $set('encryptGeneratedKey', encodeSafe64(encryptionResult.generatedKey));
+ 
+}
+
+async function encryptWithKeyText() {
+  const inText = $get('encryptWithKeyTextInput');
+  const key = decodeSafe64($get('encryptWithKey'));
+
+  const encryptionResult = await encryptWithKey({
+    key,
+    data: inText,    
+    strategy: CipherStrategy.AES_GCM
+  },$SerializationFormat);
+
+  $set('encryptWithKeyTextOutput', encryptionResult.serialized); 
+ 
 }
 
 async function decryptText() {
   const inText = $get('decryptTextInput');
-  const generatedKey = $get('decryptGeneratedKey');
+  const generatedKey = decodeSafe64($get('decryptGeneratedKey'));
 
   try {
     const decrypted = await decryptWithKey({

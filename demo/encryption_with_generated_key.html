@@ -4,16 +4,16 @@
   </head>
   <body>    
       <ul class="nav">
-        <li><a href="/">Derived Key</a></li>
-        <!-- <li><a href="/encryption_with_key.html">Key</a></li> -->
-        <li><a href="/encryption_with_generated_key.html">Generated Key</a></li>
-        <li><a href="/encryption_with_signature.html">RSA Signature</a></li>        
+        <li><a href="/">Passphrase</a></li>        
+        <li><a href="/encryption_with_generated_key.html">Key</a></li>
+        <li><a href="/encryption_with_signature.html">RSA</a></li>        
       </ul> 
      <h1 class="center"> Encryption With Generated Key </h1> 
     <fieldset>
-      <legend>Encrypt a File:</legend>
+      <legend>Generate Key & Encrypt a File:</legend>
       <input id="encryptFileInput" type="file" />    
-      <button id="encryptFileAction">Encrypt</button>
+      <button id="encryptFileAction">Generate Key & Encrypt</button>
+      <textarea id="encryptFileGeneratedKey" type="text" placeholder="Generated Key" readonly> </textarea>
       <textarea
         id="encryptFileOutput"
         placeholder="Serialized encrypted file contents will output here"
@@ -21,9 +21,20 @@
     </fieldset>
 
     <fieldset>
+      <legend>Encrypt a File With Key:</legend>
+      <input id="encryptFileWithKeyInput" type="file" />    
+      <button id="encryptFileWithKeyAction">Encrypt with key</button>
+      <textarea id="encryptFileWithKey" type="text" placeholder="Provide a Base64 encoded url safe Key" ></textarea>
+      <textarea
+        id="encryptFileWithKeyOutput"
+        placeholder="Serialized encrypted file contents will output here"
+      ></textarea>
+    </fieldset>
+
+    <fieldset>
       <legend>Decrypt a File:</legend>
       <textarea id="decryptFileInput" placeholder="Serialized encrypted file contents"></textarea>
-      <input id="decryptFileGeneratedKey" type="password" placeholder="decrypt File Generated Key" />
+      <textarea id="decryptFileKey" type="text" placeholder="Provide a Base64 encoded url safe Key"></textarea>
       <button id="decryptFileAction">Decrypt and Output</button>
       <button id="downloadDecrypted">Download Decrypted</button>
       <textarea
@@ -34,9 +45,10 @@
     </fieldset>
 
     <fieldset>
-      <legend>Encrypt some text:</legend>
-      <textarea id="encryptTextInput" placeholder="Text to encrypt"></textarea>     
-      <button id="encryptTextAction">Encrypt</button>
+      <legend>Generate Key & Encrypt some text:</legend>
+      <textarea id="encryptTextInput" placeholder="Text to encrypt"></textarea>      
+      <button id="encryptTextAction">Generate Key & Encrypt</button>      
+      <textarea id="encryptGeneratedKey" type="text" placeholder="Generated Key" readonly ></textarea>     
       <textarea
         id="encryptTextOutput"
         placeholder="Serialized encrypted will output here"
@@ -44,9 +56,20 @@
     </fieldset>
 
     <fieldset>
+      <legend>Encrypt some text with key:</legend>
+      <textarea id="encryptWithKeyTextInput" placeholder="Text to encrypt"></textarea>           
+      <button id="encryptWithKeyTextAction">Encrypt With Key</button>      
+      <textarea id="encryptWithKey" type="text" placeholder="Provide a Base64 encoded url safe Key"></textarea>   
+      <textarea
+        id="encryptWithKeyTextOutput"
+        placeholder="Serialized encrypted will output here"
+      ></textarea>    
+    </fieldset>
+
+    <fieldset>
       <legend>Decrypt some text:</legend>
       <textarea id="decryptTextInput" placeholder="Serialized encrypted"></textarea>
-      <input id="decryptGeneratedKey" type="password" placeholder="Generated Key" />
+      <textarea id="decryptGeneratedKey" type="text" placeholder="Provide a Base64 encoded url safe Key"></textarea>
       <button id="decryptTextAction">Decrypt</button>
       <textarea id="decryptTextOutput" placeholder="Decrypted text will output here"></textarea>
     </fieldset>
