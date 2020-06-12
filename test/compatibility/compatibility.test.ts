@@ -35,7 +35,7 @@ describe('compatiblity test for all cryppo port', () => {
   });
 
   Object.values(Compat.encryption_with_key).forEach( (objToValidate: any, index) => {
-      it(`${index}. can successfully decrypt using private key pem RSA 4096`, async done => {
+      it(`${index}. can successfully decrypt using key`, async done => {
         try {
           let encryptionResult;
 
