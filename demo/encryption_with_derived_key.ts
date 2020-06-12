@@ -73,7 +73,7 @@ async function decryptFile(download?: boolean) {
     const decrypted = await decryptWithKey({
       key: password,
       serialized: inText
-    }, $SerializationFormat);
+    });
 
     if (download) {
       const base64 = encode64(decrypted);
@@ -123,7 +123,7 @@ async function decryptText() {
     const decrypted = await decryptWithKey({
       key: password,
       serialized: inText
-    },$SerializationFormat);
+    });
 
     $set('decryptTextOutput', decrypted);
   } catch (ex) {

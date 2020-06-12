@@ -13,7 +13,7 @@ describe('aes-256-gcm', () => {
       const decryptedWithSourceKey = await decryptWithKey({
         serialized: result.serialized,
         key
-      }, SerializationFormat.latest_version);
+      });
       const decryptedWithDerivedKey = await decryptWithKey({
         // Slice off the key derivation data so it does not try to derive a new key
         serialized: result.serialized
@@ -21,7 +21,7 @@ describe('aes-256-gcm', () => {
           .slice(0, -2)
           .join('.'),
         key: result.key
-      }, SerializationFormat.latest_version);
+      });
 
       expect(decryptedWithSourceKey).toEqual(data);
       expect(decryptedWithDerivedKey).toEqual(data);
@@ -43,7 +43,7 @@ describe('aes-256-gcm', () => {
           const decryptedWithSourceKey = await decryptWithKey({
             serialized: result.serialized,
             key
-          }, version);
+          });
           const decryptedWithDerivedKey = await decryptWithKey({
             // Slice off the key derivation data so it does not try to derive a new key
             serialized: result.serialized
@@ -51,7 +51,7 @@ describe('aes-256-gcm', () => {
               .slice(0, -2)
               .join('.'),
             key: result.key
-          }, version);
+          });
 
           expect(decryptedWithSourceKey).toEqual(data);
           expect(decryptedWithDerivedKey).toEqual(data);

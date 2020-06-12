@@ -75,9 +75,11 @@ export class DerivedKeyOptions implements IDerivedKey {
     });
   }
 
-  public static fromSerialized(serialized: string,  forVersion: SerializationFormat): DerivedKeyOptions {
-    const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized, forVersion);
-    
+  // tslint:disable-next-line: max-line-length
+  public static fromSerialized(serialized: string): DerivedKeyOptions {
+    // tslint:disable-next-line: max-line-length
+    const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized);
+
     return new DerivedKeyOptions({
       // keys taken from ruby lib
       strategy: derivationStrategy,
@@ -103,7 +105,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     this.hash = options.hash || 'SHA256';
   }
 
-  public serialize(serializtionVersion: SerializationFormat): string {
+  public serialize(serializtionVersion: SerializationFormat = SerializationFormat.latest_version): string {
     // keys taken from ruby lib
     return serializeDerivedKeyOptions(this.strategy, {
       iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization

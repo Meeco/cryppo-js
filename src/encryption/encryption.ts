@@ -44,7 +44,7 @@ export interface IEncryptionResult {
  * Similar to `encryptWithKey` but generates random bytes to use as the key. This will be returned with the result.
  */
 export async function encryptWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey, serializtionVersion: SerializationFormat
+  options: IEncryptionOptionsWithoutKey, serializtionVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & { generatedKey: string }> {
   const key = generateRandomKey(options.keyLength || 32);
   const result = await encryptWithKey({
@@ -62,7 +62,7 @@ export async function encryptWithGeneratedKey(
  * be used to derive a key that will be used in encryption. The derived key will be returned with the results.
  */
 export async function encryptWithKeyDerivedFromString(
-  options: IEncryptionOptions, serializtionVersion: SerializationFormat
+  options: IEncryptionOptions, serializtionVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
   const derived = await generateDerivedKey({ key: options.key });
   const result = await encryptWithKey({
@@ -94,7 +94,7 @@ export async function encryptWithKey({
   data,
   strategy,
   iv
-}: IEncryptionOptions,               serializtionVersion: SerializationFormat): Promise<IEncryptionResult> {
+}: IEncryptionOptions,               serializtionVersion: SerializationFormat = SerializationFormat.latest_version): Promise<IEncryptionResult> {
   const output = _encryptWithKey(key, data, strategy, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;

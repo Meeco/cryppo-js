@@ -1,4 +1,4 @@
-import { decryptWithKey, encryptWithKeyDerivedFromString, encryptWithKey } from '../src/index';
+import { decryptWithKey, encryptWithKey } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import { encode64 } from '../src/util';
 import { SerializationFormat } from '../src/serialization-versions';
@@ -73,7 +73,7 @@ async function decryptFile(download?: boolean) {
     const decrypted = await decryptWithKey({
       key: Key,
       serialized: inText
-    }, $SerializationFormat);
+    });
 
     if (download) {
       const base64 = encode64(decrypted);
@@ -123,7 +123,7 @@ async function decryptText() {
     const decrypted = await decryptWithKey({
       key: Key,
       serialized: inText
-    },$SerializationFormat);
+    });
 
     $set('decryptTextOutput', decrypted);
   } catch (ex) {

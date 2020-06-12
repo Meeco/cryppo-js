@@ -7,6 +7,10 @@ import { SerializationFormat } from './serialization-versions';
 
 // Adds support for binary types
 YAML.defaultOptions.schema = 'yaml-1.1';
+// 65 is the version byte for encryption artefacts encoded with BSON
+const ENCRYPTION_ARTEFACTS_CURRENT_VERSION = 'A';
+// 75 is the version byte for derivation artefacts encoded with BSON
+const DERIVATION_ARTEFACTS_CURRENT_VERSION = 'K';
 
 /**
  * Wrapping some node-forge utils in case we ever need to replace it
@@ -19,22 +23,21 @@ export const generateRandomKey = (length = 32) => random.getBytesSync(length);
 export function serializeDerivedKeyOptions(
   strategy: string,
   artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts,
-  forVersion: SerializationFormat
+  serializationFormat: SerializationFormat = SerializationFormat.latest_version
 ) {
-    switch (forVersion) {
+    switch (serializationFormat) {
       case SerializationFormat.legacy: {
         const yaml = encodeYaml(artifacts);
         return `${strategy}.${encodeSafe64(yaml)}`;
       }
       default: {
-        const bsonSerialized = Buffer.concat([Buffer.from('K'), BSON.serialize(artifacts)]);
-        return `${strategy}.${encodeSafe64Bson(bsonSerialized.toString('base64'))}`;
+        return `${strategy}.${encodeSafe64Bson(DERIVATION_ARTEFACTS_CURRENT_VERSION, artifacts)}`;
       }
   }
 }
 
 export function deSerializeDerivedKeyOptions(
-  serialized: string, forVersion: SerializationFormat
+  serialized: string
 ): { derivationStrategy: string; serializationArtifacts: IEncryptionArtifacts } {
   let items = serialized.split('.');
   // We might get passed an entire encrypted string in which case we just want the key and strategy
@@ -42,8 +45,7 @@ export function deSerializeDerivedKeyOptions(
     items = items.slice(-2);
   }
   const [derivationStrategy, artifacts] = items;
-  const artifactsToDecode = forVersion === SerializationFormat.legacy ? decodeSafe64(artifacts) : artifacts;
-  const serializationArtifacts = decodeArtifactData(artifactsToDecode, forVersion);
+  const serializationArtifacts = decodeArtifactData(artifacts);
   return {
     derivationStrategy,
     serializationArtifacts,
@@ -54,16 +56,15 @@ export function serialize(
   strategy: string,
   data: string,
   artifacts: IDerivedKey | IEncryptionArtifacts,
-  forVersion: SerializationFormat
+  serializationFormat: SerializationFormat = SerializationFormat.latest_version
 ) {
-  switch (forVersion) {
+  switch (serializationFormat) {
     case SerializationFormat.legacy: {
       const yaml = encodeYaml(artifacts);
       return `${strategy}.${encodeSafe64(data)}.${encodeSafe64(yaml)}`;
     }
     default: {
-      const bsonSerialized = Buffer.concat([Buffer.from('A'), BSON.serialize(artifacts)]);
-      return `${strategy}.${encodeSafe64(data)}.${encodeSafe64Bson(bsonSerialized.toString('base64'))}`;
+      return `${strategy}.${encodeSafe64(data)}.${encodeSafe64Bson(ENCRYPTION_ARTEFACTS_CURRENT_VERSION, artifacts)}`;
     }
   }
 }
@@ -83,7 +84,7 @@ export interface IDecoded {
   decodedPairs: any[];
 }
 
-export function deSerialize(serialized: string,  forVersion: SerializationFormat): IDecoded {
+export function deSerialize(serialized: string): IDecoded {
   const items = serialized.split('.');
   if (items.length < 2) {
     throw new Error('String is not a serialized encrypted string');
@@ -99,8 +100,7 @@ export function deSerialize(serialized: string,  forVersion: SerializationFormat
       // Base64 encoded encrypted data
       return decodeSafe64(item);
     } else {
-      const artifactsToDecode = forVersion === SerializationFormat.legacy ? decodeSafe64(item) : item;
-      return decodeArtifactData(artifactsToDecode, forVersion);
+      return decodeArtifactData(item);
     }
   });
 
@@ -114,15 +114,16 @@ export function deSerialize(serialized: string,  forVersion: SerializationFormat
   };
 }
 
-function decodeArtifactData(text: string, forSerializtionVersion: SerializationFormat) {
-  switch (forSerializtionVersion) {
-    case SerializationFormat.legacy: {
-      return YAML.parse(text.replace(/ !binary/g, ' !!binary'));
-    }
-    default: {
-      return BSON.deserialize(Buffer.from(decodeSafe64Bson(text), 'base64').slice(1), {promoteBuffers: true});
-    }
-  }
+// tslint:disable-next-line: max-line-length
+function decodeArtifactData(text: string) {
+   if (decodeSafe64(text).startsWith('---')) {
+    text = decodeSafe64(text);
+    return YAML.parse(text.replace(/ !binary/g, ' !!binary'));
+   } else {
+    text = decodeSafe64Bson(text);
+    // remove version byte before deserializing
+    return BSON.deserialize(Buffer.from(text, 'base64').slice(1), {promoteBuffers: true});
+   }
 }
 
 export function stringAsBinaryBuffer(val: string): Buffer | Uint8Array {
@@ -155,15 +156,6 @@ export function encodeSafe64(data: string) {
   // and we want to maintain compatibility.
 }
 
-export function encodeSafe64Bson(data: string) {
-  return data
-    .replace(/\+/g, '-') // Convert '+' to '-'
-    .replace(/\//g, '_'); // Convert '/' to '_'
-  // Not we don't remove the trailing '=' as specified in the spec
-  // because ruby's Base64.urlsafe_encode64 does not do this
-  // and we want to maintain compatibility.
-}
-
 export function decodeSafe64(base64: string) {
   return decode64(
     base64
@@ -171,6 +163,18 @@ export function decodeSafe64(base64: string) {
       .replace(/_/g, '/')
   );
   // Don't bother concatenating an '=' to the result - see above
+}
+
+// tslint:disable-next-line: max-line-length
+export function encodeSafe64Bson(versionByte: string, artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts) {
+ const bsonSerialized = Buffer.concat([Buffer.from(versionByte), BSON.serialize(artifacts)]);
+ const base64Data = bsonSerialized.toString('base64');
+ return base64Data
+  .replace(/\+/g, '-') // Convert '+' to '-'
+  .replace(/\//g, '_'); // Convert '/' to '_'
+// Not we don't remove the trailing '=' as specified in the spec
+// because ruby's Base64.urlsafe_encode64 does not do this
+// and we want to maintain compatibility.
 }
 
 export function decodeSafe64Bson(base64: string) {
