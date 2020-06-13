@@ -5,7 +5,6 @@ import {
   decodeSafe64,
   deSerialize,
   encode64,
-  encodeSafe64Bson,
   generateRandomKey,
   serialize,
   stringAsBinaryBuffer
@@ -37,7 +36,7 @@ describe('Serialize/Deserialize', () => {
     });
 
    it(`deserializes encrypted data with ${version}`, () => {
-      const deserialized = deSerialize(testSerialized, version);
+      const deserialized = deSerialize(testSerialized);
       expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
       expect(deserialized.decodedPairs.length).toEqual(2);
       expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
@@ -62,7 +61,7 @@ describe('Serialize/Deserialize', () => {
 
       const derived = DerivedKeyOptions.randomFromOptions({});
       const encodedSerialized = derived.serialize(SerializationFormat.legacy);
-      const [_, artifacts] = encodedSerialized.split('.');
+      const [, artifacts] = encodedSerialized.split('.');
 
       const yaml = decodeSafe64(artifacts);
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
@@ -73,7 +72,7 @@ describe('Serialize/Deserialize', () => {
         strategy: CipherStrategy.AES_GCM
       }, SerializationFormat.legacy);
       const { serialized } = encrypted;
-      const [__, ___, encoded] = serialized.split('.');
+      const [, , encoded] = serialized.split('.');
       const parsed = decodeSafe64(encoded);
       expect(containsNonUtf8Characters(parsed)).toEqual(false);
       done();

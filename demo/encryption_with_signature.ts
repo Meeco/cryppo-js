@@ -64,7 +64,7 @@ async function decryptText() {
   const privateKeyPem = $get('decryptTextPublicKeyPem'); 
   const decryptTextInput = $get('decryptTextInput'); 
   try {
-    const decrypted = await decryptSerializedWithPrivateKey( {privateKeyPem: privateKeyPem, serialized: decryptTextInput}, $SerializationFormat);
+    const decrypted = await decryptSerializedWithPrivateKey( {privateKeyPem: privateKeyPem, serialized: decryptTextInput});
     $set('decryptTextOutput', decrypted);
   } catch (ex) {
     $set('decryptTextOutput', `[Decription FAILED]`);

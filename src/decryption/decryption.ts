@@ -1,7 +1,6 @@
 import { cipher, util } from 'node-forge';
 import { deSerialize } from '../../src/util';
 import { DerivedKeyOptions } from '../key-derivation/derived-key';
-import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies';
 
 interface IEncryptionOptions {

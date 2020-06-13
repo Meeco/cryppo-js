@@ -77,7 +77,6 @@ export async function encryptWithKeyDerivedFromString(
   };
 }
 
-
 /**
  * Encrypt data with the provided key.
  *
@@ -94,7 +93,8 @@ export async function encryptWithKey({
   data,
   strategy,
   iv
-}: IEncryptionOptions,               serializtionVersion: SerializationFormat = SerializationFormat.latest_version): Promise<IEncryptionResult> {
+}: IEncryptionOptions,               serializtionVersion: SerializationFormat = SerializationFormat.latest_version):
+Promise<IEncryptionResult> {
   const output = _encryptWithKey(key, data, strategy, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;

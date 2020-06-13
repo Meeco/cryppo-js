@@ -3,6 +3,7 @@ import { SerializationFormat } from '../serialization-versions';
 import {
   binaryBufferToString,
   deSerializeDerivedKeyOptions,
+  encodeUtf8,
   serializeDerivedKeyOptions,
   stringAsBinaryBuffer
 } from '../util';
@@ -120,7 +121,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     const digest = md[hash as 'sha256'].create();
     return new Promise((resolve, reject) => {
       return pkcs5.pbkdf2(
-        key,
+        encodeUtf8(key),
         this.salt,
         this.iterations,
         this.length,

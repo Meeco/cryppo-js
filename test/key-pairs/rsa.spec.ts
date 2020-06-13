@@ -100,7 +100,7 @@ describe('RSA Keypair Generation', () => {
         done(ex);
       }
     });
-  
+
     it(`decrypts data with private keys that do not have passwords with ${version}`, async done => {
       try {
         const result = await encryptWithPublicKey({
@@ -118,7 +118,7 @@ describe('RSA Keypair Generation', () => {
         done(ex);
       }
     });
-  
+
     it(`decrypts data with private keys that have a password with ${version}`, async done => {
       try {
         const password = `I ain't sayin' nothin'`;
@@ -142,5 +142,5 @@ describe('RSA Keypair Generation', () => {
         done(ex);
       }
     });
-  }); 
+  });
 });

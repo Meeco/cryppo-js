@@ -83,7 +83,7 @@ describe('Encryption', () => {
       const decrypted = await decryptSerializedWithPrivateKey({
         privateKeyPem,
         serialized: rsaEncryptedSerialized
-      }, SerializationFormat.legacy);
+      });
 
       expect(decrypted).toEqual('My super secret data');
     });
