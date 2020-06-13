@@ -61,6 +61,11 @@ module.exports = function(config) {
           '--disable-web-security'
         ]
       }
+    },
+
+    karmaTypescriptConfig : {
+      tsconfig: 'tsconfig.json'
     }
+        
   });
 };
