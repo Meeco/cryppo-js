@@ -44,16 +44,20 @@ export interface IEncryptionResult {
  * Similar to `encryptWithKey` but generates random bytes to use as the key. This will be returned with the result.
  */
 export async function encryptWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey, serializtionVersion: SerializationFormat = SerializationFormat.latest_version
+  options: IEncryptionOptionsWithoutKey,
+  serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & { generatedKey: string }> {
   const key = generateRandomKey(options.keyLength || 32);
-  const result = await encryptWithKey({
-    ...options,
-    key
-  }, serializtionVersion);
+  const result = await encryptWithKey(
+    {
+      ...options,
+      key,
+    },
+    serializationVersion
+  );
   return {
     ...result,
-    generatedKey: key
+    generatedKey: key,
   };
 }
 
@@ -62,18 +66,22 @@ export async function encryptWithGeneratedKey(
  * be used to derive a key that will be used in encryption. The derived key will be returned with the results.
  */
 export async function encryptWithKeyDerivedFromString(
-  options: IEncryptionOptions, serializtionVersion: SerializationFormat = SerializationFormat.latest_version
+  options: IEncryptionOptions,
+  serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
   const derived = await generateDerivedKey({ key: options.key });
-  const result = await encryptWithKey({
-    ...options,
-    key: derived.key
-  }, serializtionVersion);
-  const serializedKey = derived.options.serialize(serializtionVersion);
+  const result = await encryptWithKey(
+    {
+      ...options,
+      key: derived.key,
+    },
+    serializationVersion
+  );
+  const serializedKey = derived.options.serialize(serializationVersion);
   result.serialized = `${result.serialized}.${serializedKey}`;
   return {
     ...result,
-    ...derived
+    ...derived,
   };
 }
 
@@ -88,21 +96,23 @@ export async function encryptWithKeyDerivedFromString(
  * To encrypt with a derived key, use `encryptWithKeyDerivedFromString` or, to, use a random
  * key `encryptWithGeneratedKey`.
  */
-export async function encryptWithKey({
-  key,
-  data,
-  strategy,
-  iv
-}: IEncryptionOptions,               serializtionVersion: SerializationFormat = SerializationFormat.latest_version):
-Promise<IEncryptionResult> {
+export async function encryptWithKey(
+  { key, data, strategy, iv }: IEncryptionOptions,
+  serializationVersion: SerializationFormat = SerializationFormat.latest_version
+): Promise<IEncryptionResult> {
   const output = _encryptWithKey(key, data, strategy, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
-  const serialized = serialize(`${cipher}${keyLengthBits}${mode}`, encrypted, artifacts, serializtionVersion);
+  const serialized = serialize(
+    `${cipher}${keyLengthBits}${mode}`,
+    encrypted,
+    artifacts,
+    serializationVersion
+  );
   return {
     encrypted,
-    serialized
+    serialized,
   };
 }
 
@@ -126,7 +136,7 @@ function _encryptWithKey(
   cipher.update(util.createBuffer(data));
   cipher.finish();
   const artifacts: any = {
-    iv: stringAsBinaryBuffer(iv)
+    iv: stringAsBinaryBuffer(iv),
   };
   if (cipher.mode.tag) {
     artifacts.at = stringAsBinaryBuffer(cipher.mode.tag.data);
@@ -134,6 +144,6 @@ function _encryptWithKey(
   artifacts.ad = 'none';
   return {
     encrypted: cipher.output.data,
-    artifacts
+    artifacts,
   };
 }

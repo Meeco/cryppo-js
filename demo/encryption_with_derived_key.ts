@@ -12,10 +12,10 @@ const types = [
   { name: 'encryptFile', handler: encryptFile },
   { name: 'decryptFile', handler: decryptFile },
   { name: 'encryptText', handler: encryptText },
-  { name: 'decryptText', handler: decryptText }
+  { name: 'decryptText', handler: decryptText },
 ];
 
-types.map(type => {
+types.map((type) => {
   $(`${type.name}Action`)!.addEventListener(
     'click',
     () => {
@@ -28,15 +28,15 @@ types.map(type => {
 
 $(`serializationVersionSelection`)!.addEventListener(
   'change',
-  (event) => {   
-    switch(event.target.value) {
-      case "legacy":
-        $SerializationFormat = SerializationFormat.legacy
-        break;    
+  (event) => {
+    switch (event.target.value) {
+      case 'legacy':
+        $SerializationFormat = SerializationFormat.legacy;
+        break;
       default:
-        $SerializationFormat = SerializationFormat.latest_version
+        $SerializationFormat = SerializationFormat.latest_version;
     }
-    console.log("$SerializationFormat : " + $SerializationFormat)
+    console.log('$SerializationFormat : ' + $SerializationFormat);
   },
   false
 );
@@ -50,12 +50,15 @@ function encryptFile() {
   const file = $('encryptFileInput') as HTMLInputElement;
   const reader = new FileReader();
   const password = $get('encryptFilePassword');
-  reader.onload = async result => {
-    const encryptionResult = await encryptWithKeyDerivedFromString({
-      data: reader.result as string,
-      key: password,
-      strategy: CipherStrategy.AES_GCM
-    }, $SerializationFormat);
+  reader.onload = async (result) => {
+    const encryptionResult = await encryptWithKeyDerivedFromString(
+      {
+        data: reader.result as string,
+        key: password,
+        strategy: CipherStrategy.AES_GCM,
+      },
+      $SerializationFormat
+    );
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
   };
@@ -72,7 +75,7 @@ async function decryptFile(download?: boolean) {
   try {
     const decrypted = await decryptWithKey({
       key: password,
-      serialized: inText
+      serialized: inText,
     });
 
     if (download) {
@@ -106,11 +109,14 @@ async function encryptText() {
   const inText = $get('encryptTextInput');
   const password = $get('encryptTextPassword');
 
-  const encryptionResult = await encryptWithKeyDerivedFromString({
-    data: inText,
-    key: password,
-    strategy: CipherStrategy.AES_GCM
-  },$SerializationFormat);
+  const encryptionResult = await encryptWithKeyDerivedFromString(
+    {
+      data: inText,
+      key: password,
+      strategy: CipherStrategy.AES_GCM,
+    },
+    $SerializationFormat
+  );
 
   $set('encryptTextOutput', encryptionResult.serialized);
 }
@@ -122,7 +128,7 @@ async function decryptText() {
   try {
     const decrypted = await decryptWithKey({
       key: password,
-      serialized: inText
+      serialized: inText,
     });
 
     $set('decryptTextOutput', decrypted);

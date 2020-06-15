@@ -11,7 +11,7 @@ interface IEncryptionOptions {
 
 export async function decryptWithKey({
   serialized,
-  key
+  key,
 }: {
   serialized: string;
   key: string;
@@ -65,7 +65,7 @@ function _decryptWithKey(
     iv: util.createBuffer(iv),
     additionalData: ad,
     tagLength,
-    tag
+    tag,
   });
   decipher.update(encrypted);
   const pass = decipher.finish();

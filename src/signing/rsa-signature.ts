@@ -19,7 +19,7 @@ export function signWithPrivateKey(privateKeyPem: string, data: string): ISignat
     signature,
     data,
     keySize,
-    serialized
+    serialized,
   };
 }
 
@@ -33,7 +33,7 @@ export function loadRsaSignature(serializedPayload: string): ISignature {
       serialized: serializedPayload,
       signature: decodeSafe64(encodedSignature),
       data: decodeSafe64(encodedData),
-      keySize: bits
+      keySize: bits,
     };
   } else {
     throw new Error('String is not a serialized RSA signature');

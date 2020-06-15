@@ -26,14 +26,14 @@ export function serializeDerivedKeyOptions(
   artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts,
   serializationFormat: SerializationFormat = SerializationFormat.latest_version
 ) {
-    switch (serializationFormat) {
-      case SerializationFormat.legacy: {
-        const yaml = encodeYaml(artifacts);
-        return `${strategy}.${encodeSafe64(yaml)}`;
-      }
-      default: {
-        return `${strategy}.${encodeSafe64Bson(DERIVATION_ARTEFACTS_CURRENT_VERSION, artifacts)}`;
-      }
+  switch (serializationFormat) {
+    case SerializationFormat.legacy: {
+      const yaml = encodeYaml(artifacts);
+      return `${strategy}.${encodeSafe64(yaml)}`;
+    }
+    default: {
+      return `${strategy}.${encodeSafe64Bson(DERIVATION_ARTEFACTS_CURRENT_VERSION, artifacts)}`;
+    }
   }
 }
 
@@ -65,7 +65,10 @@ export function serialize(
       return `${strategy}.${encodeSafe64(data)}.${encodeSafe64(yaml)}`;
     }
     default: {
-      return `${strategy}.${encodeSafe64(data)}.${encodeSafe64Bson(ENCRYPTION_ARTEFACTS_CURRENT_VERSION, artifacts)}`;
+      return `${strategy}.${encodeSafe64(data)}.${encodeSafe64Bson(
+        ENCRYPTION_ARTEFACTS_CURRENT_VERSION,
+        artifacts
+      )}`;
     }
   }
 }
@@ -117,14 +120,14 @@ export function deSerialize(serialized: string): IDecoded {
 
 // tslint:disable-next-line: max-line-length
 function decodeArtifactData(text: string) {
-   if (decodeSafe64(text).startsWith('---')) {
+  if (decodeSafe64(text).startsWith('---')) {
     text = decodeSafe64(text);
     return YAML.parse(text.replace(/ !binary/g, ' !!binary'));
-   } else {
+  } else {
     text = decodeSafe64Bson(text);
     // remove version byte before deserializing
-    return BSON.deserialize(Buffer.from(text, 'base64').slice(1), {promoteBuffers: true});
-   }
+    return BSON.deserialize(Buffer.from(text, 'base64').slice(1), { promoteBuffers: true });
+  }
 }
 
 export function stringAsBinaryBuffer(val: string): Buffer | Uint8Array {
@@ -167,21 +170,24 @@ export function decodeSafe64(base64: string) {
 }
 
 // tslint:disable-next-line: max-line-length
-export function encodeSafe64Bson(versionByte: string, artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts) {
- const bsonSerialized = Buffer.concat([Buffer.from(versionByte), BSON.serialize(artifacts)]);
- const base64Data = bsonSerialized.toString('base64');
- return base64Data
-  .replace(/\+/g, '-') // Convert '+' to '-'
-  .replace(/\//g, '_'); // Convert '/' to '_'
-// Not we don't remove the trailing '=' as specified in the spec
-// because ruby's Base64.urlsafe_encode64 does not do this
-// and we want to maintain compatibility.
+export function encodeSafe64Bson(
+  versionByte: string,
+  artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts
+) {
+  const bsonSerialized = Buffer.concat([Buffer.from(versionByte), BSON.serialize(artifacts)]);
+  const base64Data = bsonSerialized.toString('base64');
+  return base64Data
+    .replace(/\+/g, '-') // Convert '+' to '-'
+    .replace(/\//g, '_'); // Convert '/' to '_'
+  // Not we don't remove the trailing '=' as specified in the spec
+  // because ruby's Base64.urlsafe_encode64 does not do this
+  // and we want to maintain compatibility.
 }
 
 export function decodeSafe64Bson(base64: string) {
   return base64
-      .replace(/-/g, '+') // Convert '+' to '-'
-      .replace(/_/g, '/');
+    .replace(/-/g, '+') // Convert '+' to '-'
+    .replace(/_/g, '/');
   // Don't bother concatenating an '=' to the result - see above
 }
 

@@ -5,7 +5,7 @@ import {
   deSerializeDerivedKeyOptions,
   encodeUtf8,
   serializeDerivedKeyOptions,
-  stringAsBinaryBuffer
+  stringAsBinaryBuffer,
 } from '../util';
 
 /**
@@ -17,7 +17,7 @@ const DEFAULT_ITERATION_VARIANCE = 10;
 const DEFAULT_SALT_LENGTH = 20;
 
 export enum KeyDerivationStrategy {
-  Pbkdf2Hmac = 'Pbkdf2Hmac'
+  Pbkdf2Hmac = 'Pbkdf2Hmac',
 }
 
 export interface IDerivedKey {
@@ -63,7 +63,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     length = DEFAULT_LENGTH,
     minIterations = MIN_ITERATIONS,
     strategy = KeyDerivationStrategy.Pbkdf2Hmac,
-    useSalt
+    useSalt,
   }: IRandomKeyOptions) {
     const variance = Math.floor(minIterations * (iterationVariance / 100));
     const iterations = minIterations + Math.floor(Math.random() * variance);
@@ -72,7 +72,7 @@ export class DerivedKeyOptions implements IDerivedKey {
       strategy,
       iterations,
       salt,
-      length
+      length,
     });
   }
 
@@ -88,7 +88,7 @@ export class DerivedKeyOptions implements IDerivedKey {
       iterations: (<any>serializationArtifacts).i,
       length: (<any>serializationArtifacts).l,
       hash: (<any>serializationArtifacts).hash,
-      ...serializationArtifacts
+      ...serializationArtifacts,
     });
   }
 
@@ -106,14 +106,20 @@ export class DerivedKeyOptions implements IDerivedKey {
     this.hash = options.hash || 'SHA256';
   }
 
-  public serialize(serializtionVersion: SerializationFormat = SerializationFormat.latest_version): string {
+  public serialize(
+    serializationVersion: SerializationFormat = SerializationFormat.latest_version
+  ): string {
     // keys taken from ruby lib
-    return serializeDerivedKeyOptions(this.strategy, {
-      iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
-      i: this.iterations,
-      l: this.length,
-      hash: this.hash
-    }, serializtionVersion);
+    return serializeDerivedKeyOptions(
+      this.strategy,
+      {
+        iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
+        i: this.iterations,
+        l: this.length,
+        hash: this.hash,
+      },
+      serializationVersion
+    );
   }
 
   public deriveKey(key: string): Promise<string> {

@@ -6,7 +6,7 @@ export enum CipherStrategy {
   AES_CTR = 'AES-CTR',
   AES_GCM = 'AES-GCM',
   DES_ECB = 'DES-ECB',
-  DES_CBC = 'DES-CBC'
+  DES_CBC = 'DES-CBC',
   // Not currently suppoted as they have different key size (256 not supported)
   // THREE_DES_ECB = '3DES-ECB',
   // THREE_DES_CBC = '3DES-CBC',
@@ -19,5 +19,5 @@ export enum CipherStrategy {
 export const strategyToAlgorithm = (algorithm: string): CipherStrategy =>
   algorithm
     .split(/[0-9]+/)
-    .map(v => v.toUpperCase())
+    .map((v) => v.toUpperCase())
     .join('-') as CipherStrategy;
