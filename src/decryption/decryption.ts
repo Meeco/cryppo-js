@@ -1,5 +1,6 @@
 import { cipher, util } from 'node-forge';
-import { deSerialize } from '../../src/util';
+import { deSerialize, encodeUtf8 } from '../../src/util';
+import { EncodingVersions } from '../encoding-versions';
 import { DerivedKeyOptions } from '../key-derivation/derived-key';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies';
 
@@ -28,15 +29,29 @@ export async function decryptWithKey({
   if (DerivedKeyOptions.usesDerivedKey(serialized)) {
     // Key will now be one derived with Pbkdf
     key = await _deriveKeyWithOptions(key, serialized);
+
     // Can chop off the last two parts now as they were key data
     decodedPairs = decodedPairs.slice(0, decodedPairs.length - 2);
   }
 
+  let legacyKey;
   for (let i = 0; i < decodedPairs.length; i += 2) {
     const data: string = decodedPairs[i];
     const artifacts: any = decodedPairs[i + 1];
     const strategy = strategyToAlgorithm(encryptionStrategy);
-    output += _decryptWithKey(key, data, strategy, artifacts);
+    try {
+      output += _decryptWithKey(legacyKey || key, data, strategy, artifacts);
+    } catch (err) {
+      if (!legacyKey && encodeUtf8(key) !== key) {
+        // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
+        legacyKey = await _deriveKeyWithOptions(key, serialized, EncodingVersions.legacy);
+        i -= 2;
+        continue;
+      } else {
+        // Both utf-8 and utf-16 key formats have failed - bail
+        throw err;
+      }
+    }
   }
   return output;
 }
@@ -46,9 +61,13 @@ export async function decryptWithKey({
  * we have key derivation options in the serialized payload.
  */
 // tslint:disable-next-line: max-line-length
-function _deriveKeyWithOptions(key: string, serializedOptions: string) {
+function _deriveKeyWithOptions(
+  key: string,
+  serializedOptions: string,
+  encodingVersion: EncodingVersions = EncodingVersions.latest_version
+) {
   const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions);
-  return derivedKeyOptions.deriveKey(key);
+  return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
 function _decryptWithKey(
@@ -73,5 +92,6 @@ function _decryptWithKey(
   if (pass) {
     return decipher.output.data;
   }
+
   throw new Error('Decryption failed');
 }
