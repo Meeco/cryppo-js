@@ -7,7 +7,7 @@ import {
   encode64,
   generateRandomKey,
   serialize,
-  stringAsBinaryBuffer
+  stringAsBinaryBuffer,
 } from '../src/util';
 
 describe('Serialize/Deserialize', () => {
@@ -23,19 +23,25 @@ describe('Serialize/Deserialize', () => {
   // tslint:disable-next-line: max-line-length
   const testBsonSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.QUAAAAAFaXYADAAAAAAvbiv0sBEUwuPSL0oFYXQAEAAAAAD1W3akE2zBrSGTrus7grS4AmFkAAUAAABub25lAAA=`;
 
-  Object.values(SerializationFormat).forEach(version => {
-   const testSerialized =  version === SerializationFormat.legacy ? testLegacySerialized : testBsonSerialized;
-   it(`serializes encrypted data with ${version} serialization version`, () => {
+  Object.values(SerializationFormat).forEach((version) => {
+    const testSerialized =
+      version === SerializationFormat.legacy ? testLegacySerialized : testBsonSerialized;
+    it(`serializes encrypted data with ${version} serialization version`, () => {
       expect(
-        serialize(encryptionStrategy, decode64(b64EncryptedData), {
-          iv: stringAsBinaryBuffer(iv),
-          at: stringAsBinaryBuffer(at),
-          ad
-        }, version)
+        serialize(
+          encryptionStrategy,
+          decode64(b64EncryptedData),
+          {
+            iv: stringAsBinaryBuffer(iv),
+            at: stringAsBinaryBuffer(at),
+            ad,
+          },
+          version
+        )
       ).toEqual(testSerialized);
     });
 
-   it(`deserializes encrypted data with ${version}`, () => {
+    it(`deserializes encrypted data with ${version}`, () => {
       const deserialized = deSerialize(testSerialized);
       expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
       expect(deserialized.decodedPairs.length).toEqual(2);
@@ -43,12 +49,12 @@ describe('Serialize/Deserialize', () => {
       expect(deserialized.decodedPairs[1]).toEqual({
         iv: stringAsBinaryBuffer(iv),
         at: stringAsBinaryBuffer(at),
-        ad
+        ad,
       });
     });
   });
 
-  it('serializes binary data to base64 to comply with YAML specification', async done => {
+  it('serializes binary data to base64 to comply with YAML specification', async (done) => {
     try {
       const containsNonUtf8Characters = (str: string) => {
         for (let i = 0; i < str.length; i++) {
@@ -66,11 +72,14 @@ describe('Serialize/Deserialize', () => {
       const yaml = decodeSafe64(artifacts);
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
 
-      const encrypted = await encryptWithKey({
-        key: generateRandomKey(),
-        data: 'This is some test data that will be encrypted',
-        strategy: CipherStrategy.AES_GCM
-      }, SerializationFormat.legacy);
+      const encrypted = await encryptWithKey(
+        {
+          key: generateRandomKey(),
+          data: 'This is some test data that will be encrypted',
+          strategy: CipherStrategy.AES_GCM,
+        },
+        SerializationFormat.legacy
+      );
       const { serialized } = encrypted;
       const [, , encoded] = serialized.split('.');
       const parsed = decodeSafe64(encoded);

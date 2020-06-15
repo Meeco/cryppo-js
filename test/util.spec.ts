@@ -2,17 +2,17 @@ import { generateDerivedKey } from '../src/key-derivation/pbkdf2-hmac';
 import {
   decodeDerivationArtifacts,
   encodeDerivationArtifacts,
-  generateEncryptionVerificationArtifacts
+  generateEncryptionVerificationArtifacts,
 } from '../src/util';
 
 describe('utils', () => {
-  it('can encode derivation artifacts', async done => {
+  it('can encode derivation artifacts', async (done) => {
     const result = await generateDerivedKey({
       key: `GreatPassphrase#2001!`,
       useSalt: `\xF8\xD4g)|=q\x04!\xA2\xF9\xF1\xB0P\xB1@*QE%`,
       minIterations: 21908,
       iterationVariance: 0,
-      length: 32
+      length: 32,
     });
     const encoded = encodeDerivationArtifacts(result.options);
     done();
@@ -22,7 +22,7 @@ describe('utils', () => {
     const encoded = [
       'eyJzYWx0Ijoi-NRnKXw9cVx1MDAwNCGi-fGwULFAKlFFJSIsIml0Z',
       'XJhdGlvbnMiOjIxOTA4LCJsZW5ndGgiOjMyLCJzdHJ',
-      'hdGVneSI6IlBia2RmMkhtYWMiLCJoYXNoIjoiU0hBMjU2In0='
+      'hdGVneSI6IlBia2RmMkhtYWMiLCJoYXNoIjoiU0hBMjU2In0=',
     ].join('');
     const decoded = decodeDerivationArtifacts(encoded);
     expect(decoded).toEqual({
@@ -30,7 +30,7 @@ describe('utils', () => {
       iterations: 21908,
       length: 32,
       strategy: 'Pbkdf2Hmac',
-      hash: 'SHA256'
+      hash: 'SHA256',
     });
   });
 
