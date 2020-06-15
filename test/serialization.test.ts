@@ -1,4 +1,5 @@
 import { CipherStrategy, DerivedKeyOptions, encryptWithKey } from '../src';
+import { SerializationFormat } from '../src/serialization-versions';
 import {
   decode64,
   decodeSafe64,
@@ -18,26 +19,32 @@ describe('Serialize/Deserialize', () => {
   const encryptionStrategy = 'Aes256Gcm';
 
   // tslint:disable-next-line
-  const testSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.LS0tCml2OiAhYmluYXJ5IHwtCiAgTDI0cjlMQVJGTUxqMGk5SwphdDogIWJpbmFyeSB8LQogIDlWdDJwQk5zd2EwaGs2N3JPNEswdUE9PQphZDogbm9uZQo=`;
-  it('serializes encrypted data', () => {
-    expect(
-      serialize(encryptionStrategy, decode64(b64EncryptedData), {
+  const testLegacySerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.LS0tCml2OiAhYmluYXJ5IHwtCiAgTDI0cjlMQVJGTUxqMGk5SwphdDogIWJpbmFyeSB8LQogIDlWdDJwQk5zd2EwaGs2N3JPNEswdUE9PQphZDogbm9uZQo=`;
+  // tslint:disable-next-line: max-line-length
+  const testBsonSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.QUAAAAAFaXYADAAAAAAvbiv0sBEUwuPSL0oFYXQAEAAAAAD1W3akE2zBrSGTrus7grS4AmFkAAUAAABub25lAAA=`;
+
+  Object.values(SerializationFormat).forEach(version => {
+   const testSerialized =  version === SerializationFormat.legacy ? testLegacySerialized : testBsonSerialized;
+   it(`serializes encrypted data with ${version} serialization version`, () => {
+      expect(
+        serialize(encryptionStrategy, decode64(b64EncryptedData), {
+          iv: stringAsBinaryBuffer(iv),
+          at: stringAsBinaryBuffer(at),
+          ad
+        }, version)
+      ).toEqual(testSerialized);
+    });
+
+   it(`deserializes encrypted data with ${version}`, () => {
+      const deserialized = deSerialize(testSerialized);
+      expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
+      expect(deserialized.decodedPairs.length).toEqual(2);
+      expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
+      expect(deserialized.decodedPairs[1]).toEqual({
         iv: stringAsBinaryBuffer(iv),
         at: stringAsBinaryBuffer(at),
         ad
-      })
-    ).toEqual(testSerialized);
-  });
-
-  it('deserializes encrypted data', () => {
-    const deserialized = deSerialize(testSerialized);
-    expect(deserialized.encryptionStrategy).toEqual(encryptionStrategy);
-    expect(deserialized.decodedPairs.length).toEqual(2);
-    expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
-    expect(deserialized.decodedPairs[1]).toEqual({
-      iv: stringAsBinaryBuffer(iv),
-      at: stringAsBinaryBuffer(at),
-      ad
+      });
     });
   });
 
@@ -53,8 +60,8 @@ describe('Serialize/Deserialize', () => {
       };
 
       const derived = DerivedKeyOptions.randomFromOptions({});
-      const encodedSerialized = derived.serialize();
-      const [_, artifacts] = encodedSerialized.split('.');
+      const encodedSerialized = derived.serialize(SerializationFormat.legacy);
+      const [, artifacts] = encodedSerialized.split('.');
 
       const yaml = decodeSafe64(artifacts);
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
@@ -63,9 +70,9 @@ describe('Serialize/Deserialize', () => {
         key: generateRandomKey(),
         data: 'This is some test data that will be encrypted',
         strategy: CipherStrategy.AES_GCM
-      });
+      }, SerializationFormat.legacy);
       const { serialized } = encrypted;
-      const [__, ___, encoded] = serialized.split('.');
+      const [, , encoded] = serialized.split('.');
       const parsed = decodeSafe64(encoded);
       expect(containsNonUtf8Characters(parsed)).toEqual(false);
       done();

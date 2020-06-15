@@ -5,6 +5,7 @@ import {
   encryptWithPublicKey
 } from '../../src';
 import { encryptWithKey, encryptWithKeyDerivedFromString } from '../../src/encryption/encryption';
+import { SerializationFormat } from '../../src/serialization-versions';
 import { CipherStrategy } from '../../src/strategies';
 
 describe('Encryption', () => {
@@ -16,7 +17,7 @@ describe('Encryption', () => {
         key,
         data,
         strategy: CipherStrategy.AES_GCM
-      });
+      }, SerializationFormat.legacy);
       expect(result.key).toBeTruthy();
       expect(result.key.length).toEqual(32);
       expect(result.encrypted.length).toEqual(16);
@@ -45,7 +46,7 @@ describe('Encryption', () => {
         key,
         data,
         strategy: CipherStrategy.AES_GCM
-      });
+      }, SerializationFormat.legacy);
       // Known IV and known key should produce the same results
       expect(result.serialized).toEqual(
         // As above although we don't need key derivation artifacts
@@ -63,7 +64,7 @@ describe('Encryption', () => {
       const encrypted = await encryptWithPublicKey({
         publicKeyPem,
         data: 'My super secret data'
-      });
+      }, SerializationFormat.legacy);
 
       expect(encrypted.serialized).toMatch(/Rsa4096\.(.)*\.LS0tCnt9Cg==/);
       expect(encrypted.encrypted).toBeTruthy();

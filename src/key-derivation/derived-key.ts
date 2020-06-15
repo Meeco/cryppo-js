@@ -1,9 +1,11 @@
 import { md, pkcs5, random } from 'node-forge';
+import { SerializationFormat } from '../serialization-versions';
 import {
   binaryBufferToString,
   deSerializeDerivedKeyOptions,
+  encodeUtf8,
   serializeDerivedKeyOptions,
-  stringAsBinaryBuffer
+  stringAsBinaryBuffer,
 } from '../util';
 
 /**
@@ -15,7 +17,7 @@ const DEFAULT_ITERATION_VARIANCE = 10;
 const DEFAULT_SALT_LENGTH = 20;
 
 export enum KeyDerivationStrategy {
-  Pbkdf2Hmac = 'Pbkdf2Hmac'
+  Pbkdf2Hmac = 'Pbkdf2Hmac',
 }
 
 export interface IDerivedKey {
@@ -61,7 +63,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     length = DEFAULT_LENGTH,
     minIterations = MIN_ITERATIONS,
     strategy = KeyDerivationStrategy.Pbkdf2Hmac,
-    useSalt
+    useSalt,
   }: IRandomKeyOptions) {
     const variance = Math.floor(minIterations * (iterationVariance / 100));
     const iterations = minIterations + Math.floor(Math.random() * variance);
@@ -70,21 +72,23 @@ export class DerivedKeyOptions implements IDerivedKey {
       strategy,
       iterations,
       salt,
-      length
+      length,
     });
   }
 
+  // tslint:disable-next-line: max-line-length
   public static fromSerialized(serialized: string): DerivedKeyOptions {
+    // tslint:disable-next-line: max-line-length
     const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized);
-    const salt = binaryBufferToString(serializationArtifacts.iv);
+
     return new DerivedKeyOptions({
       // keys taken from ruby lib
       strategy: derivationStrategy,
-      salt,
+      salt: binaryBufferToString(serializationArtifacts.iv),
       iterations: (<any>serializationArtifacts).i,
       length: (<any>serializationArtifacts).l,
       hash: (<any>serializationArtifacts).hash,
-      ...serializationArtifacts
+      ...serializationArtifacts,
     });
   }
 
@@ -102,14 +106,20 @@ export class DerivedKeyOptions implements IDerivedKey {
     this.hash = options.hash || 'SHA256';
   }
 
-  public serialize(): string {
+  public serialize(
+    serializationVersion: SerializationFormat = SerializationFormat.latest_version
+  ): string {
     // keys taken from ruby lib
-    return serializeDerivedKeyOptions(this.strategy, {
-      iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
-      i: this.iterations,
-      l: this.length,
-      hash: this.hash
-    });
+    return serializeDerivedKeyOptions(
+      this.strategy,
+      {
+        iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
+        i: this.iterations,
+        l: this.length,
+        hash: this.hash,
+      },
+      serializationVersion
+    );
   }
 
   public deriveKey(key: string): Promise<string> {
@@ -117,7 +127,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     const digest = md[hash as 'sha256'].create();
     return new Promise((resolve, reject) => {
       return pkcs5.pbkdf2(
-        key,
+        encodeUtf8(key),
         this.salt,
         this.iterations,
         this.length,

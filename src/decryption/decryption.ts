@@ -11,7 +11,7 @@ interface IEncryptionOptions {
 
 export async function decryptWithKey({
   serialized,
-  key
+  key,
 }: {
   serialized: string;
   key: string;
@@ -45,6 +45,7 @@ export async function decryptWithKey({
  * Determine if we need to use a derived key or not based on whether or not
  * we have key derivation options in the serialized payload.
  */
+// tslint:disable-next-line: max-line-length
 function _deriveKeyWithOptions(key: string, serializedOptions: string) {
   const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions);
   return derivedKeyOptions.deriveKey(key);
@@ -64,7 +65,7 @@ function _decryptWithKey(
     iv: util.createBuffer(iv),
     additionalData: ad,
     tagLength,
-    tag
+    tag,
   });
   decipher.update(encrypted);
   const pass = decipher.finish();

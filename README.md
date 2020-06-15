@@ -15,7 +15,9 @@ The public facing API is designed to make it as easy as possible to encrypt some
 
 **If you want to encrypt with an arbitrary string as a key**:
 
-You can do so using `encryptWithKeyDerivedFromString`. This will return the serialized encrypted data along with some information about the encryption (such as key derivation information).
+You can do so using `encryptWithKeyDerivedFromString`. This will return the serialized encrypted data along with some information about the encryption (such as key derivation information). `encryptWithKeyDerivedFromString` and `encryptWithGeneratedKey` have two serialization formats:
+  a legacy format and a more efficient current format. current format is default format, In order to serialize a structure using the old format please use
+  `SerializationFormat.legacy`
 
 ```ts
 import { CipherStrategy, encryptWithKeyDerivedFromString } from '@meeco/cryppo';
@@ -24,7 +26,8 @@ async function encryptData() {
   const result = await encryptWithKeyDerivedFromString({
     key: 'Password123!',
     data: 'My Secret Data',
-    strategy: CipherStrategy.AES_GCM
+    strategy: CipherStrategy.AES_GCM,
+    serializationVersion: SerializationFormat = SerializationFormat.latest_version
   });
   console.log(result.serialized);
 }
@@ -38,7 +41,8 @@ You can do so using `encryptWithGeneratedKey`. This will return the generated ke
 async function encryptData() {
   const result = await encryptWithGeneratedKey({
     data: 'My Secret Data',
-    strategy: CipherStrategy.AES_GCM
+    strategy: CipherStrategy.AES_GCM,
+    serializationVersion: SerializationFormat = SerializationFormat.latest_version
   });
   console.log(result.serialized);
   console.log(result.generatedKey);
@@ -56,7 +60,8 @@ async function encryptData() {
   const result = await encryptWithKeyDerivedFromString({
     key: generateRandomKey(32),
     data: 'My Secret Data',
-    strategy: CipherStrategy.AES_GCM
+    strategy: CipherStrategy.AES_GCM,
+    serializationVersion: SerializationFormat = SerializationFormat.latest_version
   });
   console.log(result.serialized);
 }
@@ -80,7 +85,8 @@ async function encryptDecryptData() {
 
   const encrypted = await encryptWithPublicKey({
     publicKey,
-    data: 'My Super Secret Data'
+    data: 'My Super Secret Data',
+    serializationFormat: SerializationFormat = SerializationFormat.latest_version
   });
 
   // Using un-encrypted private key
@@ -105,7 +111,7 @@ async function encryptDecryptData() {
 
 **If you have a serialized encrypted payload**
 
-_Note: cryppo will use a derived key or the provided key based on the structure of the serialized data_
+_Note: cryppo will use a derived key or the provided key and correct SerializationFormat based on the structure of the serialized data_.
 
 Call `decryptWithKey`
 
@@ -135,11 +141,12 @@ A string containing 3 parts concatenated with a `.`.
 
 1. Encryption Strategy Name: The strategy name as defined by EncryptionStrategy#strategy_name
 2. Encoded Encrypted Data: Encrypted Data is encoded with Base64.urlsafe_encode64
-3. Encoded Encryption Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact, converted to YAML, then encoded with Base64.urlsafe_encode64
+3. Encoded Encryption Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact,
+converted to YAML for legacy & BSON for latest_version, then encoded with Base64.urlsafe_encode64
 
 ### Encrypted data encrypted with a derived key
 
 A string containing 5 parts concatenated with a `.`. The first 3 parts are the same as above.
 
 4. Key Derivation Strategy Name: The strategy name as defined by EncryptionStrategy#strategy_name
-5. Encoded Key Derivation Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact, converted to YAML, then encoded with Base64.urlsafe_encode64
+5. Encoded Key Derivation Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact, converted to YAML for legacy & BSON for latest_version, then encoded with Base64.urlsafe_encode64

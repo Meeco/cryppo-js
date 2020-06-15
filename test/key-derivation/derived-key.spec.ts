@@ -1,4 +1,5 @@
 import { DerivedKeyOptions, KeyDerivationStrategy } from '../../src/key-derivation/derived-key';
+import { SerializationFormat } from '../../src/serialization-versions';
 import { decode64 } from '../../src/util';
 
 describe('DerivedKey', () => {
@@ -48,7 +49,7 @@ describe('DerivedKey', () => {
     try {
       const derived = DerivedKeyOptions.randomFromOptions({});
       const derivedKey = await derived.deriveKey('my key');
-      const serialized = derived.serialize();
+      const serialized = derived.serialize(SerializationFormat.legacy);
       const derivedTwo = DerivedKeyOptions.fromSerialized(serialized);
       const secondKey = await derivedTwo.deriveKey('my key');
       expect(secondKey).toEqual(derivedKey);

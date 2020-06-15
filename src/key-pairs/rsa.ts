@@ -1,4 +1,5 @@
 import { pki } from 'node-forge';
+import { SerializationFormat } from '../serialization-versions';
 import { deSerialize, keyLengthFromPublicKeyPem, serialize } from '../util';
 
 export function generateRSAKeyPair(
@@ -14,7 +15,7 @@ export function generateRSAKeyPair(
       resolve({
         privateKey: pki.privateKeyToPem(keyPair.privateKey),
         publicKey: pki.publicKeyToPem(keyPair.publicKey),
-        bits
+        bits,
       });
     });
   });
@@ -22,7 +23,7 @@ export function generateRSAKeyPair(
 
 export function encryptPrivateKeyWithPassword({
   privateKeyPem,
-  password
+  password,
 }: {
   privateKeyPem: string;
   password: string;
@@ -31,23 +32,27 @@ export function encryptPrivateKeyWithPassword({
   return pki.encryptRsaPrivateKey(publicKey, password);
 }
 
-export async function encryptWithPublicKey({
-  publicKeyPem,
-  data,
-  scheme = 'RSA-OAEP'
-}: {
-  publicKeyPem: string;
-  data: string;
-  scheme?: RsaEncryptionScheme;
-}) {
+export async function encryptWithPublicKey(
+  {
+    publicKeyPem,
+    data,
+    scheme = 'RSA-OAEP',
+  }: {
+    publicKeyPem: string;
+    data: string;
+    scheme?: RsaEncryptionScheme;
+    // tslint:disable-next-line: max-line-length
+  },
+  serializationFormat: SerializationFormat = SerializationFormat.latest_version
+) {
   const pk = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
   const encrypted = pk.encrypt(data, scheme);
 
   const bitLength = keyLengthFromPublicKeyPem(publicKeyPem);
-  const serialized = serialize(`Rsa${bitLength}`, encrypted, <any>{});
+  const serialized = serialize(`Rsa${bitLength}`, encrypted, <any>{}, serializationFormat);
   return {
     encrypted,
-    serialized
+    serialized,
   };
 }
 
@@ -63,7 +68,7 @@ export async function decryptSerializedWithPrivateKey({
   password,
   privateKeyPem,
   serialized,
-  scheme = 'RSA-OAEP'
+  scheme = 'RSA-OAEP',
 }: {
   password?: string;
   privateKeyPem: string;
@@ -75,7 +80,7 @@ export async function decryptSerializedWithPrivateKey({
     password,
     privateKeyPem,
     encrypted,
-    scheme
+    scheme,
   });
 }
 
@@ -86,7 +91,7 @@ export async function decryptWithPrivateKey({
   password,
   privateKeyPem,
   encrypted,
-  scheme = 'RSA-OAEP'
+  scheme = 'RSA-OAEP',
 }: {
   password?: string;
   privateKeyPem: string;

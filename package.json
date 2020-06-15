@@ -13,7 +13,7 @@
     "prebuild": "npm run lint",
     "prepack": "npm run build",
     "prepublishOnly": "npm run build",
-    "start": "parcel serve demo/index.html",
+    "start": "parcel serve demo/encryption_with_derived_key.html",
     "test": "jest"
   },
   "publishConfig": {
@@ -39,14 +39,16 @@
   "author": "Meeco",
   "license": "MIT",
   "dependencies": {
+    "bson": "^4.0.4",
     "node-forge": "0.8.5",
     "yaml": "^1.6.0"
   },
   "devDependencies": {
+    "@types/bson": "^4.0.2",
     "@types/jest": "^24.0.15",
     "@types/node-forge": "0.8.4",
     "@types/yaml": "^1.0.2",
-    "bili": "^4.8.1",
+    "bili": "^4.10.1",
     "jasmine-core": "^3.4.0",
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
@@ -60,12 +62,12 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-safari-launcher": "^1.0.0",
     "karma-typescript": "^4.1.0",
-    "parcel-bundler": "^1.12.3",
+    "parcel-bundler": "^1.12.4",
     "rollup-plugin-typescript2": "^0.26.0",
     "sass": "^1.22.2",
     "ts-jest": "^24.0.2",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.2"
+    "tslint": "^5.20.1",
+    "typescript": "^3.9.5"
   },
   "jest": {
     "testMatch": [

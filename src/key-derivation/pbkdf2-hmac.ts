@@ -10,7 +10,7 @@ export async function generateDerivedKey({
   length,
   minIterations,
   iterationVariance,
-  useSalt
+  useSalt,
 }: Partial<IRandomKeyOptions> & { key: string }): Promise<{
   key: string;
   options: DerivedKeyOptions;
@@ -20,11 +20,11 @@ export async function generateDerivedKey({
     length,
     minIterations,
     strategy: KeyDerivationStrategy.Pbkdf2Hmac,
-    useSalt
+    useSalt,
   });
   const derivedKey = await derivedKeyOptions.deriveKey(key);
   return {
     key: derivedKey,
-    options: derivedKeyOptions
+    options: derivedKeyOptions,
   };
 }
