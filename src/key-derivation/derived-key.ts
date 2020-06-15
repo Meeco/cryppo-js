@@ -1,4 +1,5 @@
 import { md, pkcs5, random } from 'node-forge';
+import { EncodingVersions } from '../encoding-versions';
 import { SerializationFormat } from '../serialization-versions';
 import {
   binaryBufferToString,
@@ -122,12 +123,16 @@ export class DerivedKeyOptions implements IDerivedKey {
     );
   }
 
-  public deriveKey(key: string): Promise<string> {
+  public deriveKey(
+    key: string,
+    encodingVersion: EncodingVersions = EncodingVersions.latest_version
+  ): Promise<string> {
     const hash: string = this.hash.toLocaleLowerCase();
     const digest = md[hash as 'sha256'].create();
+    key = encodingVersion === EncodingVersions.legacy ? key : encodeUtf8(key);
     return new Promise((resolve, reject) => {
       return pkcs5.pbkdf2(
-        encodeUtf8(key),
+        key,
         this.salt,
         this.iterations,
         this.length,
