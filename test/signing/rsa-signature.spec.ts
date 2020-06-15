@@ -2,13 +2,13 @@ import { generateRSAKeyPair } from '../../src/key-pairs/rsa';
 import {
   loadRsaSignature,
   signWithPrivateKey,
-  verifyWithPublicKey
+  verifyWithPublicKey,
 } from '../../src/signing/rsa-signature';
 import { encodeSafe64 } from '../../src/util';
 
 describe('signing', () => {
   const data = 'Sign me!';
-  it('can sign a message with a private key then serialize it', async done => {
+  it('can sign a message with a private key then serialize it', async (done) => {
     // RSA key generation can take a while...
     const timeout = 40000;
     try {
@@ -28,7 +28,7 @@ describe('signing', () => {
       done(err);
     }
   });
-  it('can load a signature then verify it', async done => {
+  it('can load a signature then verify it', async (done) => {
     try {
       const keyPair = await generateRSAKeyPair(2048);
       const signatureObj = signWithPrivateKey(keyPair.privateKey, data);

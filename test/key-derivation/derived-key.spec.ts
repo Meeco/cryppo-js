@@ -25,7 +25,7 @@ describe('DerivedKey', () => {
       length: 40,
       minIterations: 500,
       strategy: 'SomeStrategy',
-      useSalt: 'MySalt'
+      useSalt: 'MySalt',
     });
     expect(derived.strategy).toEqual('SomeStrategy');
     expect(derived.iterations).toEqual(500);
@@ -45,7 +45,7 @@ describe('DerivedKey', () => {
     expect((<any>derived).hash).toEqual('SHA256');
   });
 
-  it('can generate the same key multiple times by serializing and deserializing', async done => {
+  it('can generate the same key multiple times by serializing and deserializing', async (done) => {
     try {
       const derived = DerivedKeyOptions.randomFromOptions({});
       const derivedKey = await derived.deriveKey('my key');
