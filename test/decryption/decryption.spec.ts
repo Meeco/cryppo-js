@@ -42,15 +42,13 @@ describe('decryption', () => {
   it('can decrypt a serialized payload with a passphrases that encoded using legacy', async (done) => {
     try {
       const serialized =
-        'Aes256Gcm.JtFCzRdQ_YgeStalMrnNijW1ck8HZiMI9Qq8fwPqMCbUQ_AnGCDFvvPwic9vDNorHClG5ZQjsGFs2uXo-XGZn3aUgPd5359q2RSys9A3WKpwysR0cLsY_EmxJcboIOYEnxG99iFfLIAYUJUEltnLioS3pmqBcD6wjI1nmDyb-qZQr1_Vk03tZPnj0JQHgtk=.QUAAAAAFaXYADAAAAACWuKmZvW0oy8X-ZpQFYXQAEAAAAADQJdrF4-oPIkrfM5gn6VS4AmFkAAUAAABub25lAAA=.Pbkdf2Hmac.S0EAAAAFaXYAFAAAAAAFZBPaAeWSa9UIMMRHG-6J6bNgFRBpAL1TAAAQbAAgAAAAAmhhc2gABwAAAFNIQTI1NgAA';
+        'Aes256Gcm.tWZy2w==.LS0tCml2OiAhYmluYXJ5IHwtCiAgS3lZMFB5NjRlaWNqdFlxdAphdDogIWJpbmFyeSB8LQogIFB6YXlHRFZwYU9QdjBReXdDN090d1E9PQphZDogbm9uZQo=.Pbkdf2Hmac.LS0tCml2OiAhYmluYXJ5IHwtCiAgS0tkUXd3SXhENldIcm5hTDN2TjlSNUl4cmhFPQppOiAyMDMxNApsOiAzMgpoYXNoOiBTSEEyNTYK';
       const key = `Tiramisù Hans Zemlak`;
       const decrypted = await decryptWithKey({
         serialized,
         key,
       });
-      expect(decrypted).toEqual(
-        'Fresh parsley, Italian sausage, shallots, garlic, sun-dried tomatoes and mozzarella cheese in an all-butter crust. With a side of mixed fruits.'
-      );
+      expect(decrypted).toEqual('abcd');
       done();
     } catch (err) {
       done(err);

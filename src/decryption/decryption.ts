@@ -21,6 +21,7 @@ export async function decryptWithKey({
   const { encryptionStrategy } = deSerialized;
   let { decodedPairs } = deSerialized;
   let output: string = '';
+  let derivedKey;
 
   /**
    * Determine if we need to use a derived key or not based on whether or not
@@ -28,7 +29,7 @@ export async function decryptWithKey({
    */
   if (DerivedKeyOptions.usesDerivedKey(serialized)) {
     // Key will now be one derived with Pbkdf
-    key = await _deriveKeyWithOptions(key, serialized);
+    derivedKey = await _deriveKeyWithOptions(key, serialized);
 
     // Can chop off the last two parts now as they were key data
     decodedPairs = decodedPairs.slice(0, decodedPairs.length - 2);
@@ -40,7 +41,7 @@ export async function decryptWithKey({
     const artifacts: any = decodedPairs[i + 1];
     const strategy = strategyToAlgorithm(encryptionStrategy);
     try {
-      output += _decryptWithKey(legacyKey || key, data, strategy, artifacts);
+      output += _decryptWithKey(legacyKey || derivedKey || key, data, strategy, artifacts);
     } catch (err) {
       if (!legacyKey && encodeUtf8(key) !== key) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
