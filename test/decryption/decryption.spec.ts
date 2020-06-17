@@ -41,14 +41,15 @@ describe('decryption', () => {
 
   it('can decrypt a serialized payload with a passphrases that encoded using legacy', async (done) => {
     try {
-          const serialized = 'Aes256Gcm.tWZy2w==.LS0tCml2OiAhYmluYXJ5IHwtCiAgS3lZMFB5NjRlaWNqdFlxdAphdDogIWJpbmFyeSB8LQogIFB6YXlHRFZwYU9QdjBReXdDN090d1E9PQphZDogbm9uZQo=.Pbkdf2Hmac.LS0tCml2OiAhYmluYXJ5IHwtCiAgS0tkUXd3SXhENldIcm5hTDN2TjlSNUl4cmhFPQppOiAyMDMxNApsOiAzMgpoYXNoOiBTSEEyNTYK';
-          const key = `Tiramisù Hans Zemlak`;
-          const decrypted = await decryptWithKey({
+      const serialized =
+        'Aes256Gcm.tWZy2w==.LS0tCml2OiAhYmluYXJ5IHwtCiAgS3lZMFB5NjRlaWNqdFlxdAphdDogIWJpbmFyeSB8LQogIFB6YXlHRFZwYU9QdjBReXdDN090d1E9PQphZDogbm9uZQo=.Pbkdf2Hmac.LS0tCml2OiAhYmluYXJ5IHwtCiAgS0tkUXd3SXhENldIcm5hTDN2TjlSNUl4cmhFPQppOiAyMDMxNApsOiAzMgpoYXNoOiBTSEEyNTYK';
+      const key = `Tiramisù Hans Zemlak`;
+      const decrypted = await decryptWithKey({
         serialized,
         key,
       });
-          expect(decrypted).toEqual('abcd');
-          done();
+      expect(decrypted).toEqual('abcd');
+      done();
     } catch (err) {
       done(err);
     }
