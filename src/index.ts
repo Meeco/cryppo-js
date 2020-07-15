@@ -1,4 +1,9 @@
-// import { encryptWithDerivedKey } from './encrypt-with-derived-key';
+import { Buffer as _buffer } from 'buffer';
+if (typeof window !== 'undefined' && typeof (<any>window).global === 'undefined') {
+  // Ensures browser will run without manual polyfills in Angular
+  (<any>window).Buffer = _buffer;
+  (<any>window).global = window;
+}
 
 export * from './decryption/decryption';
 export * from './encryption/encryption';

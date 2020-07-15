@@ -1,4 +1,5 @@
 import * as BSON from 'bson';
+import { Buffer as _buffer } from 'buffer';
 import { pki, random, util } from 'node-forge';
 import * as YAML from 'yaml';
 import { IEncryptionArtifacts } from './encryption/encryption';
@@ -126,20 +127,13 @@ function decodeArtifactData(text: string) {
   } else {
     text = decodeSafe64Bson(text);
     // remove version byte before deserializing
-    return BSON.deserialize(Buffer.from(text, 'base64').slice(1), { promoteBuffers: true });
+    return BSON.deserialize(_buffer.from(text, 'base64').slice(1), { promoteBuffers: true });
   }
 }
 
 export function stringAsBinaryBuffer(val: string): Buffer | Uint8Array {
-  if (typeof Buffer !== 'undefined') {
-    return Buffer.from(val, 'binary');
-  }
-
-  const bufView = new Uint8Array(val.length);
-  for (let i = 0, strLen = val.length; i < strLen; i++) {
-    bufView[i] = val.charCodeAt(i);
-  }
-  return bufView;
+  // We use the polyfill for browser coverage and compatibility with bson serialize
+  return _buffer.from(val, 'binary');
 }
 
 export function binaryBufferToString(val: Buffer | Uint8Array | ArrayBuffer): string {
@@ -174,7 +168,7 @@ export function encodeSafe64Bson(
   versionByte: string,
   artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts
 ) {
-  const bsonSerialized = Buffer.concat([Buffer.from(versionByte), BSON.serialize(artifacts)]);
+  const bsonSerialized = _buffer.concat([_buffer.from(versionByte), BSON.serialize(artifacts)]);
   const base64Data = bsonSerialized.toString('base64');
   return base64Data
     .replace(/\+/g, '-') // Convert '+' to '-'
