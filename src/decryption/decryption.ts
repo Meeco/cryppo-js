@@ -43,7 +43,7 @@ export async function decryptWithKey({
     try {
       output += _decryptWithKey(legacyKey || derivedKey || key, data, strategy, artifacts);
     } catch (err) {
-      if (!legacyKey && encodeUtf8(key) !== key) {
+      if (!legacyKey && encodeUtf8(key) !== key && DerivedKeyOptions.usesDerivedKey(serialized)) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
         legacyKey = await _deriveKeyWithOptions(key, serialized, EncodingVersions.legacy);
         i -= 2;
