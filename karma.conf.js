@@ -1,7 +1,7 @@
 // Karma configuration
 // Generated on Tue Jun 25 2019 14:43:25 GMT+0930 (ACST)
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -19,7 +19,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      '**/*.ts': 'karma-typescript'
+      '**/*.ts': 'karma-typescript',
     },
     // test results reporter to use
     // possible values: 'dots', 'progress'
@@ -58,14 +58,19 @@ module.exports = function(config) {
         flags: [
           '--no-sandbox', // required to run without privileges in docker
           '--disable-gpu',
-          '--disable-web-security'
-        ]
-      }
+          '--disable-web-security',
+        ],
+      },
     },
 
-    karmaTypescriptConfig : {
-      tsconfig: 'tsconfig.json'
-    }
-        
+    karmaTypescriptConfig: {
+      tsconfig: 'tsconfig.json',
+      bundlerOptions: {
+        transforms: [
+          // support es6 modules (YAML)
+          require('karma-typescript-es6-transform')(),
+        ],
+      },
+    },
   });
 };
