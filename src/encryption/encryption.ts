@@ -121,7 +121,7 @@ export async function encryptWithKey(
  */
 const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1).toLowerCase();
 
-function _encryptWithKey(
+export function _encryptWithKey(
   key: string,
   data: string,
   strategy: CipherStrategy,

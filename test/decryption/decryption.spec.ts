@@ -1,4 +1,6 @@
-import { decryptWithKey } from '../../src/decryption/decryption';
+import { _decryptWithKey, decryptWithKey } from '../../src/decryption/decryption';
+import { CipherStrategy, strategyToAlgorithm } from '../../src/strategies';
+import { binaryBufferToString } from '../../src/util';
 describe('decryption', () => {
   it('can decrypt a serialized payload that includes key derivation artifacts', async (done) => {
     try {
@@ -15,6 +17,25 @@ describe('decryption', () => {
         key,
       });
       expect(decrypted).toEqual('some data to encrypt');
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  it('can decrypt directly using encryption artifacts', async (done) => {
+    try {
+      const key = `Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`;
+      const decrypted = await _decryptWithKey(key, 'Ç', CipherStrategy.AES_GCM, {
+        iv: binaryBufferToString(
+          new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
+        ),
+        ad: 'none',
+        at: binaryBufferToString(
+          new Uint8Array([105, 3, 81, 233, 134, 232, 125, 103, 71, 239, 206, 72, 171, 224, 186, 45])
+        ),
+      });
+      expect(decrypted).toEqual('1');
       done();
     } catch (err) {
       done(err);

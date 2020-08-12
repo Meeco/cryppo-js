@@ -71,7 +71,7 @@ function _deriveKeyWithOptions(
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
-function _decryptWithKey(
+export function _decryptWithKey(
   key: string,
   encryptedData: any,
   strategy: CipherStrategy,
