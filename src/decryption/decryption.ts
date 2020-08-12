@@ -41,7 +41,12 @@ export async function decryptWithKey({
     const artifacts: any = decodedPairs[i + 1];
     const strategy = strategyToAlgorithm(encryptionStrategy);
     try {
-      output += _decryptWithKey(legacyKey || derivedKey || key, data, strategy, artifacts);
+      output += decryptWithKeyUsingArtefacts(
+        legacyKey || derivedKey || key,
+        data,
+        strategy,
+        artifacts
+      );
     } catch (err) {
       if (!legacyKey && encodeUtf8(key) !== key && DerivedKeyOptions.usesDerivedKey(serialized)) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
@@ -71,7 +76,7 @@ function _deriveKeyWithOptions(
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
-function _decryptWithKey(
+export function decryptWithKeyUsingArtefacts(
   key: string,
   encryptedData: any,
   strategy: CipherStrategy,
