@@ -1,5 +1,5 @@
-import { _decryptWithKey, decryptWithKey } from '../../src/decryption/decryption';
-import { CipherStrategy, strategyToAlgorithm } from '../../src/strategies';
+import { decryptWithKey, decryptWithKeyUsingArtefacts } from '../../src/decryption/decryption';
+import { CipherStrategy } from '../../src/strategies';
 import { binaryBufferToString } from '../../src/util';
 describe('decryption', () => {
   it('can decrypt a serialized payload that includes key derivation artifacts', async (done) => {
@@ -23,10 +23,10 @@ describe('decryption', () => {
     }
   });
 
-  it('can decrypt directly using encryption artifacts', async (done) => {
+  it('can decrypt with key using encryption artifacts', async (done) => {
     try {
       const key = `Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`;
-      const decrypted = await _decryptWithKey(key, 'Ç', CipherStrategy.AES_GCM, {
+      const decrypted = await decryptWithKeyUsingArtefacts(key, 'Ç', CipherStrategy.AES_GCM, {
         iv: binaryBufferToString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),

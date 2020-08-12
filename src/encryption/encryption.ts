@@ -100,7 +100,7 @@ export async function encryptWithKey(
   { key, data, strategy, iv }: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
-  const output = _encryptWithKey(key, data, strategy, iv);
+  const output = encryptWithKeyUsingArtefacts(key, data, strategy, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
@@ -121,7 +121,7 @@ export async function encryptWithKey(
  */
 const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1).toLowerCase();
 
-export function _encryptWithKey(
+export function encryptWithKeyUsingArtefacts(
   key: string,
   data: string,
   strategy: CipherStrategy,
