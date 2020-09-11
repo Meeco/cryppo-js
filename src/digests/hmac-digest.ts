@@ -1,4 +1,4 @@
-import { Base64, Bytes, Hex, hmac, util } from 'node-forge';
+import { Hex, hmac } from 'node-forge';
 
 export function hmacSha256Digest(key: string, message: string): Hex {
   const hm = hmac.create();
