@@ -1,4 +1,4 @@
-import { hmacSha256Digest } from '../../src/digests/hmac-digest';
+import { hmacSha256Digest } from '../../src';
 
 describe('HMAC', () => {
   it('Computes a SHA-256 HMAC', () => {
