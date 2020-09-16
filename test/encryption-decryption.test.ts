@@ -13,6 +13,9 @@ describe('aes-256-gcm', () => {
         { key, data, strategy },
         SerializationFormat.latest_version
       );
+      if (result.serialized === null) {
+        throw new Error('serialized should not be null here');
+      }
       const decryptedWithSourceKey = await decryptWithKey({
         serialized: result.serialized,
         key,
@@ -40,6 +43,9 @@ describe('aes-256-gcm', () => {
           const key = 'correct horse battery staple';
           const data = 'some secret data';
           const result = await encryptWithKeyDerivedFromString({ key, data, strategy }, version);
+          if (result.serialized === null) {
+            throw new Error('serialized should not be null here');
+          }
           const decryptedWithSourceKey = await decryptWithKey({
             serialized: result.serialized,
             key,
