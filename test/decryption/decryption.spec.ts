@@ -60,6 +60,43 @@ describe('decryption', () => {
     }
   });
 
+  it('returns null if an empty string is passed in as encrypted data to decryptWithKey', async (done) => {
+    try {
+      const serialized =
+        'Aes256Gcm.YkYlgdxu-EwLFnGpnxOXPknfW1qjNFlaJmv7v-yrRdVS7w-MIbfvhuQYmGiMsRq38htIkFJRw_9HCry59B4n8Ez5YBRqUSWYvDTRnnd1oUyxezaceKeU7Hn2T43WvelvdeGKtDg66nijBx_xzQTB8zAlX2cgEjvHetjbN6nh1dHVybEILJhTuFYGqbt6S6U=.QUAAAAACYWQABQAAAG5vbmUABWF0ABAAAAAAqkkHxjg39NsGla7nqctVwwVpdgAMAAAAAJR6lOtoqTZuQrNARAA=.Pbkdf2Hmac.SzAAAAAQaQBdTgAABWl2ABQAAAAASXD6kLUzKWrDCmzxASTuwiJfY8UQbAAgAAAAAA==';
+      const key = `Tiramisù Hans Zemlak`;
+      const decrypted = await decryptWithKey({
+        serialized,
+        key,
+      });
+      expect(decrypted).toEqual(
+        'Fresh parsley, Italian sausage, shallots, garlic, sun-dried tomatoes and mozzarella cheese in an all-butter crust. With a side of mixed fruits.'
+      );
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  it('returns null if an empty string is passed in as encrypted data to decryptWithKeyUsingArtefacts', async (done) => {
+    try {
+      const key = `Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`;
+      const decrypted = await decryptWithKeyUsingArtefacts(key, '', CipherStrategy.AES_GCM, {
+        iv: binaryBufferToString(
+          new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
+        ),
+        ad: 'none',
+        at: binaryBufferToString(
+          new Uint8Array([105, 3, 81, 233, 134, 232, 125, 103, 71, 239, 206, 72, 171, 224, 186, 45])
+        ),
+      });
+      expect(decrypted).toEqual(null);
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+
   it('can decrypt a serialized payload with a passphrases that encoded using legacy', async (done) => {
     try {
       const serialized =

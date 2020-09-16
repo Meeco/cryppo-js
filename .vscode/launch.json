@@ -20,6 +20,14 @@
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
-    }
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach",
+      "skipFiles": ["<node_internals>/**"],
+      "restart": true,
+      "timeout": 600000
+    },
   ]
 }

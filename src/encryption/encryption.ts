@@ -36,8 +36,8 @@ export type IEncryptionOptions = IEncryptionOptionsWithoutKey & {
 };
 
 export interface IEncryptionResult {
-  serialized: string;
-  encrypted: string;
+  serialized: string | null;
+  encrypted: string | null;
 }
 
 /**
@@ -100,13 +100,16 @@ export async function encryptWithKey(
   { key, data, strategy, iv }: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
+  if (data === '') {
+    return { encrypted: null, serialized: null };
+  }
   const output = encryptWithKeyUsingArtefacts(key, data, strategy, iv);
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
   const serialized = serialize(
     `${cipher}${keyLengthBits}${mode}`,
-    encrypted,
+    encrypted || '',
     artifacts,
     serializationVersion
   );
@@ -127,9 +130,12 @@ export function encryptWithKeyUsingArtefacts(
   strategy: CipherStrategy,
   iv?: string
 ): {
-  encrypted: string;
-  artifacts: any;
+  encrypted: string | null;
+  artifacts?: any;
 } {
+  if (data === '') {
+    return { encrypted: null };
+  }
   const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key));
   iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
