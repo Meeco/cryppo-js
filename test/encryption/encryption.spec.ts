@@ -103,7 +103,6 @@ describe('Encryption', () => {
         },
         SerializationFormat.legacy
       );
-      // Known IV and known key should produce the same results
       expect(result.serialized).toEqual(null);
       done();
     } catch (e) {
@@ -123,7 +122,6 @@ describe('Encryption', () => {
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         )
       );
-      // Known IV and known key should produce the same results
       expect(result.encrypted).toBeNull();
       done();
     } catch (e) {
