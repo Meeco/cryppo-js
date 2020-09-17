@@ -16,10 +16,13 @@ export async function decryptWithKey({
 }: {
   serialized: string;
   key: string;
-}): Promise<string> {
+}): Promise<string | null> {
   const deSerialized = deSerialize(serialized);
   const { encryptionStrategy } = deSerialized;
   let { decodedPairs } = deSerialized;
+  if (decodedPairs[0] === '') {
+    return null;
+  }
   let output: string = '';
   let derivedKey;
 
@@ -82,6 +85,9 @@ export function decryptWithKeyUsingArtefacts(
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
 ) {
+  if (encryptedData === '') {
+    return null;
+  }
   const decipher = cipher.createDecipher(strategy, key);
   const tagLength = 128;
   const tag = util.createBuffer(at); // authentication tag from encryption

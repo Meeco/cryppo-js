@@ -81,6 +81,9 @@ describe('Serialize/Deserialize', () => {
         SerializationFormat.legacy
       );
       const { serialized } = encrypted;
+      if (serialized === null) {
+        throw new Error('serialized should not be null here');
+      }
       const [, , encoded] = serialized.split('.');
       const parsed = decodeSafe64(encoded);
       expect(containsNonUtf8Characters(parsed)).toEqual(false);
