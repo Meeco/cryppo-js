@@ -1,10 +1,9 @@
-name: Build and Publish Release
+name: Build and Publish Beta Release
 
 on:
  push:
    tags:
-     - 'releases/*'
-     - '!releases/**-beta'
+     - 'releases/**-beta'
 
 jobs:
   test:
@@ -40,7 +39,7 @@ jobs:
       - run: |
           npm config set //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN
           npm config set scope "@meeco"
-          npm publish --access public 
+          npm publish --access public --tag beta
         env:
           CI: true
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
