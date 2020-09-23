@@ -133,7 +133,7 @@ export function encryptWithKeyUsingArtefacts(
   const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key));
   iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
-  cipher.update(util.createBuffer(data));
+  cipher.update(util.createBuffer(data, 'utf8'));
   cipher.finish();
   const artifacts: any = {
     iv: stringAsBinaryBuffer(iv),

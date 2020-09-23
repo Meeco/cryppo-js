@@ -32,13 +32,13 @@ describe('aes-256-gcm', () => {
     }
   });
 
-  Object.values(CipherStrategy).forEach((strategy) => {
-    Object.values(SerializationFormat).forEach((version) => {
+  Object.values([CipherStrategy.AES_GCM]).forEach((strategy) => {
+    Object.values([SerializationFormat.latest_version]).forEach((version) => {
       it(`can successfully encrypt and decrypt with ${strategy}
          Encryption and ${version} serialization version`, async (done) => {
         try {
           const key = 'correct horse battery staple';
-          const data = 'some secret data';
+          const data = 'some secret data 杨鸿飞';
           const result = await encryptWithKeyDerivedFromString({ key, data, strategy }, version);
           const decryptedWithSourceKey = await decryptWithKey({
             serialized: result.serialized,

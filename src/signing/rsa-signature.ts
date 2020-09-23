@@ -1,4 +1,4 @@
-import { md, pki } from 'node-forge';
+import { md, pki, util } from 'node-forge';
 import { decodeSafe64, encodeSafe64, keyLengthFromPrivateKeyPem } from '../../src/util';
 
 export interface ISignature {
@@ -14,7 +14,9 @@ export function signWithPrivateKey(privateKeyPem: string, data: string): ISignat
   mdDigest.update(data, 'utf8');
   const signature = key.sign(mdDigest);
   const keySize = keyLengthFromPrivateKeyPem(privateKeyPem);
-  const serialized = `Sign.Rsa${keySize}.${encodeSafe64(signature)}.${encodeSafe64(data)}`;
+  const serialized = `Sign.Rsa${keySize}.${encodeSafe64(signature)}.${encodeSafe64(
+    util.encodeUtf8(data)
+  )}`;
   return {
     signature,
     data,
@@ -32,7 +34,7 @@ export function loadRsaSignature(serializedPayload: string): ISignature {
     return {
       serialized: serializedPayload,
       signature: decodeSafe64(encodedSignature),
-      data: decodeSafe64(encodedData),
+      data: util.decodeUtf8(decodeSafe64(encodedData)),
       keySize: bits,
     };
   } else {
