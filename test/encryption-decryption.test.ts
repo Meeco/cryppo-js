@@ -32,8 +32,8 @@ describe('aes-256-gcm', () => {
     }
   });
 
-  Object.values([CipherStrategy.AES_GCM]).forEach((strategy) => {
-    Object.values([SerializationFormat.latest_version]).forEach((version) => {
+  Object.values(CipherStrategy).forEach((strategy) => {
+    Object.values(SerializationFormat).forEach((version) => {
       it(`can successfully encrypt and decrypt with ${strategy}
          Encryption and ${version} serialization version`, async (done) => {
         try {
