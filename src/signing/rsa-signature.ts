@@ -34,7 +34,10 @@ export function loadRsaSignature(serializedPayload: string): ISignature {
     let data = decodeSafe64(encodedData);
     try {
       data = util.decodeUtf8(data);
-    } catch {}
+    } catch {
+      // in the event that data was encrypted without being encoded as utf-8 first
+      // we just return the raw base64 encoded data for backwards compatibility
+    }
 
     return {
       serialized: serializedPayload,

@@ -35,6 +35,30 @@ describe('aes-256-gcm', () => {
     }
   });
 
+  // in the event that data was encrypted without being encoded as utf-8 first
+  // we just return the raw base64 encoded data for backwards compatibility
+  it(`can successfully decrypt data that was not encoded with utf-8 earlier`, async (done) => {
+    try {
+      const key = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
+      // const orignal_data = 'some secret data 鍵键';
+      const decryptedData = 'some secret data³à.';
+
+      const encryptedSerialized =
+        'Aes256Gcm.pso4ejxoKW0HUzWYmNyzpY6DRw==.QUAAAAAFaXYADAAAAACIZMGHJl0tQVM7FCYFYXQAEAAAAAA-ia2XV2A0RmFZBG7BEQ8yAmFkAAUAAABub25lAAA=.Pbkdf2Hmac.S0EAAAAFaXYAFAAAAABP57egKZTvRAeE2DHGLwE1IGF4PhBpAIlPAAAQbAAgAAAAAmhhc2gABwAAAFNIQTI1NgAA';
+
+      const decryptedWithSourceKey = await decryptWithKey({
+        serialized: encryptedSerialized,
+        key,
+      });
+
+      expect(decryptedWithSourceKey).toEqual(decryptedData);
+
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+
   Object.values(CipherStrategy).forEach((strategy) => {
     Object.values(SerializationFormat).forEach((version) => {
       it(`can successfully encrypt and decrypt with ${strategy}

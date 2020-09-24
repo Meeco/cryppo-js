@@ -105,6 +105,8 @@ export function decryptWithKeyUsingArtefacts(
     try {
       return util.decodeUtf8(decipher.output.data);
     } catch {
+      // in the event that data was encrypted without being encoded as utf-8 first
+      // we just return the raw base64 encoded data for backwards compatibility
       return decipher.output.data;
     }
   }
