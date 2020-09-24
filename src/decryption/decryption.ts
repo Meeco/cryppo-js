@@ -102,7 +102,13 @@ export function decryptWithKeyUsingArtefacts(
   const pass = decipher.finish();
   // pass is false if there was a failure (eg: authentication tag didn't match)
   if (pass) {
-    return util.decodeUtf8(decipher.output.data);
+    try {
+      return util.decodeUtf8(decipher.output.data);
+    } catch {
+      // in the event that data was encrypted without being encoded as utf-8 first
+      // we just return the raw base64 encoded data for backwards compatibility
+      return decipher.output.data;
+    }
   }
 
   throw new Error('Decryption failed');
