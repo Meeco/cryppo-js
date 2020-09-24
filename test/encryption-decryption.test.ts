@@ -6,7 +6,7 @@ import { CipherStrategy } from '../src/strategies';
 describe('aes-256-gcm', () => {
   it(`can successfully encrypt and decrypt with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
-      const key = 'correct horse battery staple';
+      const key = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
       const data = 'some secret data';
       const strategy = CipherStrategy.AES_GCM;
       const result = await encryptWithKeyDerivedFromString(
@@ -41,7 +41,8 @@ describe('aes-256-gcm', () => {
          Encryption and ${version} serialization version`, async (done) => {
         try {
           const key = 'correct horse battery staple';
-          const data = 'some secret data';
+          const data =
+            'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష';
           const result = await encryptWithKeyDerivedFromString({ key, data, strategy }, version);
           if (result.serialized === null) {
             throw new Error('serialized should not be null here');
