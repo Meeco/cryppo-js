@@ -102,7 +102,11 @@ export function decryptWithKeyUsingArtefacts(
   const pass = decipher.finish();
   // pass is false if there was a failure (eg: authentication tag didn't match)
   if (pass) {
-    return util.decodeUtf8(decipher.output.data);
+    try {
+      return util.decodeUtf8(decipher.output.data);
+    } catch {
+      return decipher.output.data;
+    }
   }
 
   throw new Error('Decryption failed');

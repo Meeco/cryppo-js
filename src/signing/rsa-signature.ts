@@ -31,10 +31,15 @@ export function loadRsaSignature(serializedPayload: string): ISignature {
   const regex = /Rsa\d{1,4}/g;
   if (signed === 'Sign' && regex.test(signingStrategy)) {
     const bits = parseInt(signingStrategy.replace('Rsa', ''), 10);
+    let data = decodeSafe64(encodedData);
+    try {
+      data = util.decodeUtf8(data);
+    } catch {}
+
     return {
       serialized: serializedPayload,
       signature: decodeSafe64(encodedSignature),
-      data: util.decodeUtf8(decodeSafe64(encodedData)),
+      data,
       keySize: bits,
     };
   } else {
