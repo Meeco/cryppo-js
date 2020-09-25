@@ -9,7 +9,7 @@ import {
   encryptBinaryWithKey,
   encryptStringWithKey,
   loadRsaSignature,
-  verifyWithPublicKey
+  verifyWithPublicKey,
 } from '../../src';
 import { decodeSafe64 } from '../../src/util';
 import Compat from './compat.json';
@@ -77,11 +77,12 @@ describe('compatiblity test for all cryppo port', () => {
 
 describe('Backwards and forwards copmatibility', () => {
   const key = decodeSafe64('W0NldJtd-ducHL4o02MBaFYYWQI9GB4XdK5BikAMxQs=');
-  it('Can decrypt pain strings older cryppo-js versions (~0.11.0)', async () => {
+  it('Can decrypt plain strings older cryppo-js versions (~0.11.0)', async () => {
     const decrypted = await decryptWithKey({
       key,
       // "Hello world"
-      serialized: 'Aes256Gcm.z7pHi08eMhcGt2s=.QUAAAAAFaXYADAAAAAAWKhi96ZRIZk9TW3sFYXQAEAAAAACn54Pe46ITLaXbtS6iKN03AmFkAAUAAABub25lAAA='
+      serialized:
+        'Aes256Gcm.z7pHi08eMhcGt2s=.QUAAAAAFaXYADAAAAAAWKhi96ZRIZk9TW3sFYXQAEAAAAACn54Pe46ITLaXbtS6iKN03AmFkAAUAAABub25lAAA=',
     });
 
     expect(decrypted).toEqual('Hello World');
@@ -91,7 +92,8 @@ describe('Backwards and forwards copmatibility', () => {
     const decrypted = await decryptWithKey({
       key,
       // Hello 😀
-      serialized: 'Aes256Gcm.m6_M6fxxHJM=.QUAAAAAFaXYADAAAAADsX9sHdgtXsRSQM_AFYXQAEAAAAADFEdyvfEQG_jc2V92qRzmtAmFkAAUAAABub25lAAA='
+      serialized:
+        'Aes256Gcm.m6_M6fxxHJM=.QUAAAAAFaXYADAAAAADsX9sHdgtXsRSQM_AFYXQAEAAAAADFEdyvfEQG_jc2V92qRzmtAmFkAAUAAABub25lAAA=',
     });
 
     // Prints as 'Helloøã'
@@ -104,11 +106,11 @@ describe('Backwards and forwards copmatibility', () => {
     const encrypted = await encryptStringWithKey({
       data: 'Hello 😀',
       key,
-      strategy: CipherStrategy.AES_GCM
-    })
+      strategy: CipherStrategy.AES_GCM,
+    });
     const decrypted = await decryptStringWithKey({
       key,
-      serialized: encrypted.serialized!
+      serialized: encrypted.serialized!,
     });
 
     expect(decrypted).toEqual('Hello 😀');
@@ -128,11 +130,11 @@ describe('Backwards and forwards copmatibility', () => {
       const encrypted = await encryptBinaryWithKey({
         data: expected,
         key,
-        strategy: CipherStrategy.AES_GCM
+        strategy: CipherStrategy.AES_GCM,
       });
       const decrypted = await decryptBinaryWithKey({
         serialized: encrypted.serialized!,
-        key
+        key,
       });
       expect(decrypted).toBeTruthy();
       expect(decrypted).toEqual(expected);
