@@ -1,8 +1,8 @@
 import {
   decryptSerializedWithPrivateKey,
   decryptStringWithKey,
-  loadRsaSignature,
-  verifyWithPublicKey,
+  loadStringRsaSignature,
+  verifyStringWithPublicKey,
 } from '../../src';
 import { decodeSafe64 } from '../../src/util';
 import Compat from './compat.json';
@@ -28,8 +28,8 @@ describe('compatiblity test for all cryppo port', () => {
   Object.values(Compat.signatures).forEach((objToValidate: any, index) => {
     it(`${index}. can successfully verify RSA signature with public key pem and serialized signature`, async (done) => {
       try {
-        const encryptionResult = await loadRsaSignature(objToValidate.serialized_signature);
-        const verify = await verifyWithPublicKey(objToValidate.public_pem, encryptionResult);
+        const encryptionResult = await loadStringRsaSignature(objToValidate.serialized_signature);
+        const verify = await verifyStringWithPublicKey(objToValidate.public_pem, encryptionResult);
         expect(verify).toEqual(true);
         done();
       } catch (err) {

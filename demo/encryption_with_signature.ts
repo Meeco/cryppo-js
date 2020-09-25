@@ -1,8 +1,8 @@
 import {
-  signWithPrivateKey,
-  verifyWithPublicKey,
-  loadRsaSignature,
   decryptSerializedWithPrivateKey,
+  loadStringRsaSignature,
+  signStringWithPrivateKey,
+  verifyStringWithPublicKey,
 } from '../src/index';
 import { SerializationFormat } from '../src/serialization-versions';
 
@@ -47,7 +47,7 @@ async function encryptText() {
   const inText = $get('encryptTextInput');
   const privateKeyPem = $get('encryptTextPrivateKeyPem');
 
-  const encryptionResult = await signWithPrivateKey(privateKeyPem, inText);
+  const encryptionResult = await signStringWithPrivateKey(privateKeyPem, inText);
 
   $set('encryptTextOutput', encryptionResult.serialized);
 }
@@ -55,9 +55,9 @@ async function encryptText() {
 async function verifyText() {
   const publicKeyPem = $get('verifyTextPublicKeyPem');
   const serializedPayload = $get('verifyTextInput');
-  const encryptionResult = await loadRsaSignature(serializedPayload);
+  const encryptionResult = await loadStringRsaSignature(serializedPayload);
   try {
-    const verifyed = await verifyWithPublicKey(publicKeyPem, encryptionResult);
+    const verifyed = await verifyStringWithPublicKey(publicKeyPem, encryptionResult);
     $set('verifyTextOutput', verifyed ? 'Successfully Verified' : 'Unsuccessful Verification');
   } catch (ex) {
     $set('verifyTextOutput', `[Verification FAILED]`);
