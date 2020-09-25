@@ -1,4 +1,7 @@
-import { decryptWithKey, decryptWithKeyUsingArtefacts } from '../../src/decryption/decryption';
+import {
+  decryptStringWithKey,
+  decryptStringWithKeyUsingArtefacts,
+} from '../../src/decryption/decryption';
 import { CipherStrategy } from '../../src/strategies';
 import { binaryBufferToString } from '../../src/util';
 describe('decryption', () => {
@@ -12,7 +15,7 @@ describe('decryption', () => {
         'iAyMDU4NQpsOiAzMgo=',
       ].join('');
       const key = `MyPassword!!`;
-      const decrypted = await decryptWithKey({
+      const decrypted = await decryptStringWithKey({
         serialized,
         key,
       });
@@ -26,7 +29,7 @@ describe('decryption', () => {
   it('can decrypt with key using encryption artifacts', async (done) => {
     try {
       const key = `Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`;
-      const decrypted = await decryptWithKeyUsingArtefacts(key, 'Ç', CipherStrategy.AES_GCM, {
+      const decrypted = await decryptStringWithKeyUsingArtefacts(key, 'Ç', CipherStrategy.AES_GCM, {
         iv: binaryBufferToString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),
@@ -47,7 +50,7 @@ describe('decryption', () => {
       const serialized =
         'Aes256Gcm.YkYlgdxu-EwLFnGpnxOXPknfW1qjNFlaJmv7v-yrRdVS7w-MIbfvhuQYmGiMsRq38htIkFJRw_9HCry59B4n8Ez5YBRqUSWYvDTRnnd1oUyxezaceKeU7Hn2T43WvelvdeGKtDg66nijBx_xzQTB8zAlX2cgEjvHetjbN6nh1dHVybEILJhTuFYGqbt6S6U=.QUAAAAACYWQABQAAAG5vbmUABWF0ABAAAAAAqkkHxjg39NsGla7nqctVwwVpdgAMAAAAAJR6lOtoqTZuQrNARAA=.Pbkdf2Hmac.SzAAAAAQaQBdTgAABWl2ABQAAAAASXD6kLUzKWrDCmzxASTuwiJfY8UQbAAgAAAAAA==';
       const key = `Tiramisù Hans Zemlak`;
-      const decrypted = await decryptWithKey({
+      const decrypted = await decryptStringWithKey({
         serialized,
         key,
       });
@@ -60,12 +63,12 @@ describe('decryption', () => {
     }
   });
 
-  it('returns null if an empty string is passed in as encrypted data to decryptWithKey', async (done) => {
+  it('returns null if an empty string is passed in as encrypted data to decryptStringWithKey', async (done) => {
     try {
       const serialized =
         'Aes256Gcm..QUAAAAACYWQABQAAAG5vbmUABWF0ABAAAAAAqkkHxjg39NsGla7nqctVwwVpdgAMAAAAAJR6lOtoqTZuQrNARAA=.Pbkdf2Hmac.SzAAAAAQaQBdTgAABWl2ABQAAAAASXD6kLUzKWrDCmzxASTuwiJfY8UQbAAgAAAAAA==';
       const key = `Tiramisù Hans Zemlak`;
-      const decrypted = await decryptWithKey({
+      const decrypted = await decryptStringWithKey({
         serialized,
         key,
       });
@@ -76,10 +79,11 @@ describe('decryption', () => {
     }
   });
 
-  it('returns null if an empty string is passed in as encrypted data to decryptWithKeyUsingArtefacts', async (done) => {
+  // tslint:disable-next-line: max-line-length
+  it('returns null if an empty string is passed in as encrypted data to decryptStringWithKeyUsingArtefacts', async (done) => {
     try {
       const key = `Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`;
-      const decrypted = await decryptWithKeyUsingArtefacts(key, '', CipherStrategy.AES_GCM, {
+      const decrypted = await decryptStringWithKeyUsingArtefacts(key, '', CipherStrategy.AES_GCM, {
         iv: binaryBufferToString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),
@@ -100,7 +104,7 @@ describe('decryption', () => {
       const serialized =
         'Aes256Gcm.tWZy2w==.LS0tCml2OiAhYmluYXJ5IHwtCiAgS3lZMFB5NjRlaWNqdFlxdAphdDogIWJpbmFyeSB8LQogIFB6YXlHRFZwYU9QdjBReXdDN090d1E9PQphZDogbm9uZQo=.Pbkdf2Hmac.LS0tCml2OiAhYmluYXJ5IHwtCiAgS0tkUXd3SXhENldIcm5hTDN2TjlSNUl4cmhFPQppOiAyMDMxNApsOiAzMgpoYXNoOiBTSEEyNTYK';
       const key = `Tiramisù Hans Zemlak`;
-      const decrypted = await decryptWithKey({
+      const decrypted = await decryptStringWithKey({
         serialized,
         key,
       });

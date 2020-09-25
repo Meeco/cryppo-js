@@ -1,6 +1,6 @@
 import {
   decryptSerializedWithPrivateKey,
-  decryptWithKey,
+  decryptStringWithKey,
   loadRsaSignature,
   verifyWithPublicKey,
 } from '../../src';
@@ -12,7 +12,7 @@ describe('compatiblity test for all cryppo port', () => {
     it(`${index}. can successfully decrypt with AES-GCM Encryption and
         legacy & latest serialization version`, async (done) => {
       try {
-        const decryptedWithSourceKey = await decryptWithKey({
+        const decryptedWithSourceKey = await decryptStringWithKey({
           serialized: objToValidate.serialized,
           key: objToValidate.passphrase,
         });
@@ -52,7 +52,7 @@ describe('compatiblity test for all cryppo port', () => {
             break;
           case 'Aes256Gcm':
             const key = decodeSafe64(objToValidate.key);
-            encryptionResult = await decryptWithKey({
+            encryptionResult = await decryptStringWithKey({
               serialized: objToValidate.serialized,
               key,
             });
