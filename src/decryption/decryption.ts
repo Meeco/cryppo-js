@@ -57,7 +57,7 @@ export async function decryptWithKey(
     serialized: string;
     key: string;
   },
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ): Promise<string | null> {
   const deSerialized = deSerialize(serialized);
   const { encryptionStrategy } = deSerialized;
@@ -147,8 +147,7 @@ export function decryptBinaryWithKeyUsingArtefacts(
   key: string,
   encryptedData: any,
   strategy: CipherStrategy,
-  { iv, at, ad }: IEncryptionOptions,
-  encoding?: Encoding
+  { iv, at, ad }: IEncryptionOptions
 ) {
   return decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad }, 'raw');
 }
@@ -165,7 +164,7 @@ export function decryptWithKeyUsingArtefacts(
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ) {
   if (encryptedData === '') {
     return null;

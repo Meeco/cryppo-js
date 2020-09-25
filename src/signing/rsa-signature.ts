@@ -8,19 +8,11 @@ export interface ISignature {
   keySize: number;
 }
 
-export function signStringWithPrivateKey(
-  privateKeyPem: string,
-  data: string,
-  encoding?: Encoding
-): ISignature {
+export function signStringWithPrivateKey(privateKeyPem: string, data: string): ISignature {
   return signWithPrivateKey(privateKeyPem, data, 'utf8');
 }
 
-export function signBinaryWithPrivateKey(
-  privateKeyPem: string,
-  data: string,
-  encoding?: Encoding
-): ISignature {
+export function signBinaryWithPrivateKey(privateKeyPem: string, data: string): ISignature {
   return signWithPrivateKey(privateKeyPem, data, 'raw');
 }
 
@@ -34,7 +26,7 @@ export function signBinaryWithPrivateKey(
 export function signWithPrivateKey(
   privateKeyPem: string,
   data: string,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ): ISignature {
   const mdDigest = md.sha256.create();
   const key = pki.privateKeyFromPem(privateKeyPem) as pki.rsa.PrivateKey;
@@ -71,7 +63,10 @@ export function loadBinaryRsaSignature(serializedPayload: string): ISignature {
  * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
  * encrypted with 'raw' encoding will produce incorrect decrypted value.
  */
-export function loadRsaSignature(serializedPayload: string, encoding?: Encoding): ISignature {
+export function loadRsaSignature(
+  serializedPayload: string,
+  encoding: Encoding = 'raw'
+): ISignature {
   const decomposedPayload = serializedPayload.split('.');
   const [signed, signingStrategy, encodedSignature, encodedData] = decomposedPayload;
   const regex = /Rsa\d{1,4}/g;
@@ -117,7 +112,7 @@ export function verifyBinaryWithPublicKey(publicKeyPem: string, signatureObj: IS
 export function verifyWithPublicKey(
   publicKeyPem: string,
   signatureObj: ISignature,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ) {
   const key = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
   const mdDigest = md.sha256.create();

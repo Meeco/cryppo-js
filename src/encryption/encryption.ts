@@ -72,7 +72,7 @@ export async function encryptBinaryWithGeneratedKey(
 export async function encryptWithGeneratedKey(
   options: IEncryptionOptionsWithoutKey,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ): Promise<IEncryptionResult & { generatedKey: string }> {
   const key = generateRandomKey(options.keyLength || 32);
 
@@ -137,7 +137,7 @@ export async function encryptBinaryWithKeyDerivedFromString(
 export async function encryptWithKeyDerivedFromString(
   options: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
   const derived = await generateDerivedKey({ key: options.key });
 
@@ -208,7 +208,7 @@ export async function encryptBinaryWithKey(
 export async function encryptWithKey(
   { key, data, strategy, iv }: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ): Promise<IEncryptionResult> {
   if (data === '') {
     return { encrypted: null, serialized: null };
@@ -281,7 +281,7 @@ export function encryptWithKeyUsingArtefacts(
   data: string,
   strategy: CipherStrategy,
   iv?: string,
-  encoding?: Encoding
+  encoding: Encoding = 'raw'
 ): {
   encrypted: string | null;
   artifacts?: any;
