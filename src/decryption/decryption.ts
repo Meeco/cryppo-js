@@ -1,4 +1,4 @@
-import { cipher, util } from 'node-forge';
+import { cipher, Encoding, util } from 'node-forge';
 import { deSerialize, encodeUtf8 } from '../../src/util';
 import { EncodingVersions } from '../encoding-versions';
 import { DerivedKeyOptions } from '../key-derivation/derived-key';
@@ -10,13 +10,55 @@ interface IEncryptionOptions {
   ad: string;
 }
 
-export async function decryptWithKey({
+export async function decryptStringWithKey({
   serialized,
   key,
 }: {
   serialized: string;
   key: string;
 }): Promise<string | null> {
+  return decryptWithKey(
+    {
+      serialized,
+      key,
+    },
+    'utf8'
+  );
+}
+
+export async function decryptBinaryWithKey({
+  serialized,
+  key,
+}: {
+  serialized: string;
+  key: string;
+}): Promise<string | null> {
+  return decryptWithKey(
+    {
+      serialized,
+      key,
+    },
+    'raw'
+  );
+}
+
+/**
+ * @deprecated This method should be replaced by
+ * decryptStringWithKey or decryptBinaryWithKey method.
+ * The default encoding is 'raw' is suitable for binaries and 1 byte UTF-8.
+ * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
+ * encrypted with 'raw' encoding will produce incorrect decrypted value.
+ */
+export async function decryptWithKey(
+  {
+    serialized,
+    key,
+  }: {
+    serialized: string;
+    key: string;
+  },
+  encoding: Encoding = 'raw'
+): Promise<string | null> {
   const deSerialized = deSerialize(serialized);
   const { encryptionStrategy } = deSerialized;
   let { decodedPairs } = deSerialized;
@@ -44,12 +86,25 @@ export async function decryptWithKey({
     const artifacts: any = decodedPairs[i + 1];
     const strategy = strategyToAlgorithm(encryptionStrategy);
     try {
-      output += decryptWithKeyUsingArtefacts(
-        legacyKey || derivedKey || key,
-        data,
-        strategy,
-        artifacts
-      );
+      switch (encoding) {
+        case 'utf8':
+          output += decryptStringWithKeyUsingArtefacts(
+            legacyKey || derivedKey || key,
+            data,
+            strategy,
+            artifacts
+          );
+          break;
+
+        case 'raw':
+          output += decryptBinaryWithKeyUsingArtefacts(
+            legacyKey || derivedKey || key,
+            data,
+            strategy,
+            artifacts
+          );
+          break;
+      }
     } catch (err) {
       if (!legacyKey && encodeUtf8(key) !== key && DerivedKeyOptions.usesDerivedKey(serialized)) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
@@ -79,11 +134,37 @@ function _deriveKeyWithOptions(
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
-export function decryptWithKeyUsingArtefacts(
+export function decryptStringWithKeyUsingArtefacts(
   key: string,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
+) {
+  return decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad }, 'utf8');
+}
+
+export function decryptBinaryWithKeyUsingArtefacts(
+  key: string,
+  encryptedData: any,
+  strategy: CipherStrategy,
+  { iv, at, ad }: IEncryptionOptions
+) {
+  return decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad }, 'raw');
+}
+
+/**
+ * @deprecated This method should be replaced by
+ * decryptStringWithKeyUsingArtefacts or decryptBinaryWithKeyUsingArtefacts method.
+ * The default encoding is 'raw' is suitable for binaries and 1 byte UTF-8.
+ * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
+ * encrypted with 'raw' encoding will produce incorrect decrypted value.
+ */
+export function decryptWithKeyUsingArtefacts(
+  key: string,
+  encryptedData: any,
+  strategy: CipherStrategy,
+  { iv, at, ad }: IEncryptionOptions,
+  encoding: Encoding = 'raw'
 ) {
   if (encryptedData === '') {
     return null;
@@ -103,7 +184,12 @@ export function decryptWithKeyUsingArtefacts(
   // pass is false if there was a failure (eg: authentication tag didn't match)
   if (pass) {
     try {
-      return util.decodeUtf8(decipher.output.data);
+      switch (encoding) {
+        case 'utf8':
+          return util.decodeUtf8(decipher.output.data);
+        case 'raw':
+          return decipher.output.data;
+      }
     } catch {
       // in the event that data was encrypted without being encoded as utf-8 first
       // we just return the raw base64 encoded data for backwards compatibility

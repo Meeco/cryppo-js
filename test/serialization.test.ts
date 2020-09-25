@@ -1,4 +1,4 @@
-import { CipherStrategy, DerivedKeyOptions, encryptWithKey } from '../src';
+import { CipherStrategy, DerivedKeyOptions, encryptStringWithKey } from '../src';
 import { SerializationFormat } from '../src/serialization-versions';
 import {
   decode64,
@@ -72,7 +72,7 @@ describe('Serialize/Deserialize', () => {
       const yaml = decodeSafe64(artifacts);
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
 
-      const encrypted = await encryptWithKey(
+      const encrypted = await encryptStringWithKey(
         {
           key: generateRandomKey(),
           data: 'This is some test data that will be encrypted',

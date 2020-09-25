@@ -1,4 +1,9 @@
-import { decryptWithKey, encryptWithKeyDerivedFromString } from '../src/index';
+import {
+  decryptBinaryWithKey,
+  decryptStringWithKey,
+  encryptBinaryWithKeyDerivedFromString,
+  encryptStringWithKeyDerivedFromString,
+} from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import { encode64 } from '../src/util';
 import { SerializationFormat } from '../src/serialization-versions';
@@ -51,7 +56,7 @@ function encryptFile() {
   const reader = new FileReader();
   const password = $get('encryptFilePassword');
   reader.onload = async (result) => {
-    const encryptionResult = await encryptWithKeyDerivedFromString(
+    const encryptionResult = await encryptBinaryWithKeyDerivedFromString(
       {
         data: reader.result as string,
         key: password,
@@ -73,7 +78,7 @@ async function decryptFile(download?: boolean) {
   const password = $get('decryptFilePassword');
 
   try {
-    const decrypted = await decryptWithKey({
+    const decrypted = await decryptBinaryWithKey({
       key: password,
       serialized: inText,
     });
@@ -109,7 +114,7 @@ async function encryptText() {
   const inText = $get('encryptTextInput');
   const password = $get('encryptTextPassword');
 
-  const encryptionResult = await encryptWithKeyDerivedFromString(
+  const encryptionResult = await encryptStringWithKeyDerivedFromString(
     {
       data: inText,
       key: password,
@@ -126,7 +131,7 @@ async function decryptText() {
   const password = $get('decryptTextPassword');
 
   try {
-    const decrypted = await decryptWithKey({
+    const decrypted = await decryptStringWithKey({
       key: password,
       serialized: inText,
     });
