@@ -16,6 +16,10 @@ interface IEncryptionOptions {
   ad: string;
 }
 
+/**
+ * @deprecated This method should be replaced by
+ * decryptWithKey method. This method convert give bytes to utf8 string
+ */
 export async function decryptStringWithKey({
   serialized,
   key,
@@ -31,6 +35,10 @@ export async function decryptStringWithKey({
   return result ? bytesToUtf8(result) : null;
 }
 
+/**
+ * @deprecated This method should be replaced by
+ * decryptWithKey method. This method convert give bytes to raw string
+ */
 export async function decryptBinaryWithKey({
   serialized,
   key,
@@ -117,22 +125,32 @@ function _deriveKeyWithOptions(
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
+/**
+ * @deprecated This method should be replaced by
+ * decryptWithKeyUsingArtefacts method. This method convert give bytes to utf8 string
+ */
 export function decryptStringWithKeyUsingArtefacts(
   key: string,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
 ) {
-  return decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
+  const result = decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
+  return result ? bytesToUtf8(result) : null;
 }
 
+/**
+ * @deprecated This method should be replaced by
+ * decryptWithKeyUsingArtefacts method. This method convert give bytes to string
+ */
 export function decryptBinaryWithKeyUsingArtefacts(
   key: string,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
 ) {
-  return decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
+  const result = decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
+  return result ? bytesToBinary(result) : null;
 }
 
 export function decryptWithKeyUsingArtefacts(

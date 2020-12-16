@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { util } from 'node-forge';
 import { join } from 'path';
 import {
   CipherStrategy,
@@ -78,7 +79,7 @@ describe('compatiblity test for all cryppo port', () => {
 describe('Backwards and forwards copmatibility', () => {
   const key = decodeSafe64('W0NldJtd-ducHL4o02MBaFYYWQI9GB4XdK5BikAMxQs=');
   it('Can decrypt plain strings older cryppo-js versions (~0.11.0)', async () => {
-    const decrypted = await decryptWithKey({
+    const decrypted = await decryptStringWithKey({
       key,
       // "Hello world"
       serialized:
@@ -99,15 +100,11 @@ describe('Backwards and forwards copmatibility', () => {
     // Prints as 'Helloøã'
     const expected = decodeSafe64('SGVsbG_44wA=');
 
-    expect(decrypted).toEqual(expected);
+    expect(util.createBuffer(decrypted as Uint8Array).data).toEqual(expected);
   });
 
   it('Can encrypt and derypt strings with multi-byte characters', async () => {
-    const encrypted = await encryptStringWithKey({
-      data: 'Hello 😀',
-      key,
-      strategy: CipherStrategy.AES_GCM,
-    });
+    const encrypted = await encryptStringWithKey(key, 'Hello 😀', CipherStrategy.AES_GCM);
     const decrypted = await decryptStringWithKey({
       key,
       serialized: encrypted.serialized!,
@@ -121,17 +118,13 @@ describe('Backwards and forwards copmatibility', () => {
     it('can decrypt binary files encrypted with older cryppo-js versions (~0.11.0)', async () => {
       const serialized = readFileSync(join(__dirname, 'encrypted.example.png'), 'binary');
       const expected = readFileSync(join(__dirname, 'decrypted.png'), 'binary');
-      const decrypted = await decryptWithKey({ serialized, key });
+      const decrypted = await decryptBinaryWithKey({ serialized, key });
       expect(expected).toEqual(decrypted);
     });
 
     it('can encrypt and decrypt a png file', async () => {
       const expected = readFileSync(join(__dirname, 'decrypted.png'), 'binary');
-      const encrypted = await encryptBinaryWithKey({
-        data: expected,
-        key,
-        strategy: CipherStrategy.AES_GCM,
-      });
+      const encrypted = await encryptBinaryWithKey(key, expected, CipherStrategy.AES_GCM);
       const decrypted = await decryptBinaryWithKey({
         serialized: encrypted.serialized!,
         key,

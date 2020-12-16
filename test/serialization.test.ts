@@ -76,6 +76,7 @@ describe('Serialize/Deserialize', () => {
         generateRandomKey(),
         'This is some test data that will be encrypted',
         CipherStrategy.AES_GCM,
+        undefined,
         SerializationFormat.legacy
       );
       const { serialized } = encrypted;

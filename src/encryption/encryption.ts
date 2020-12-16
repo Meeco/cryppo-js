@@ -48,7 +48,7 @@ export interface IEncryptionResult {
 }
 
 /**
- * @deprecated This method should be replaced by encryptWithGeneratedKey
+ * @deprecated This method should be replaced by encryptWithGeneratedKey. This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
 export async function encryptStringWithGeneratedKey(
   data: string,
@@ -60,7 +60,7 @@ export async function encryptStringWithGeneratedKey(
 }
 
 /**
- * @deprecated This method should be replaced by encryptWithGeneratedKey
+ * @deprecated This method should be replaced by encryptWithGeneratedKey. This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
 export async function encryptBinaryWithGeneratedKey(
   data: string,
@@ -131,7 +131,7 @@ export async function encryptStringWithKeyDerivedFromString(
 
 /**
  * @deprecated This method should be replaced by
- * encryptWithKey method. This method convert give string to utf8
+ * encryptWithKey method. This method convert give data string to UTF-8 bytes utf8
  * before enctryptin it
  */
 export async function encryptStringWithKey(
@@ -194,7 +194,7 @@ const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1)
 
 /**
  * @deprecated This method should be replaced by
- * encryptWithKeyUsingArtefacts
+ * encryptWithKeyUsingArtefacts. This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
 export function encryptStringWithKeyUsingArtefacts(
   key: string,
@@ -210,7 +210,7 @@ export function encryptStringWithKeyUsingArtefacts(
 
 /**
  * @deprecated This method should be replaced by
- * encryptWithKeyUsingArtefacts
+ * encryptWithKeyUsingArtefacts. This method convert give data string to UTF-8 bytes raw bytes
  */
 export function encryptBinaryWithKeyUsingArtefacts(
   key: string,
@@ -233,6 +233,10 @@ export function encryptWithKeyUsingArtefacts({
   encrypted: string | null;
   artifacts?: any;
 } {
+  if (data.length === 0) {
+    return { encrypted: null };
+  }
+
   const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key));
   iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
