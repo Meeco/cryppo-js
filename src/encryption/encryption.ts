@@ -48,7 +48,8 @@ export interface IEncryptionResult {
 }
 
 /**
- * @deprecated This method should be replaced by encryptWithGeneratedKey. This method convert give data string to UTF-8 bytes UTF-8 bytes
+ * @deprecated This method should be replaced by encryptWithGeneratedKey.
+ * This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
 export async function encryptStringWithGeneratedKey(
   data: string,
@@ -60,7 +61,8 @@ export async function encryptStringWithGeneratedKey(
 }
 
 /**
- * @deprecated This method should be replaced by encryptWithGeneratedKey. This method convert give data string to UTF-8 bytes UTF-8 bytes
+ * @deprecated This method should be replaced by encryptWithGeneratedKey.
+ * This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
 export async function encryptBinaryWithGeneratedKey(
   data: string,
@@ -96,7 +98,7 @@ export async function encryptStringWithKeyDerivedFromString(
   iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
-  const derived = await generateDerivedKey({ key: key });
+  const derived = await generateDerivedKey({ key });
 
   let result: any;
   result = await encryptWithKey(

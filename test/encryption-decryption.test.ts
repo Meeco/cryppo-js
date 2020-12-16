@@ -1,11 +1,11 @@
-import { decryptWithKey, decryptStringWithKey } from '../src';
+import { decryptStringWithKey, decryptWithKey } from '../src';
 import {
-  encryptWithKey,
   encryptStringWithKeyDerivedFromString,
+  encryptWithKey,
 } from '../src/encryption/encryption';
 import { SerializationFormat } from '../src/serialization-versions';
 import { CipherStrategy } from '../src/strategies';
-import { generateRandomKey, utf8ToBytes, bytesToUtf8, encodeUtf8 } from '../src/util';
+import { bytesToUtf8, generateRandomKey, utf8ToBytes } from '../src/util';
 
 describe('aes-256-gcm', () => {
   it(`can successfully encrypt and decrypt with AES-GCM Encryption and latest serialization version`, async (done) => {
@@ -24,10 +24,9 @@ describe('aes-256-gcm', () => {
         throw new Error('serialized should not be null here');
       }
 
-      console.log(result.serialized);
       const decryptedWithSourceKey = await decryptStringWithKey({
         serialized: result.serialized,
-        key: key,
+        key,
       });
       const decryptedWithDerivedKey = await decryptStringWithKey({
         // Slice off the key derivation data so it does not try to derive a new key
@@ -67,11 +66,11 @@ describe('aes-256-gcm', () => {
     }
   });
 
-  it(`can successfully encrypt and decrypt bytes with AES-GCM Encryption and latest serialization version`, async (done) => {
+  it(`can encrypt/decrypt bytes with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
       const key = generateRandomKey();
       const data = utf8ToBytes(
-        'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష'
+        'this is a test 这是一个测试 이것은 테스트입니다 これすهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷ'
       );
 
       const strategy = CipherStrategy.AES_GCM;
