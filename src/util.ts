@@ -19,6 +19,12 @@ const DERIVATION_ARTEFACTS_CURRENT_VERSION = 'K';
 export const encode64 = util.encode64;
 export const decode64 = util.decode64;
 export const encodeUtf8 = util.encodeUtf8;
+export const utf8ToBytes = util.text.utf8.encode;
+export const bytesToUtf8 = util.text.utf8.decode;
+export const utf16ToBytes = util.text.utf16.encode;
+export const bytesToUtf16 = util.text.utf16.decode;
+export const binaryToBytes = util.binary.raw.decode;
+export const bytesToBinary = util.binary.raw.encode;
 
 export const generateRandomKey = (length = 32) => random.getBytesSync(length);
 

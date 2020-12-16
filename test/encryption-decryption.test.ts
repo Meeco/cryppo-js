@@ -1,7 +1,11 @@
-import { decryptStringWithKey } from '../src';
-import { encryptStringWithKeyDerivedFromString } from '../src/encryption/encryption';
+import { decryptWithKey, decryptStringWithKey } from '../src';
+import {
+  encryptWithKey,
+  encryptStringWithKeyDerivedFromString,
+} from '../src/encryption/encryption';
 import { SerializationFormat } from '../src/serialization-versions';
 import { CipherStrategy } from '../src/strategies';
+import { generateRandomKey, utf8ToBytes, bytesToUtf8, encodeUtf8 } from '../src/util';
 
 describe('aes-256-gcm', () => {
   it(`can successfully encrypt and decrypt with AES-GCM Encryption and latest serialization version`, async (done) => {
@@ -10,15 +14,19 @@ describe('aes-256-gcm', () => {
       const data = 'some secret data';
       const strategy = CipherStrategy.AES_GCM;
       const result = await encryptStringWithKeyDerivedFromString(
-        { key, data, strategy },
+        key,
+        data,
+        strategy,
         SerializationFormat.latest_version
       );
       if (result.serialized === null) {
         throw new Error('serialized should not be null here');
       }
+
+      console.log(result.serialized);
       const decryptedWithSourceKey = await decryptStringWithKey({
         serialized: result.serialized,
-        key,
+        key: key,
       });
       const decryptedWithDerivedKey = await decryptStringWithKey({
         // Slice off the key derivation data so it does not try to derive a new key
@@ -44,7 +52,7 @@ describe('aes-256-gcm', () => {
       const decryptedData = 'some secret data³à.';
 
       const encryptedSerialized =
-        'Aes256Gcm.pso4ejxoKW0HUzWYmNyzpY6DRw==.QUAAAAAFaXYADAAAAACIZMGHJl0tQVM7FCYFYXQAEAAAAAA-ia2XV2A0RmFZBG7BEQ8yAmFkAAUAAABub25lAAA=.Pbkdf2Hmac.S0EAAAAFaXYAFAAAAABP57egKZTvRAeE2DHGLwE1IGF4PhBpAIlPAAAQbAAgAAAAAmhhc2gABwAAAFNIQTI1NgAA';
+        'Aes256Gcm.P2oHHPICeWS7S1EjRaujoq8z8v00.QUAAAAAFaXYADAAAAACzJaH669kLnh5DTOEFYXQAEAAAAADRP9HC0nBoMrXgsyqK4NgLAmFkAAUAAABub25lAAA=.Pbkdf2Hmac.S0EAAAAFaXYAFAAAAAAHMiaRKt7BlXUQU7yVGEy-oNSLaBBpALpQAAAQbAAgAAAAAmhhc2gABwAAAFNIQTI1NgAA';
 
       const decryptedWithSourceKey = await decryptStringWithKey({
         serialized: encryptedSerialized,
@@ -52,6 +60,33 @@ describe('aes-256-gcm', () => {
       });
 
       expect(decryptedWithSourceKey).toEqual(decryptedData);
+
+      done();
+    } catch (err) {
+      done(err);
+    }
+  });
+
+  it(`can successfully encrypt and decrypt bytes with AES-GCM Encryption and latest serialization version`, async (done) => {
+    try {
+      const key = generateRandomKey();
+      const data = utf8ToBytes(
+        'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష'
+      );
+
+      const strategy = CipherStrategy.AES_GCM;
+
+      const result = await encryptWithKey({ key, data, strategy });
+
+      if (result.serialized === null) {
+        throw new Error('serialized should not be null here');
+      }
+      const decryptedWithSourceKey = await decryptWithKey({
+        serialized: result.serialized,
+        key,
+      });
+
+      expect(bytesToUtf8(decryptedWithSourceKey as Uint8Array)).toEqual(bytesToUtf8(data));
 
       done();
     } catch (err) {
@@ -67,10 +102,7 @@ describe('aes-256-gcm', () => {
           const key = 'correct horse battery staple';
           const data =
             'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష';
-          const result = await encryptStringWithKeyDerivedFromString(
-            { key, data, strategy },
-            version
-          );
+          const result = await encryptStringWithKeyDerivedFromString(key, data, strategy, version);
           if (result.serialized === null) {
             throw new Error('serialized should not be null here');
           }
