@@ -84,7 +84,7 @@ export async function encryptWithGeneratedKey(
 
   let result: any;
   result = await encryptWithKey(
-    { key: key, data: options.data, strategy: options.strategy, iv: options.iv },
+    { key, data: options.data, strategy: options.strategy, iv: options.iv },
     serializationVersion
   );
 
@@ -101,7 +101,7 @@ export async function encryptStringWithKeyDerivedFromString(
   iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
-  const derived = await generateDerivedKey({ key: key });
+  const derived = await generateDerivedKey({ key });
 
   let result: any;
   result = await encryptWithKey(
@@ -149,7 +149,7 @@ export async function encryptStringWithKey(
   if (!data || data === '') {
     return { encrypted: null, serialized: null };
   }
-  return encryptWithKey({ key: key, data: utf8ToBytes(data), strategy, iv }, serializationVersion);
+  return encryptWithKey({ key, data: utf8ToBytes(data), strategy, iv }, serializationVersion);
 }
 
 /**
@@ -167,7 +167,7 @@ export async function encryptBinaryWithKey(
     return { encrypted: null, serialized: null };
   }
   return encryptWithKey(
-    { key: key, data: binaryStringToBytes(data), strategy, iv },
+    { key, data: binaryStringToBytes(data), strategy, iv },
     serializationVersion
   );
 }

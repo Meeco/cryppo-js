@@ -99,7 +99,7 @@ export async function decryptWithKey({
 }): Promise<Uint8Array | null> {
   const deSerialized = deSerialize(serialized);
   const { encryptionStrategy } = deSerialized;
-  let { decodedPairs } = deSerialized;
+  const { decodedPairs } = deSerialized;
   if (decodedPairs[0] === '') {
     return null;
   }

@@ -7,43 +7,45 @@ import { binaryStringToBytes, bytesToBinaryString, decodeSafe64, encodeSafe64 } 
  */
 export class EncryptionKey {
   /**
-   * The constructor is intentionally private as we want the user ot be explicit as to whether the value coming
-   * in is raw bytes or a base64 encoded version.
-   *
-   * @param _value  Value as binary string. Avoid outputting to console but should be used for actual encryption.
-   */
-  private constructor(private readonly _value: Uint8Array) {}
-  /**
    * Create an {@link EncryptionKey} from encoded URL-safe base 64 version of the key
    */
-  static fromSerialized(value: string) {
+  public static fromSerialized(value: string) {
     return new EncryptionKey(binaryStringToBytes(decodeSafe64(value || '')));
   }
   /**
    * @deprecated
    * Create an {@link EncryptionKey} from a binary string version of the key
    */
-  static fromRaw(value: string) {
+  public static fromRaw(value: string) {
     return new EncryptionKey(binaryStringToBytes(value));
   }
-  static fromBytes(bytes: Uint8Array) {
+  public static fromBytes(bytes: Uint8Array) {
     return bytesToBinaryString(bytes);
   }
+
+  /**
+   * The constructor is intentionally private as we want the user ot be explicit as to whether the value coming
+   * in is raw bytes or a base64 encoded version.
+   *
+   * @param value  Value as binary string. Avoid outputting to console but should be used for actual encryption.
+   */
+  private constructor(private readonly value: Uint8Array) {}
+
   /**
    * Return the actual encryption key to be used for encryption/decryption
    */
   get key() {
-    return bytesToBinaryString(this._value);
+    return bytesToBinaryString(this.value);
   }
 
   /**
    * Implicitly called by `JSON.stringify()` to ensure that the value is safely printable
    */
-  toJSON() {
-    return encodeSafe64(bytesToBinaryString(this._value));
+  get toJSON() {
+    return encodeSafe64(bytesToBinaryString(this.value));
   }
 
   get bytes() {
-    return this._value;
+    return this.value;
   }
 }
