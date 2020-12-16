@@ -1,4 +1,5 @@
 import { CipherStrategy, DerivedKeyOptions, encryptStringWithKey } from '../src';
+import { EncryptionKey } from '../src/encryption-key';
 import { SerializationFormat } from '../src/serialization-versions';
 import {
   decode64,
@@ -73,7 +74,7 @@ describe('Serialize/Deserialize', () => {
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
 
       const encrypted = await encryptStringWithKey(
-        generateRandomKey(),
+        EncryptionKey.fromRaw(generateRandomKey()),
         'This is some test data that will be encrypted',
         CipherStrategy.AES_GCM,
         undefined,

@@ -6,12 +6,14 @@ import {
   decryptBinaryWithKey,
   decryptSerializedWithPrivateKey,
   decryptStringWithKey,
+  decryptStringWithKeyDerivedFromString,
   decryptWithKey,
   encryptBinaryWithKey,
   encryptStringWithKey,
   loadRsaSignature,
   verifyWithPublicKey,
 } from '../../src';
+import { EncryptionKey } from '../../src/encryption-key';
 import { decodeSafe64 } from '../../src/util';
 import Compat from './compat.json';
 
@@ -20,9 +22,9 @@ describe('compatiblity test for all cryppo port', () => {
     it(`${index}. can successfully decrypt with AES-GCM Encryption and
         legacy & latest serialization version`, async (done) => {
       try {
-        const decryptedWithSourceKey = await decryptStringWithKey({
+        const decryptedWithSourceKey = await decryptStringWithKeyDerivedFromString({
           serialized: objToValidate.serialized,
-          key: objToValidate.passphrase,
+          passphrase: objToValidate.passphrase,
         });
         expect(decryptedWithSourceKey).toEqual(objToValidate.expected_decryption_result);
 
@@ -59,7 +61,7 @@ describe('compatiblity test for all cryppo port', () => {
             });
             break;
           case 'Aes256Gcm':
-            const key = decodeSafe64(objToValidate.key);
+            const key = EncryptionKey.fromSerialized(objToValidate.key);
             encryptionResult = await decryptStringWithKey({
               serialized: objToValidate.serialized,
               key,
@@ -77,7 +79,7 @@ describe('compatiblity test for all cryppo port', () => {
 });
 
 describe('Backwards and forwards copmatibility', () => {
-  const key = decodeSafe64('W0NldJtd-ducHL4o02MBaFYYWQI9GB4XdK5BikAMxQs=');
+  const key = EncryptionKey.fromSerialized('W0NldJtd-ducHL4o02MBaFYYWQI9GB4XdK5BikAMxQs=');
   it('Can decrypt plain strings older cryppo-js versions (~0.11.0)', async () => {
     const decrypted = await decryptStringWithKey({
       key,

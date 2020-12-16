@@ -1,4 +1,5 @@
-import { decryptStringWithKey, decryptWithKey } from '../src';
+import { decryptStringWithKeyDerivedFromString, decryptWithKey } from '../src';
+import { EncryptionKey } from '../src/encryption-key';
 import {
   encryptStringWithKeyDerivedFromString,
   encryptWithKey,
@@ -10,11 +11,11 @@ import { bytesToUtf8, generateRandomKey, utf8ToBytes } from '../src/util';
 describe('aes-256-gcm', () => {
   it(`can successfully encrypt and decrypt with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
-      const key = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
+      const passphrase = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
       const data = 'some secret data';
       const strategy = CipherStrategy.AES_GCM;
       const result = await encryptStringWithKeyDerivedFromString(
-        key,
+        passphrase,
         data,
         strategy,
         undefined,
@@ -24,17 +25,11 @@ describe('aes-256-gcm', () => {
         throw new Error('serialized should not be null here');
       }
 
-      const decryptedWithSourceKey = await decryptStringWithKey({
+      const decryptedWithDerivedKey = await decryptStringWithKeyDerivedFromString({
         serialized: result.serialized,
-        key,
-      });
-      const decryptedWithDerivedKey = await decryptStringWithKey({
-        // Slice off the key derivation data so it does not try to derive a new key
-        serialized: result.serialized.split('.').slice(0, -2).join('.'),
-        key: result.key,
+        passphrase,
       });
 
-      expect(decryptedWithSourceKey).toEqual(data);
       expect(decryptedWithDerivedKey).toEqual(data);
 
       done();
@@ -53,9 +48,9 @@ describe('aes-256-gcm', () => {
       const encryptedSerialized =
         'Aes256Gcm.P2oHHPICeWS7S1EjRaujoq8z8v00.QUAAAAAFaXYADAAAAACzJaH669kLnh5DTOEFYXQAEAAAAADRP9HC0nBoMrXgsyqK4NgLAmFkAAUAAABub25lAAA=.Pbkdf2Hmac.S0EAAAAFaXYAFAAAAAAHMiaRKt7BlXUQU7yVGEy-oNSLaBBpALpQAAAQbAAgAAAAAmhhc2gABwAAAFNIQTI1NgAA';
 
-      const decryptedWithSourceKey = await decryptStringWithKey({
+      const decryptedWithSourceKey = await decryptStringWithKeyDerivedFromString({
         serialized: encryptedSerialized,
-        key,
+        passphrase: key,
       });
 
       expect(decryptedWithSourceKey).toEqual(decryptedData);
@@ -68,7 +63,7 @@ describe('aes-256-gcm', () => {
 
   it(`can encrypt/decrypt bytes with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
-      const key = generateRandomKey();
+      const key = EncryptionKey.fromRaw(generateRandomKey());
       const data = utf8ToBytes(
         'this is a test 这是一个测试 이것은 테스트입니다 これすهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷ'
       );
@@ -111,17 +106,12 @@ describe('aes-256-gcm', () => {
           if (result.serialized === null) {
             throw new Error('serialized should not be null here');
           }
-          const decryptedWithSourceKey = await decryptStringWithKey({
+
+          const decryptedWithDerivedKey = await decryptStringWithKeyDerivedFromString({
             serialized: result.serialized,
-            key,
-          });
-          const decryptedWithDerivedKey = await decryptStringWithKey({
-            // Slice off the key derivation data so it does not try to derive a new key
-            serialized: result.serialized.split('.').slice(0, -2).join('.'),
-            key: result.key,
+            passphrase: key,
           });
 
-          expect(decryptedWithSourceKey).toEqual(data);
           expect(decryptedWithDerivedKey).toEqual(data);
 
           done();

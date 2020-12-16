@@ -1,12 +1,13 @@
-import { cipher, Encoding, util } from 'node-forge';
+import { cipher, util } from 'node-forge';
 import {
-  bytesToBinary,
+  bytesToBinaryString,
   bytesToUtf8,
   deSerialize,
   encodeUtf8,
   stringAsBinaryBuffer,
 } from '../../src/util';
 import { EncodingVersions } from '../encoding-versions';
+import { EncryptionKey } from '../encryption-key';
 import { DerivedKeyOptions } from '../key-derivation/derived-key';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies';
 
@@ -25,7 +26,7 @@ export async function decryptStringWithKey({
   key,
 }: {
   serialized: string;
-  key: string;
+  key: EncryptionKey;
 }): Promise<string | null> {
   const result = await decryptWithKey({
     serialized,
@@ -44,14 +45,49 @@ export async function decryptBinaryWithKey({
   key,
 }: {
   serialized: string;
-  key: string;
+  key: EncryptionKey;
 }): Promise<string | null> {
   const result = await decryptWithKey({
     serialized,
     key,
   });
 
-  return result ? bytesToBinary(result) : null;
+  return result ? bytesToBinaryString(result) : null;
+}
+
+/**
+ * @deprecated This method should be replaced by
+ * decryptWithKeyDerivedFromString method. This method convert give bytes to utf-8 string
+ */
+export async function decryptStringWithKeyDerivedFromString({
+  serialized,
+  passphrase,
+  encodingVersion = EncodingVersions.latest_version,
+}: {
+  serialized: string;
+  passphrase: string;
+  encodingVersion?: EncodingVersions;
+}): Promise<string | null> {
+  const derivedKey = await _deriveKeyWithOptions(passphrase, serialized, encodingVersion);
+  const result = await decryptWithKey({
+    serialized: serialized.split('.').slice(0, 3).join('.'),
+    key: EncryptionKey.fromRaw(derivedKey),
+  });
+  return result ? bytesToUtf8(result as Uint8Array) : null;
+}
+
+export async function decryptWithKeyDerivedFromString({
+  serialized,
+  passphrase,
+}: {
+  serialized: string;
+  passphrase: string;
+}): Promise<Uint8Array | null> {
+  const derivedKey = await _deriveKeyWithOptions(passphrase, serialized);
+  return await decryptWithKey({
+    serialized: serialized.split('.').slice(0, 3).join('.'),
+    key: EncryptionKey.fromRaw(derivedKey),
+  });
 }
 
 export async function decryptWithKey({
@@ -59,7 +95,7 @@ export async function decryptWithKey({
   key,
 }: {
   serialized: string;
-  key: string;
+  key: EncryptionKey;
 }): Promise<Uint8Array | null> {
   const deSerialized = deSerialize(serialized);
   const { encryptionStrategy } = deSerialized;
@@ -69,20 +105,6 @@ export async function decryptWithKey({
   }
   let output: Uint8Array | null = null;
 
-  let derivedKey;
-
-  /**
-   * Determine if we need to use a derived key or not based on whether or not
-   * we have key derivation options in the serialized payload.
-   */
-  if (DerivedKeyOptions.usesDerivedKey(serialized)) {
-    // Key will now be one derived with Pbkdf
-    derivedKey = await _deriveKeyWithOptions(key, serialized);
-
-    // Can chop off the last two parts now as they were key data
-    decodedPairs = decodedPairs.slice(0, decodedPairs.length - 2);
-  }
-
   let legacyKey;
   for (let i = 0; i < decodedPairs.length; i += 2) {
     const data: string = decodedPairs[i];
@@ -91,15 +113,19 @@ export async function decryptWithKey({
 
     try {
       output = decryptWithKeyUsingArtefacts(
-        legacyKey || derivedKey || key,
+        legacyKey ? EncryptionKey.fromRaw(legacyKey) : key,
         data,
         strategy,
         artifacts
       );
     } catch (err) {
-      if (!legacyKey && encodeUtf8(key) !== key && DerivedKeyOptions.usesDerivedKey(serialized)) {
+      if (
+        !legacyKey &&
+        encodeUtf8(key.key) !== key.key &&
+        DerivedKeyOptions.usesDerivedKey(serialized)
+      ) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
-        legacyKey = await _deriveKeyWithOptions(key, serialized, EncodingVersions.legacy);
+        legacyKey = await _deriveKeyWithOptions(key.key, serialized, EncodingVersions.legacy);
         i -= 2;
         continue;
       } else {
@@ -130,7 +156,7 @@ function _deriveKeyWithOptions(
  * decryptWithKeyUsingArtefacts method. This method convert give bytes to utf8 string
  */
 export function decryptStringWithKeyUsingArtefacts(
-  key: string,
+  key: EncryptionKey,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
@@ -144,17 +170,17 @@ export function decryptStringWithKeyUsingArtefacts(
  * decryptWithKeyUsingArtefacts method. This method convert give bytes to string
  */
 export function decryptBinaryWithKeyUsingArtefacts(
-  key: string,
+  key: EncryptionKey,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
 ) {
   const result = decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
-  return result ? bytesToBinary(result) : null;
+  return result ? bytesToBinaryString(result) : null;
 }
 
 export function decryptWithKeyUsingArtefacts(
-  key: string,
+  key: EncryptionKey,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
@@ -162,7 +188,7 @@ export function decryptWithKeyUsingArtefacts(
   if (encryptedData === '') {
     return null;
   }
-  const decipher = cipher.createDecipher(strategy, key);
+  const decipher = cipher.createDecipher(strategy, key.key);
   const tagLength = 128;
   const tag = util.createBuffer(at); // authentication tag from encryption
   const encrypted = util.createBuffer(encryptedData);

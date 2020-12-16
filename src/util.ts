@@ -23,8 +23,8 @@ export const utf8ToBytes = util.text.utf8.encode;
 export const bytesToUtf8 = util.text.utf8.decode;
 export const utf16ToBytes = util.text.utf16.encode;
 export const bytesToUtf16 = util.text.utf16.decode;
-export const binaryToBytes = util.binary.raw.decode;
-export const bytesToBinary = util.binary.raw.encode;
+export const binaryStringToBytes = util.binary.raw.decode;
+export const bytesToBinaryString = util.binary.raw.encode;
 
 export const generateRandomKey = (length = 32) => random.getBytesSync(length);
 
