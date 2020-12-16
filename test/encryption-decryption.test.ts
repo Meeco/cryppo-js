@@ -17,6 +17,7 @@ describe('aes-256-gcm', () => {
         key,
         data,
         strategy,
+        undefined,
         SerializationFormat.latest_version
       );
       if (result.serialized === null) {
@@ -48,7 +49,6 @@ describe('aes-256-gcm', () => {
   it(`can successfully decrypt data that was not encoded with utf-8 earlier`, async (done) => {
     try {
       const key = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
-      // const orignal_data = 'some secret data 鍵键';
       const decryptedData = 'some secret data³à.';
 
       const encryptedSerialized =
@@ -102,7 +102,13 @@ describe('aes-256-gcm', () => {
           const key = 'correct horse battery staple';
           const data =
             'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష';
-          const result = await encryptStringWithKeyDerivedFromString(key, data, strategy, version);
+          const result = await encryptStringWithKeyDerivedFromString(
+            key,
+            data,
+            strategy,
+            undefined,
+            version
+          );
           if (result.serialized === null) {
             throw new Error('serialized should not be null here');
           }

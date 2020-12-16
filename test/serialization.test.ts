@@ -73,11 +73,9 @@ describe('Serialize/Deserialize', () => {
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
 
       const encrypted = await encryptStringWithKey(
-        {
-          key: generateRandomKey(),
-          data: 'This is some test data that will be encrypted',
-          strategy: CipherStrategy.AES_GCM,
-        },
+        generateRandomKey(),
+        'This is some test data that will be encrypted',
+        CipherStrategy.AES_GCM,
         SerializationFormat.legacy
       );
       const { serialized } = encrypted;

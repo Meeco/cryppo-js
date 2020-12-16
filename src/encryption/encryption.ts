@@ -25,6 +25,11 @@ export interface IEncryptionOptionsWithoutKey {
    * Defaults to 32 - length to use for generated key
    */
   keyLength?: number;
+
+  /**
+   * @deprecated Primarily for testing purposes.
+   */
+  iv?: string;
 }
 
 export interface IEncryptionArtifacts {
@@ -43,15 +48,15 @@ export interface IEncryptionResult {
 }
 
 /**
- * Similar to `encryptStringWithKey`
- * but generates random bytes to use as the key. This will be returned with the result.
+ * @deprecated This method should be replaced by encryptWithGeneratedKey
  */
 export async function encryptStringWithGeneratedKey(
   data: string,
   strategy: CipherStrategy,
+  iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & { generatedKey: string }> {
-  return encryptWithGeneratedKey({ data: utf8ToBytes(data), strategy }, serializationVersion);
+  return encryptWithGeneratedKey({ data: utf8ToBytes(data), strategy, iv }, serializationVersion);
 }
 
 /**
@@ -60,9 +65,10 @@ export async function encryptStringWithGeneratedKey(
 export async function encryptBinaryWithGeneratedKey(
   data: string,
   strategy: CipherStrategy,
+  iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & { generatedKey: string }> {
-  return encryptWithGeneratedKey({ data: binaryToBytes(data), strategy }, serializationVersion);
+  return encryptWithGeneratedKey({ data: binaryToBytes(data), strategy, iv }, serializationVersion);
 }
 
 export async function encryptWithGeneratedKey(
@@ -73,7 +79,7 @@ export async function encryptWithGeneratedKey(
 
   let result: any;
   result = await encryptWithKey(
-    { key, data: options.data, strategy: options.strategy },
+    { key, data: options.data, strategy: options.strategy, iv: options.iv },
     serializationVersion
   );
 
@@ -87,6 +93,7 @@ export async function encryptStringWithKeyDerivedFromString(
   key: string,
   data: string,
   strategy: CipherStrategy,
+  iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
   const derived = await generateDerivedKey({ key: key });
@@ -97,6 +104,7 @@ export async function encryptStringWithKeyDerivedFromString(
       key: derived.key,
       data: utf8ToBytes(data),
       strategy,
+      iv,
     },
     serializationVersion
   );
@@ -130,12 +138,13 @@ export async function encryptStringWithKey(
   key: string,
   data: string,
   strategy: CipherStrategy,
+  iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
   if (!data || data === '') {
     return { encrypted: null, serialized: null };
   }
-  return encryptWithKey({ key, data: utf8ToBytes(data), strategy }, serializationVersion);
+  return encryptWithKey({ key, data: utf8ToBytes(data), strategy, iv }, serializationVersion);
 }
 
 /**
@@ -146,21 +155,22 @@ export async function encryptBinaryWithKey(
   key: string,
   data: string,
   strategy: CipherStrategy,
+  iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
   if (!data || data === '') {
     return { encrypted: null, serialized: null };
   }
-  return encryptWithKey({ key, data: binaryToBytes(data), strategy }, serializationVersion);
+  return encryptWithKey({ key, data: binaryToBytes(data), strategy, iv }, serializationVersion);
 }
 
 export async function encryptWithKey(
-  { key, data, strategy }: IEncryptionOptions,
+  { key, data, strategy, iv }: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
   let output: any;
 
-  output = encryptWithKeyUsingArtefacts({ key, data, strategy });
+  output = encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
 
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.length * 8;
@@ -189,12 +199,13 @@ const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1)
 export function encryptStringWithKeyUsingArtefacts(
   key: string,
   data: string,
-  strategy: CipherStrategy
+  strategy: CipherStrategy,
+  iv?: string
 ): {
   encrypted: string | null;
   artifacts?: any;
 } {
-  return encryptWithKeyUsingArtefacts({ key, data: utf8ToBytes(data), strategy });
+  return encryptWithKeyUsingArtefacts({ key, data: utf8ToBytes(data), strategy, iv });
 }
 
 /**
@@ -204,24 +215,26 @@ export function encryptStringWithKeyUsingArtefacts(
 export function encryptBinaryWithKeyUsingArtefacts(
   key: string,
   data: string,
-  strategy: CipherStrategy
+  strategy: CipherStrategy,
+  iv?: string
 ): {
   encrypted: string | null;
   artifacts?: any;
 } {
-  return encryptWithKeyUsingArtefacts({ key, data: binaryToBytes(data), strategy });
+  return encryptWithKeyUsingArtefacts({ key, data: binaryToBytes(data), strategy, iv });
 }
 
 export function encryptWithKeyUsingArtefacts({
   key,
   data,
   strategy,
+  iv,
 }: IEncryptionOptions): {
   encrypted: string | null;
   artifacts?: any;
 } {
   const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key));
-  const iv = random.getBytesSync(12);
+  iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
   cipher.update(util.createBuffer(data));
   cipher.finish();
