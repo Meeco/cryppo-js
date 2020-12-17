@@ -1,4 +1,4 @@
-import { CipherStrategy, DerivedKeyOptions, encryptStringWithKey } from '../src';
+import { CipherStrategy, DerivedKeyOptions, encryptWithKey } from '../src';
 import { EncryptionKey } from '../src/encryption-key';
 import { SerializationFormat } from '../src/serialization-versions';
 import {
@@ -8,6 +8,7 @@ import {
   deSerialize,
   encode64,
   serialize,
+  utf8ToBytes,
 } from '../src/util';
 
 describe('Serialize/Deserialize', () => {
@@ -72,12 +73,14 @@ describe('Serialize/Deserialize', () => {
       const yaml = decodeSafe64(artifacts);
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
 
-      const encrypted = await encryptStringWithKey({
-        key: EncryptionKey.generateRandom(),
-        data: 'This is some test data that will be encrypted',
-        strategy: CipherStrategy.AES_GCM,
-        serializationVersion: SerializationFormat.legacy,
-      });
+      const encrypted = await encryptWithKey(
+        {
+          key: EncryptionKey.generateRandom(),
+          data: utf8ToBytes('This is some test data that will be encrypted'),
+          strategy: CipherStrategy.AES_GCM,
+        },
+        SerializationFormat.legacy
+      );
       const { serialized } = encrypted;
       if (serialized === null) {
         throw new Error('serialized should not be null here');

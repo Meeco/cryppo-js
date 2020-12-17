@@ -1,10 +1,4 @@
-import {
-  decryptBinaryWithKey,
-  decryptStringWithKey,
-  encryptBinaryWithGeneratedKey,
-  encryptStringWithGeneratedKey,
-  encryptStringWithKey,
-} from '../src/index';
+import { decryptWithKey, encryptWithGeneratedKey, encryptWithKey } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import {
   encode64,
@@ -12,6 +6,9 @@ import {
   decodeSafe64,
   decodeSafe64Bson,
   binaryStringToBytes,
+  bytesToBinaryString,
+  utf8ToBytes,
+  bytesToUtf8,
 } from '../src/util';
 import { SerializationFormat } from '../src/serialization-versions';
 import { EncryptionKey } from '../src/encryption-key';
@@ -65,9 +62,11 @@ function encryptFile() {
   const file = $('encryptFileInput') as HTMLInputElement;
   const reader = new FileReader();
   reader.onload = async (result) => {
-    const encryptionResult = await encryptBinaryWithGeneratedKey({
-      data: reader.result as string,
-      strategy: CipherStrategy.AES_GCM,
+    const encryptionResult = await encryptWithGeneratedKey({
+      options: {
+        data: binaryStringToBytes(reader.result as string),
+        strategy: CipherStrategy.AES_GCM,
+      },
       serializationVersion: $SerializationFormat,
     });
     $set('encryptFileOutput', encryptionResult.serialized);
@@ -84,9 +83,11 @@ function encryptFileWithKey() {
   const file = $('encryptFileWithKeyInput') as HTMLInputElement;
   const reader = new FileReader();
   reader.onload = async (result) => {
-    const encryptionResult = await encryptBinaryWithGeneratedKey({
-      data: reader.result as string,
-      strategy: CipherStrategy.AES_GCM,
+    const encryptionResult = await encryptWithGeneratedKey({
+      options: {
+        data: binaryStringToBytes(reader.result as string),
+        strategy: CipherStrategy.AES_GCM,
+      },
       serializationVersion: $SerializationFormat,
     });
     $set('encryptFileWithKeyOutput', encryptionResult.serialized);
@@ -104,19 +105,19 @@ async function decryptFile(download?: boolean) {
   const password = EncryptionKey.fromSerialized($get('decryptFileKey'));
 
   try {
-    const decrypted = await decryptBinaryWithKey({
+    const decrypted = await decryptWithKey({
       key: password,
       serialized: inText,
     });
 
     if (download) {
-      const base64 = encode64(decrypted);
+      const base64 = encode64(bytesToBinaryString(decrypted));
       window.open(`data:application/octet-stream;charset=utf-16le;base64,${base64}`, '_blank');
     } else {
-      $set('decryptFileOutput', decrypted);
+      $set('decryptFileOutput', bytesToBinaryString(decrypted));
       // // Optional : Render the output blob as an image using an object url
       // // https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
-      const blob = str2blob(decrypted);
+      const blob = str2blob(bytesToBinaryString(decrypted));
       const url = URL.createObjectURL(blob);
       $('imgOutput')!.setAttribute('src', url);
     }
@@ -139,9 +140,11 @@ function str2blob(str: string, contentType?: string) {
 async function encryptText() {
   const inText = $get('encryptTextInput');
 
-  const encryptionResult = await encryptStringWithGeneratedKey({
-    data: inText,
-    strategy: CipherStrategy.AES_GCM,
+  const encryptionResult = await encryptWithGeneratedKey({
+    options: {
+      data: utf8ToBytes(inText),
+      strategy: CipherStrategy.AES_GCM,
+    },
     serializationVersion: $SerializationFormat,
   });
 
@@ -153,12 +156,14 @@ async function encryptWithKeyText() {
   const inText = $get('encryptWithKeyTextInput');
   const key = EncryptionKey.fromSerialized($get('encryptWithKey'));
 
-  const encryptionResult = await encryptStringWithKey({
-    key,
-    data: inText,
-    strategy: CipherStrategy.AES_GCM,
-    serializationVersion: $SerializationFormat,
-  });
+  const encryptionResult = await encryptWithKey(
+    {
+      key,
+      data: utf8ToBytes(inText),
+      strategy: CipherStrategy.AES_GCM,
+    },
+    $SerializationFormat
+  );
 
   $set('encryptWithKeyTextOutput', encryptionResult.serialized);
 }
@@ -168,12 +173,12 @@ async function decryptText() {
   const generatedKey = EncryptionKey.fromSerialized($get('decryptGeneratedKey'));
 
   try {
-    const decrypted = await decryptStringWithKey({
+    const decrypted = await decryptWithKey({
       key: generatedKey,
       serialized: inText,
     });
 
-    $set('decryptTextOutput', decrypted);
+    $set('decryptTextOutput', bytesToUtf8(decrypted));
   } catch (ex) {
     $set('decryptTextOutput', `[DECRYPTION FAILED]`);
   }

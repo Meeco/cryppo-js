@@ -1,9 +1,6 @@
-import { decryptStringWithKeyDerivedFromString, decryptWithKey } from '../src';
+import { decryptWithKey, decryptWithKeyDerivedFromString } from '../src';
 import { EncryptionKey } from '../src/encryption-key';
-import {
-  encryptStringWithKeyDerivedFromString,
-  encryptWithKey,
-} from '../src/encryption/encryption';
+import { encryptWithKey, encryptWithKeyDerivedFromString } from '../src/encryption/encryption';
 import { SerializationFormat } from '../src/serialization-versions';
 import { CipherStrategy } from '../src/strategies';
 import { bytesToUtf8, generateRandomBytesString, utf8ToBytes } from '../src/util';
@@ -12,10 +9,10 @@ describe('aes-256-gcm', () => {
   it(`can successfully encrypt and decrypt with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
       const passphrase = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
-      const data = 'some secret data';
+      const data = utf8ToBytes('some secret data');
       const strategy = CipherStrategy.AES_GCM;
-      const result = await encryptStringWithKeyDerivedFromString({
-        key: passphrase,
+      const result = await encryptWithKeyDerivedFromString({
+        passphrase,
         data,
         strategy,
         serializationVersion: SerializationFormat.latest_version,
@@ -24,12 +21,12 @@ describe('aes-256-gcm', () => {
         throw new Error('serialized should not be null here');
       }
 
-      const decryptedWithDerivedKey = await decryptStringWithKeyDerivedFromString({
+      const decryptedWithDerivedKey = await decryptWithKeyDerivedFromString({
         serialized: result.serialized,
         passphrase,
       });
 
-      expect(decryptedWithDerivedKey).toEqual(data);
+      expect(bytesToUtf8(decryptedWithDerivedKey!)).toEqual(bytesToUtf8(data));
 
       done();
     } catch (err) {
@@ -47,12 +44,12 @@ describe('aes-256-gcm', () => {
       const encryptedSerialized =
         'Aes256Gcm.P2oHHPICeWS7S1EjRaujoq8z8v00.QUAAAAAFaXYADAAAAACzJaH669kLnh5DTOEFYXQAEAAAAADRP9HC0nBoMrXgsyqK4NgLAmFkAAUAAABub25lAAA=.Pbkdf2Hmac.S0EAAAAFaXYAFAAAAAAHMiaRKt7BlXUQU7yVGEy-oNSLaBBpALpQAAAQbAAgAAAAAmhhc2gABwAAAFNIQTI1NgAA';
 
-      const decryptedWithSourceKey = await decryptStringWithKeyDerivedFromString({
+      const decryptedWithSourceKey = await decryptWithKeyDerivedFromString({
         serialized: encryptedSerialized,
         passphrase: key,
       });
 
-      expect(decryptedWithSourceKey).toEqual(decryptedData);
+      expect(bytesToUtf8(decryptedWithSourceKey!)).toEqual(decryptedData);
 
       done();
     } catch (err) {
@@ -92,11 +89,12 @@ describe('aes-256-gcm', () => {
       it(`can successfully encrypt and decrypt with ${strategy}
          Encryption and ${version} serialization version`, async (done) => {
         try {
-          const key = 'correct horse battery staple';
-          const data =
-            'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష';
-          const result = await encryptStringWithKeyDerivedFromString({
-            key,
+          const passphrase = 'correct horse battery staple';
+          const data = utf8ToBytes(
+            'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష'
+          );
+          const result = await encryptWithKeyDerivedFromString({
+            passphrase,
             data,
             strategy,
             serializationVersion: version,
@@ -105,12 +103,12 @@ describe('aes-256-gcm', () => {
             throw new Error('serialized should not be null here');
           }
 
-          const decryptedWithDerivedKey = await decryptStringWithKeyDerivedFromString({
+          const decryptedWithDerivedKey = await decryptWithKeyDerivedFromString({
             serialized: result.serialized,
-            passphrase: key,
+            passphrase,
           });
 
-          expect(decryptedWithDerivedKey).toEqual(data);
+          expect(bytesToUtf8(decryptedWithDerivedKey!)).toEqual(bytesToUtf8(data));
 
           done();
         } catch (err) {

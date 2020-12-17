@@ -5,12 +5,13 @@ import {
   decryptWithPrivateKey,
   encodeSafe64,
   encryptWithPublicKey,
+  utf8ToBytes,
 } from '../../src';
 import { EncryptionKey } from '../../src/encryption-key';
 import {
-  encryptStringWithKey,
-  encryptStringWithKeyDerivedFromString,
-  encryptStringWithKeyUsingArtefacts,
+  encryptWithKey,
+  encryptWithKeyDerivedFromString,
+  encryptWithKeyUsingArtefacts,
 } from '../../src/encryption/encryption';
 import { SerializationFormat } from '../../src/serialization-versions';
 import { CipherStrategy } from '../../src/strategies';
@@ -18,10 +19,10 @@ import { CipherStrategy } from '../../src/strategies';
 describe('Encryption', () => {
   it('encrypts data with AES-256 GCM Encryption using a string key including derivation artifacts', async (done) => {
     try {
-      const key = 'correct horse battery staple';
-      const data = 'some secret data';
-      const result = await encryptStringWithKeyDerivedFromString({
-        key,
+      const passphrase = 'correct horse battery staple';
+      const data = utf8ToBytes('some secret data');
+      const result = await encryptWithKeyDerivedFromString({
+        passphrase,
         data,
         strategy: CipherStrategy.AES_GCM,
         serializationVersion: SerializationFormat.legacy,
@@ -48,14 +49,16 @@ describe('Encryption', () => {
   it('encrypts data using a provided key', async (done) => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`øù@!L DRûÿ­ÙSAaÍÖ¡Ï9£S2îÏ`));
-      const data = 'some secret data';
-      const result = await encryptStringWithKey({
-        key,
-        data,
-        strategy: CipherStrategy.AES_GCM,
-        iv: 'û¶¦ËüqIû',
-        serializationVersion: SerializationFormat.legacy,
-      });
+      const data = utf8ToBytes('some secret data');
+      const result = await encryptWithKey(
+        {
+          key,
+          data,
+          strategy: CipherStrategy.AES_GCM,
+          iv: 'û¶¦ËüqIû',
+        },
+        SerializationFormat.legacy
+      );
       // Known IV and known key should produce the same results
       expect(result.serialized).toEqual(
         // As above although we don't need key derivation artifacts
@@ -71,8 +74,8 @@ describe('Encryption', () => {
   it('can encrypt with key using encryption artifacts', async (done) => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
-      const data = '1';
-      const result = await encryptStringWithKeyUsingArtefacts({
+      const data = utf8ToBytes('1');
+      const result = await encryptWithKeyUsingArtefacts({
         key,
         data,
         strategy: CipherStrategy.AES_GCM,
@@ -91,14 +94,16 @@ describe('Encryption', () => {
   it('returns null if an empty string is passed in to encryptStringWithKey', async (done) => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`øù@!L DRûÿ­ÙSAaÍÖ¡Ï9£S2îÏ`));
-      const data = '';
-      const result = await encryptStringWithKey({
-        key,
-        data,
-        strategy: CipherStrategy.AES_GCM,
-        iv: 'û¶¦ËüqIû',
-        serializationVersion: SerializationFormat.legacy,
-      });
+      const data = utf8ToBytes('');
+      const result = await encryptWithKey(
+        {
+          key,
+          data,
+          strategy: CipherStrategy.AES_GCM,
+          iv: 'û¶¦ËüqIû',
+        },
+        SerializationFormat.legacy
+      );
       expect(result.serialized).toEqual(null);
       done();
     } catch (e) {
@@ -109,8 +114,8 @@ describe('Encryption', () => {
   it('returns null if an empty string is passed in to encryptStringWithKeyUsingArtefacts', async (done) => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
-      const data = '';
-      const result = await encryptStringWithKeyUsingArtefacts({
+      const data = utf8ToBytes('');
+      const result = await encryptWithKeyUsingArtefacts({
         key,
         data,
         strategy: CipherStrategy.AES_GCM,

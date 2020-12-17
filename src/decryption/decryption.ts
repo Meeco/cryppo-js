@@ -17,49 +17,9 @@ interface IEncryptionOptions {
   ad: string;
 }
 
-/**
- * @deprecated This method should be replaced by
- * decryptWithKey method. This method convert give bytes to utf8 string
- */
-export async function decryptStringWithKey({
-  serialized,
-  key,
-}: {
-  serialized: string;
-  key: EncryptionKey;
-}): Promise<string | null> {
-  const result = await decryptWithKey({
-    serialized,
-    key,
-  });
+//#region  decrypt using drived key
 
-  return result ? bytesToUtf8(result) : null;
-}
-
-/**
- * @deprecated This method should be replaced by
- * decryptWithKey method. This method convert give bytes to raw string
- */
-export async function decryptBinaryWithKey({
-  serialized,
-  key,
-}: {
-  serialized: string;
-  key: EncryptionKey;
-}): Promise<string | null> {
-  const result = await decryptWithKey({
-    serialized,
-    key,
-  });
-
-  return result ? bytesToBinaryString(result) : null;
-}
-
-/**
- * @deprecated This method should be replaced by
- * decryptWithKeyDerivedFromString method. This method convert give bytes to utf-8 string
- */
-export async function decryptStringWithKeyDerivedFromString({
+export async function decryptWithKeyDerivedFromString({
   serialized,
   passphrase,
   encodingVersion = EncodingVersions.latest_version,
@@ -67,29 +27,11 @@ export async function decryptStringWithKeyDerivedFromString({
   serialized: string;
   passphrase: string;
   encodingVersion?: EncodingVersions;
-}): Promise<string | null> {
-  const derivedKey = await _deriveKeyWithOptions({
-    key: passphrase,
-    serializedOptions: serialized,
-    encodingVersion,
-  });
-  const result = await decryptWithKey({
-    serialized: serialized.split('.').slice(0, 3).join('.'),
-    key: derivedKey,
-  });
-  return result ? bytesToUtf8(result!) : null;
-}
-
-export async function decryptWithKeyDerivedFromString({
-  serialized,
-  passphrase,
-}: {
-  serialized: string;
-  passphrase: string;
 }): Promise<Uint8Array | null> {
   const derivedKey = await _deriveKeyWithOptions({
     key: passphrase,
     serializedOptions: serialized,
+    encodingVersion,
   });
   return await decryptWithKey({
     serialized: serialized.split('.').slice(0, 3).join('.'),
@@ -97,6 +39,9 @@ export async function decryptWithKeyDerivedFromString({
   });
 }
 
+//#endregion
+
+//#region  decrypt using key
 export async function decryptWithKey({
   serialized,
   key,
@@ -143,6 +88,8 @@ export async function decryptWithKey({
   return output;
 }
 
+//#endregion
+
 /**
  * Determine if we need to use a derived key or not based on whether or not
  * we have key derivation options in the serialized payload.
@@ -161,33 +108,7 @@ function _deriveKeyWithOptions({
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
-/**
- * @deprecated This method should be replaced by
- * decryptWithKeyUsingArtefacts method. This method convert give bytes to utf8 string
- */
-export function decryptStringWithKeyUsingArtefacts(
-  key: EncryptionKey,
-  encryptedData: any,
-  strategy: CipherStrategy,
-  { iv, at, ad }: IEncryptionOptions
-) {
-  const result = decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
-  return result ? bytesToUtf8(result) : null;
-}
-
-/**
- * @deprecated This method should be replaced by
- * decryptWithKeyUsingArtefacts method. This method convert give bytes to string
- */
-export function decryptBinaryWithKeyUsingArtefacts(
-  key: EncryptionKey,
-  encryptedData: any,
-  strategy: CipherStrategy,
-  { iv, at, ad }: IEncryptionOptions
-) {
-  const result = decryptWithKeyUsingArtefacts(key, encryptedData, strategy, { iv, at, ad });
-  return result ? bytesToBinaryString(result) : null;
-}
+//#region  decrypt using Artefact
 
 export function decryptWithKeyUsingArtefacts(
   key: EncryptionKey,
@@ -217,3 +138,5 @@ export function decryptWithKeyUsingArtefacts(
 
   throw new Error('Decryption failed');
 }
+
+//#endregion decrypt using Artefact
