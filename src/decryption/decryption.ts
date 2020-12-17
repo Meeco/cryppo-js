@@ -71,7 +71,7 @@ export async function decryptStringWithKeyDerivedFromString({
   const derivedKey = await _deriveKeyWithOptions(passphrase, serialized, encodingVersion);
   const result = await decryptWithKey({
     serialized: serialized.split('.').slice(0, 3).join('.'),
-    key: EncryptionKey.fromRaw(derivedKey),
+    key: derivedKey,
   });
   return result ? bytesToUtf8(result as Uint8Array) : null;
 }
@@ -86,7 +86,7 @@ export async function decryptWithKeyDerivedFromString({
   const derivedKey = await _deriveKeyWithOptions(passphrase, serialized);
   return await decryptWithKey({
     serialized: serialized.split('.').slice(0, 3).join('.'),
-    key: EncryptionKey.fromRaw(derivedKey),
+    key: derivedKey,
   });
 }
 
@@ -112,20 +112,19 @@ export async function decryptWithKey({
     const strategy = strategyToAlgorithm(encryptionStrategy);
 
     try {
-      output = decryptWithKeyUsingArtefacts(
-        legacyKey ? EncryptionKey.fromRaw(legacyKey) : key,
-        data,
-        strategy,
-        artifacts
-      );
+      output = decryptWithKeyUsingArtefacts(legacyKey ? legacyKey : key, data, strategy, artifacts);
     } catch (err) {
       if (
         !legacyKey &&
-        encodeUtf8(key.key) !== key.key &&
+        bytesToUtf8(key.bytes) !== bytesToBinaryString(key.bytes) &&
         DerivedKeyOptions.usesDerivedKey(serialized)
       ) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
-        legacyKey = await _deriveKeyWithOptions(key.key, serialized, EncodingVersions.legacy);
+        legacyKey = await _deriveKeyWithOptions(
+          bytesToBinaryString(key.bytes),
+          serialized,
+          EncodingVersions.legacy
+        );
         i -= 2;
         continue;
       } else {
@@ -188,7 +187,7 @@ export function decryptWithKeyUsingArtefacts(
   if (encryptedData === '') {
     return null;
   }
-  const decipher = cipher.createDecipher(strategy, key.key);
+  const decipher = cipher.createDecipher(strategy, util.createBuffer(key.bytes));
   const tagLength = 128;
   const tag = util.createBuffer(at); // authentication tag from encryption
   const encrypted = util.createBuffer(encryptedData);

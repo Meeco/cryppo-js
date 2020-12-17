@@ -63,7 +63,7 @@ describe('aes-256-gcm', () => {
 
   it(`can encrypt/decrypt bytes with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
-      const key = EncryptionKey.fromRaw(generateRandomKey());
+      const key = EncryptionKey.generateRandomKey();
       const data = utf8ToBytes(
         'this is a test 这是一个测试 이것은 테스트입니다 これすهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷ'
       );

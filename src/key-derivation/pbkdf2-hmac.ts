@@ -1,3 +1,5 @@
+import { EncryptionKey } from '../encryption-key';
+import { binaryStringToBytes } from '../util';
 import { DerivedKeyOptions, IRandomKeyOptions, KeyDerivationStrategy } from './derived-key';
 
 /**
@@ -12,7 +14,7 @@ export async function generateDerivedKey({
   iterationVariance,
   useSalt,
 }: Partial<IRandomKeyOptions> & { key: string }): Promise<{
-  key: string;
+  key: EncryptionKey;
   options: DerivedKeyOptions;
 }> {
   const derivedKeyOptions = DerivedKeyOptions.randomFromOptions({

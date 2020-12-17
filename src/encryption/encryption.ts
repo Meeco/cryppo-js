@@ -80,7 +80,7 @@ export async function encryptWithGeneratedKey(
   options: IEncryptionOptionsWithoutKey,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult & { generatedKey: string }> {
-  const key = EncryptionKey.fromRaw(generateRandomKey(options.keyLength || 32));
+  const key = EncryptionKey.generateRandomKey(options.keyLength || 32);
 
   let result: any;
   result = await encryptWithKey(
@@ -100,13 +100,13 @@ export async function encryptStringWithKeyDerivedFromString(
   strategy: CipherStrategy,
   iv?: string,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
+): Promise<IEncryptionResult & IRandomKeyOptions & { key: EncryptionKey }> {
   const derived = await generateDerivedKey({ key });
 
   let result: any;
   result = await encryptWithKey(
     {
-      key: EncryptionKey.fromRaw(derived.key),
+      key: derived.key,
       data: utf8ToBytes(data),
       strategy,
       iv,
@@ -181,7 +181,7 @@ export async function encryptWithKey(
   output = encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
 
   const { encrypted, artifacts } = output;
-  const keyLengthBits = key.key.length * 8;
+  const keyLengthBits = key.bytes.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
   const serialized = serialize(
     `${cipher}${keyLengthBits}${mode}`,
@@ -250,7 +250,7 @@ export function encryptWithKeyUsingArtefacts({
     return { encrypted: null };
   }
 
-  const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key.key));
+  const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key.bytes));
   iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
   cipher.update(util.createBuffer(data));

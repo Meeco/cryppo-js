@@ -1,26 +1,37 @@
+import { random } from 'node-forge';
 import { binaryStringToBytes, bytesToBinaryString, decodeSafe64, encodeSafe64 } from './util';
 
 /**
- * An key that can be used to encrypt and decrypt data
+ * A key that can be used to encrypt and decrypt data
  * This wrapper ensures that keys can be safely serialized as JSON (by encoding them as URL-Safe Base64)
  * and avoids confusion when dealing with converting to and from this encoded format.
  */
 export class EncryptionKey {
-  /**
-   * Create an {@link EncryptionKey} from encoded URL-safe base 64 version of the key
-   */
   public static fromSerialized(value: string) {
-    return new EncryptionKey(binaryStringToBytes(decodeSafe64(value || '')));
+    this.checkStringValue(value);
+    return new EncryptionKey(binaryStringToBytes(decodeSafe64(value)));
   }
-  /**
-   * @deprecated
-   * Create an {@link EncryptionKey} from a binary string version of the key
-   */
-  public static fromRaw(value: string) {
-    return new EncryptionKey(binaryStringToBytes(value));
-  }
+
   public static fromBytes(bytes: Uint8Array) {
-    return bytesToBinaryString(bytes);
+    this.checkBytesValue(bytes);
+    return new EncryptionKey(bytes);
+  }
+
+  public static generateRandomKey(length: number = 32) {
+    return new EncryptionKey(binaryStringToBytes(random.getBytesSync(length)));
+  }
+
+  private static checkStringValue(value: string) {
+    value = value.trim();
+    if (!value) {
+      throw new Error('bytes are empty or undefined');
+    }
+  }
+
+  private static checkBytesValue(value: Uint8Array) {
+    if (!value || value.length === 0) {
+      throw new Error('bytes are empty or undefined');
+    }
   }
 
   /**
@@ -32,16 +43,9 @@ export class EncryptionKey {
   private constructor(private readonly value: Uint8Array) {}
 
   /**
-   * Return the actual encryption key to be used for encryption/decryption
+   * Encode a key in a human-readable and url-safe format.
    */
-  get key() {
-    return bytesToBinaryString(this.value);
-  }
-
-  /**
-   * Implicitly called by `JSON.stringify()` to ensure that the value is safely printable
-   */
-  get toJSON() {
+  get serialize() {
     return encodeSafe64(bytesToBinaryString(this.value));
   }
 
