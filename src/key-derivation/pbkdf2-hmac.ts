@@ -1,3 +1,4 @@
+import { EncryptionKey } from '../encryption-key';
 import { DerivedKeyOptions, IRandomKeyOptions, KeyDerivationStrategy } from './derived-key';
 
 /**
@@ -6,13 +7,13 @@ import { DerivedKeyOptions, IRandomKeyOptions, KeyDerivationStrategy } from './d
  * (i.e. to derive the same key again from the same password/phrase).
  */
 export async function generateDerivedKey({
-  key,
+  passphrase,
   length,
   minIterations,
   iterationVariance,
   useSalt,
-}: Partial<IRandomKeyOptions> & { key: string }): Promise<{
-  key: string;
+}: Partial<IRandomKeyOptions> & { passphrase: string }): Promise<{
+  key: EncryptionKey;
   options: DerivedKeyOptions;
 }> {
   const derivedKeyOptions = DerivedKeyOptions.randomFromOptions({
@@ -22,7 +23,7 @@ export async function generateDerivedKey({
     strategy: KeyDerivationStrategy.Pbkdf2Hmac,
     useSalt,
   });
-  const derivedKey = await derivedKeyOptions.deriveKey(key);
+  const derivedKey = await derivedKeyOptions.deriveKey(passphrase);
   return {
     key: derivedKey,
     options: derivedKeyOptions,

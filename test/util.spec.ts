@@ -8,7 +8,7 @@ import {
 describe('utils', () => {
   it('can encode derivation artifacts', async (done) => {
     const result = await generateDerivedKey({
-      key: `GreatPassphrase#2001!`,
+      passphrase: `GreatPassphrase#2001!`,
       useSalt: `\xF8\xD4g)|=q\x04!\xA2\xF9\xF1\xB0P\xB1@*QE%`,
       minIterations: 21908,
       iterationVariance: 0,

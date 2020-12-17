@@ -1,15 +1,16 @@
-import { cipher as forgeCipher, Encoding, random, util } from 'node-forge';
+import { cipher as forgeCipher, random, util } from 'node-forge';
+import { EncryptionKey } from '../encryption-key';
 import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
 import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
-import { generateRandomKey, serialize, stringAsBinaryBuffer } from '../util';
+import { binaryStringToBytesBuffer, serialize } from '../util';
 
 export interface IEncryptionOptionsWithoutKey {
   /***
    * Data to encrypt
    */
-  data: string;
+  data: Uint8Array;
   /**
    * Encryption/Cipher strategy to use
    */
@@ -32,7 +33,7 @@ export interface IEncryptionArtifacts {
 }
 
 export type IEncryptionOptions = IEncryptionOptionsWithoutKey & {
-  key: string;
+  key: EncryptionKey;
 };
 
 export interface IEncryptionResult {
@@ -40,64 +41,14 @@ export interface IEncryptionResult {
   encrypted: string | null;
 }
 
-/**
- * Similar to `encryptStringWithKey`
- * but generates random bytes to use as the key. This will be returned with the result.
- */
-export async function encryptStringWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & { generatedKey: string }> {
-  return encryptWithGeneratedKey(options, serializationVersion, 'utf8');
-}
-
-/**
- * Similar to `encryptBinaryWithKey`
- * but generates random bytes to use as the key. This will be returned with the result.
- */
-export async function encryptBinaryWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & { generatedKey: string }> {
-  return encryptWithGeneratedKey(options, serializationVersion, 'raw');
-}
-
-/**
- * @deprecated This method should be replaced by
- * encryptBinaryWithGeneratedKey or encryptStringWithGeneratedKey method.
- * The default encoding is 'raw' is suitable for binaries and 1 byte UTF-8.
- * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
- * encrypted with 'raw' encoding will produce incorrect decrypted value.
- */
 export async function encryptWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  encoding: Encoding = 'raw'
-): Promise<IEncryptionResult & { generatedKey: string }> {
-  const key = generateRandomKey(options.keyLength || 32);
+  { data, strategy, keyLength, iv }: IEncryptionOptionsWithoutKey,
+  serializationVersion: SerializationFormat = SerializationFormat.latest_version
+): Promise<IEncryptionResult & { generatedKey: EncryptionKey }> {
+  const key = EncryptionKey.generateRandom(keyLength || 32);
 
   let result: any;
-  switch (encoding) {
-    case 'utf8':
-      result = await encryptStringWithKey(
-        {
-          ...options,
-          key,
-        },
-        serializationVersion
-      );
-      break;
-
-    case 'raw':
-      result = await encryptBinaryWithKey(
-        {
-          ...options,
-          key,
-        },
-        serializationVersion
-      );
-      break;
-  }
+  result = await encryptWithKey({ key, data, strategy, iv }, serializationVersion);
 
   return {
     ...result,
@@ -105,64 +56,31 @@ export async function encryptWithGeneratedKey(
   };
 }
 
-/**
- * Similar to `encryptStringWithKey` but allows passing an arbitrary string/passphrase which will
- * be used to derive a key that will be used in encryption. The derived key will be returned with the results.
- */
-export async function encryptStringWithKeyDerivedFromString(
-  options: IEncryptionOptions,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
-  return encryptWithKeyDerivedFromString(options, serializationVersion, 'utf8');
-}
-
-/**
- * Similar to `encryptBinaryWithKey` but allows passing an arbitrary string/passphrase which will
- * be used to derive a key that will be used in encryption. The derived key will be returned with the results.
- */
-export async function encryptBinaryWithKeyDerivedFromString(
-  options: IEncryptionOptions,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
-  return encryptWithKeyDerivedFromString(options, serializationVersion, 'raw');
-}
-
-/**
- * @deprecated This method should be replaced by
- * encryptStringWithKeyDerivedFromString or encryptBinaryWithKeyDerivedFromString method.
- * The default encoding is 'raw' is suitable for binaries and 1 byte UTF-8.
- * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
- * encrypted with 'raw' encoding will produce incorrect decrypted value.
- */
-export async function encryptWithKeyDerivedFromString(
-  options: IEncryptionOptions,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  encoding: Encoding = 'raw'
-): Promise<IEncryptionResult & IRandomKeyOptions & { key: string }> {
-  const derived = await generateDerivedKey({ key: options.key });
+export async function encryptWithKeyDerivedFromString({
+  passphrase,
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  passphrase: string;
+  data: Uint8Array;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult & IRandomKeyOptions & { key: EncryptionKey }> {
+  const derived = await generateDerivedKey({ passphrase });
 
   let result: any;
-  switch (encoding) {
-    case 'utf8':
-      result = await encryptStringWithKey(
-        {
-          ...options,
-          key: derived.key,
-        },
-        serializationVersion
-      );
-      break;
-
-    case 'raw':
-      result = await encryptBinaryWithKey(
-        {
-          ...options,
-          key: derived.key,
-        },
-        serializationVersion
-      );
-      break;
-  }
+  result = await encryptWithKey(
+    {
+      key: derived.key,
+      data,
+      strategy,
+      iv,
+    },
+    serializationVersion
+  );
 
   const serializedKey = derived.options.serialize(serializationVersion);
   result.serialized = `${result.serialized}.${serializedKey}`;
@@ -172,61 +90,23 @@ export async function encryptWithKeyDerivedFromString(
   };
 }
 
-/**
- * Encrypt data with the provided key.
- *
- * This is technically synchronous at the moment but it returns a promise in the event that we want to make
- * it asynchronous using Web Workers or similar in future.
- *
- * @param options.key The exact key to use - key.length must be valid for specified encryption
- * strategy (typically 32 bytes).
- * To encrypt with a derived key, use `encryptWithKeyDerivedFromString` or, to, use a random
- * key `encryptWithGeneratedKey`.
- */
-
-export async function encryptStringWithKey(
-  { key, data, strategy, iv }: IEncryptionOptions,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult> {
-  return encryptWithKey({ key, data, strategy, iv }, serializationVersion, 'utf8');
-}
-
-export async function encryptBinaryWithKey(
-  { key, data, strategy, iv }: IEncryptionOptions,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult> {
-  return encryptWithKey({ key, data, strategy, iv }, serializationVersion, 'raw');
-}
-
-/**
- * @deprecated This method should be replaced by
- * encryptStringWithKey or encryptBinaryWithKey method.
- * The default encoding is 'raw' is suitable for binaries and 1 byte UTF-8.
- * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
- * encrypted with 'raw' encoding will produce incorrect decrypted value.
- */
 export async function encryptWithKey(
   { key, data, strategy, iv }: IEncryptionOptions,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  encoding: Encoding = 'raw'
+  serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
-  if (data === '') {
-    return { encrypted: null, serialized: null };
-  }
-
   let output: any;
-  switch (encoding) {
-    case 'utf8':
-      output = encryptStringWithKeyUsingArtefacts(key, data, strategy, iv);
-      break;
 
-    case 'raw':
-      output = encryptBinaryWithKeyUsingArtefacts(key, data, strategy, iv);
-      break;
+  if (!data || data.length === 0) {
+    return {
+      encrypted: null,
+      serialized: null,
+    };
   }
+
+  output = encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
 
   const { encrypted, artifacts } = output;
-  const keyLengthBits = key.length * 8;
+  const keyLengthBits = key.bytes.length * 8;
   const [cipher, mode] = strategy.split('-').map(upperWords);
   const serialized = serialize(
     `${cipher}${keyLengthBits}${mode}`,
@@ -245,60 +125,29 @@ export async function encryptWithKey(
  */
 const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1).toLowerCase();
 
-export function encryptStringWithKeyUsingArtefacts(
-  key: string,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string
-): {
+export function encryptWithKeyUsingArtefacts({
+  key,
+  data,
+  strategy,
+  iv,
+}: IEncryptionOptions): {
   encrypted: string | null;
   artifacts?: any;
 } {
-  return encryptWithKeyUsingArtefacts(key, data, strategy, iv, 'utf8');
-}
-
-export function encryptBinaryWithKeyUsingArtefacts(
-  key: string,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string
-): {
-  encrypted: string | null;
-  artifacts?: any;
-} {
-  return encryptWithKeyUsingArtefacts(key, data, strategy, iv, 'raw');
-}
-
-/**
- * @deprecated This method should be replaced by
- * encryptStringWithKeyUsingArtefacts or encryptBinaryWithKeyUsingArtefacts method.
- * The default encoding is 'raw' is suitable for binaries and 1 byte UTF-8.
- * string with greater than 2 bytes UTF-8 string will produce an incorrect result. e.g. data string '鍵键'
- * encrypted with 'raw' encoding will produce incorrect decrypted value.
- */
-export function encryptWithKeyUsingArtefacts(
-  key: string,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string,
-  encoding: Encoding = 'raw'
-): {
-  encrypted: string | null;
-  artifacts?: any;
-} {
-  if (data === '') {
+  if (data.length === 0) {
     return { encrypted: null };
   }
-  const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key));
+
+  const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key.bytes));
   iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
-  cipher.update(util.createBuffer(data, encoding));
+  cipher.update(util.createBuffer(data));
   cipher.finish();
   const artifacts: any = {
-    iv: stringAsBinaryBuffer(iv),
+    iv: binaryStringToBytesBuffer(iv),
   };
   if (cipher.mode.tag) {
-    artifacts.at = stringAsBinaryBuffer(cipher.mode.tag.data);
+    artifacts.at = binaryStringToBytesBuffer(cipher.mode.tag.data);
   }
   artifacts.ad = 'none';
   return {

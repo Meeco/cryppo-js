@@ -19,8 +19,18 @@ const DERIVATION_ARTEFACTS_CURRENT_VERSION = 'K';
 export const encode64 = util.encode64;
 export const decode64 = util.decode64;
 export const encodeUtf8 = util.encodeUtf8;
+export const utf8ToBytes = util.text.utf8.encode;
+export const bytesToUtf8 = util.text.utf8.decode;
+export const utf16ToBytes = util.text.utf16.encode;
+export const bytesToUtf16 = util.text.utf16.decode;
+export const binaryStringToBytes = util.binary.raw.decode;
+export const bytesToBinaryString = util.binary.raw.encode;
+export const binaryStringToBytesBuffer = (value: string) =>
+  _buffer.from(util.binary.raw.decode(value));
+export const bytesBufferToBinaryString = (val: Buffer | Uint8Array | ArrayBuffer) =>
+  util.createBuffer(val).data;
 
-export const generateRandomKey = (length = 32) => random.getBytesSync(length);
+export const generateRandomBytesString = (length = 32) => random.getBytesSync(length);
 
 export function serializeDerivedKeyOptions(
   strategy: string,
@@ -129,15 +139,6 @@ function decodeArtifactData(text: string) {
     // remove version byte before deserializing
     return BSON.deserialize(_buffer.from(text, 'base64').slice(1), { promoteBuffers: true });
   }
-}
-
-export function stringAsBinaryBuffer(val: string): Buffer | Uint8Array {
-  // We use the polyfill for browser coverage and compatibility with bson serialize
-  return _buffer.from(val, 'binary');
-}
-
-export function binaryBufferToString(val: Buffer | Uint8Array | ArrayBuffer): string {
-  return util.createBuffer(val).data;
 }
 
 /**
