@@ -25,8 +25,12 @@ export const utf16ToBytes = util.text.utf16.encode;
 export const bytesToUtf16 = util.text.utf16.decode;
 export const binaryStringToBytes = util.binary.raw.decode;
 export const bytesToBinaryString = util.binary.raw.encode;
+export const binaryStringToBufferBytes = (value: string) =>
+  _buffer.from(util.binary.raw.decode(value));
+export const bytesToBinaryStringBuffer = (val: Buffer | Uint8Array | ArrayBuffer) =>
+  util.createBuffer(val).data;
 
-export const generateRandomKey = (length = 32) => random.getBytesSync(length);
+export const generateRandomBytesString = (length = 32) => random.getBytesSync(length);
 
 export function serializeDerivedKeyOptions(
   strategy: string,

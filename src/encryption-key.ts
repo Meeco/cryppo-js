@@ -17,7 +17,7 @@ export class EncryptionKey {
     return new EncryptionKey(bytes);
   }
 
-  public static generateRandomKey(length: number = 32) {
+  public static generateRandom(length: number = 32) {
     return new EncryptionKey(binaryStringToBytes(random.getBytesSync(length)));
   }
 

@@ -20,13 +20,12 @@ describe('Encryption', () => {
     try {
       const key = 'correct horse battery staple';
       const data = 'some secret data';
-      const result = await encryptStringWithKeyDerivedFromString(
+      const result = await encryptStringWithKeyDerivedFromString({
         key,
         data,
-        CipherStrategy.AES_GCM,
-        undefined,
-        SerializationFormat.legacy
-      );
+        strategy: CipherStrategy.AES_GCM,
+        serializationVersion: SerializationFormat.legacy,
+      });
       expect(result.key).toBeTruthy();
       expect(result.key.bytes.length).toEqual(32);
       expect(result.encrypted?.length).toEqual(16);
@@ -50,13 +49,13 @@ describe('Encryption', () => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`øù@!L DRûÿ­ÙSAaÍÖ¡Ï9£S2îÏ`));
       const data = 'some secret data';
-      const result = await encryptStringWithKey(
+      const result = await encryptStringWithKey({
         key,
         data,
-        CipherStrategy.AES_GCM,
-        'û¶¦ËüqIû',
-        SerializationFormat.legacy
-      );
+        strategy: CipherStrategy.AES_GCM,
+        iv: 'û¶¦ËüqIû',
+        serializationVersion: SerializationFormat.legacy,
+      });
       // Known IV and known key should produce the same results
       expect(result.serialized).toEqual(
         // As above although we don't need key derivation artifacts
@@ -73,14 +72,14 @@ describe('Encryption', () => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
       const data = '1';
-      const result = await encryptStringWithKeyUsingArtefacts(
+      const result = await encryptStringWithKeyUsingArtefacts({
         key,
         data,
-        CipherStrategy.AES_GCM,
-        binaryBufferToString(
+        strategy: CipherStrategy.AES_GCM,
+        iv: binaryBufferToString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
-        )
-      );
+        ),
+      });
       // Known IV and known key should produce the same results
       expect(result.encrypted).toEqual('Ç');
       done();
@@ -93,13 +92,13 @@ describe('Encryption', () => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`øù@!L DRûÿ­ÙSAaÍÖ¡Ï9£S2îÏ`));
       const data = '';
-      const result = await encryptStringWithKey(
+      const result = await encryptStringWithKey({
         key,
         data,
-        CipherStrategy.AES_GCM,
-        'û¶¦ËüqIû',
-        SerializationFormat.legacy
-      );
+        strategy: CipherStrategy.AES_GCM,
+        iv: 'û¶¦ËüqIû',
+        serializationVersion: SerializationFormat.legacy,
+      });
       expect(result.serialized).toEqual(null);
       done();
     } catch (e) {
@@ -111,14 +110,14 @@ describe('Encryption', () => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
       const data = '';
-      const result = await encryptStringWithKeyUsingArtefacts(
+      const result = await encryptStringWithKeyUsingArtefacts({
         key,
         data,
-        CipherStrategy.AES_GCM,
-        binaryBufferToString(
+        strategy: CipherStrategy.AES_GCM,
+        iv: binaryBufferToString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
-        )
-      );
+        ),
+      });
       expect(result.encrypted).toBeNull();
       done();
     } catch (e) {

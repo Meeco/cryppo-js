@@ -6,7 +6,7 @@ import {
 } from '../src/encryption/encryption';
 import { SerializationFormat } from '../src/serialization-versions';
 import { CipherStrategy } from '../src/strategies';
-import { bytesToUtf8, generateRandomKey, utf8ToBytes } from '../src/util';
+import { bytesToUtf8, generateRandomBytesString, utf8ToBytes } from '../src/util';
 
 describe('aes-256-gcm', () => {
   it(`can successfully encrypt and decrypt with AES-GCM Encryption and latest serialization version`, async (done) => {
@@ -14,13 +14,12 @@ describe('aes-256-gcm', () => {
       const passphrase = 'keyمفتاح sleutelcléSchlüsselchiaveキーключllave鍵键चाभी';
       const data = 'some secret data';
       const strategy = CipherStrategy.AES_GCM;
-      const result = await encryptStringWithKeyDerivedFromString(
-        passphrase,
+      const result = await encryptStringWithKeyDerivedFromString({
+        key: passphrase,
         data,
         strategy,
-        undefined,
-        SerializationFormat.latest_version
-      );
+        serializationVersion: SerializationFormat.latest_version,
+      });
       if (result.serialized === null) {
         throw new Error('serialized should not be null here');
       }
@@ -63,7 +62,7 @@ describe('aes-256-gcm', () => {
 
   it(`can encrypt/decrypt bytes with AES-GCM Encryption and latest serialization version`, async (done) => {
     try {
-      const key = EncryptionKey.generateRandomKey();
+      const key = EncryptionKey.generateRandom();
       const data = utf8ToBytes(
         'this is a test 这是一个测试 이것은 테스트입니다 これすهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷ'
       );
@@ -80,7 +79,7 @@ describe('aes-256-gcm', () => {
         key,
       });
 
-      expect(bytesToUtf8(decryptedWithSourceKey as Uint8Array)).toEqual(bytesToUtf8(data));
+      expect(bytesToUtf8(decryptedWithSourceKey!)).toEqual(bytesToUtf8(data));
 
       done();
     } catch (err) {
@@ -96,13 +95,12 @@ describe('aes-256-gcm', () => {
           const key = 'correct horse battery staple';
           const data =
             'this is a test 这是一个测试 이것은 테스트입니다 これはテストですهذا اختبار यह एक परीक्षण है Это проверка ഇതൊരു പരീക്ഷണമാണ് ఇది ఒక పరీక్ష';
-          const result = await encryptStringWithKeyDerivedFromString(
+          const result = await encryptStringWithKeyDerivedFromString({
             key,
             data,
             strategy,
-            undefined,
-            version
-          );
+            serializationVersion: version,
+          });
           if (result.serialized === null) {
             throw new Error('serialized should not be null here');
           }

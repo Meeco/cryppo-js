@@ -102,11 +102,15 @@ describe('Backwards and forwards copmatibility', () => {
     // Prints as 'Helloøã'
     const expected = decodeSafe64('SGVsbG_44wA=');
 
-    expect(util.createBuffer(decrypted as Uint8Array).data).toEqual(expected);
+    expect(util.createBuffer(decrypted!).data).toEqual(expected);
   });
 
   it('Can encrypt and derypt strings with multi-byte characters', async () => {
-    const encrypted = await encryptStringWithKey(key, 'Hello 😀', CipherStrategy.AES_GCM);
+    const encrypted = await encryptStringWithKey({
+      key,
+      data: 'Hello 😀',
+      strategy: CipherStrategy.AES_GCM,
+    });
     const decrypted = await decryptStringWithKey({
       key,
       serialized: encrypted.serialized!,
@@ -126,7 +130,11 @@ describe('Backwards and forwards copmatibility', () => {
 
     it('can encrypt and decrypt a png file', async () => {
       const expected = readFileSync(join(__dirname, 'decrypted.png'), 'binary');
-      const encrypted = await encryptBinaryWithKey(key, expected, CipherStrategy.AES_GCM);
+      const encrypted = await encryptBinaryWithKey({
+        key,
+        data: expected,
+        strategy: CipherStrategy.AES_GCM,
+      });
       const decrypted = await decryptBinaryWithKey({
         serialized: encrypted.serialized!,
         key,

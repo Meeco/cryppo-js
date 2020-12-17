@@ -1,5 +1,6 @@
 import { cipher, util } from 'node-forge';
 import {
+  binaryStringToBytes,
   bytesToBinaryString,
   bytesToUtf8,
   deSerialize,
@@ -68,12 +69,16 @@ export async function decryptStringWithKeyDerivedFromString({
   passphrase: string;
   encodingVersion?: EncodingVersions;
 }): Promise<string | null> {
-  const derivedKey = await _deriveKeyWithOptions(passphrase, serialized, encodingVersion);
+  const derivedKey = await _deriveKeyWithOptions({
+    key: passphrase,
+    serializedOptions: serialized,
+    encodingVersion,
+  });
   const result = await decryptWithKey({
     serialized: serialized.split('.').slice(0, 3).join('.'),
     key: derivedKey,
   });
-  return result ? bytesToUtf8(result as Uint8Array) : null;
+  return result ? bytesToUtf8(result!) : null;
 }
 
 export async function decryptWithKeyDerivedFromString({
@@ -83,7 +88,10 @@ export async function decryptWithKeyDerivedFromString({
   serialized: string;
   passphrase: string;
 }): Promise<Uint8Array | null> {
-  const derivedKey = await _deriveKeyWithOptions(passphrase, serialized);
+  const derivedKey = await _deriveKeyWithOptions({
+    key: passphrase,
+    serializedOptions: serialized,
+  });
   return await decryptWithKey({
     serialized: serialized.split('.').slice(0, 3).join('.'),
     key: derivedKey,
@@ -116,15 +124,15 @@ export async function decryptWithKey({
     } catch (err) {
       if (
         !legacyKey &&
-        bytesToUtf8(key.bytes) !== bytesToBinaryString(key.bytes) &&
+        encodeUtf8(bytesToBinaryString(key.bytes)) !== bytesToBinaryString(key.bytes) &&
         DerivedKeyOptions.usesDerivedKey(serialized)
       ) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
-        legacyKey = await _deriveKeyWithOptions(
-          bytesToBinaryString(key.bytes),
-          serialized,
-          EncodingVersions.legacy
-        );
+        legacyKey = await _deriveKeyWithOptions({
+          key: bytesToBinaryString(key.bytes),
+          serializedOptions: serialized,
+          encodingVersion: EncodingVersions.legacy,
+        });
         i -= 2;
         continue;
       } else {
@@ -141,11 +149,15 @@ export async function decryptWithKey({
  * we have key derivation options in the serialized payload.
  */
 // tslint:disable-next-line: max-line-length
-function _deriveKeyWithOptions(
-  key: string,
-  serializedOptions: string,
-  encodingVersion: EncodingVersions = EncodingVersions.latest_version
-) {
+function _deriveKeyWithOptions({
+  key,
+  serializedOptions,
+  encodingVersion = EncodingVersions.latest_version,
+}: {
+  key: string;
+  serializedOptions: string;
+  encodingVersion?: EncodingVersions;
+}) {
   const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions);
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }

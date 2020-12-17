@@ -116,7 +116,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     return serializeDerivedKeyOptions(
       this.strategy,
       {
-        iv: stringAsBinaryBuffer(this.salt), // ensures proper yaml serialization
+        iv: stringAsBinaryBuffer(this.salt),
         i: this.iterations,
         l: this.length,
         hash: this.hash,

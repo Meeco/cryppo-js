@@ -4,13 +4,7 @@ import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
 import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
-import {
-  binaryStringToBytes,
-  generateRandomKey,
-  serialize,
-  stringAsBinaryBuffer,
-  utf8ToBytes,
-} from '../util';
+import { binaryStringToBytes, serialize, stringAsBinaryBuffer, utf8ToBytes } from '../util';
 
 export interface IEncryptionOptionsWithoutKey {
   /***
@@ -51,36 +45,52 @@ export interface IEncryptionResult {
  * @deprecated This method should be replaced by encryptWithGeneratedKey.
  * This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
-export async function encryptStringWithGeneratedKey(
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & { generatedKey: string }> {
-  return encryptWithGeneratedKey({ data: utf8ToBytes(data), strategy, iv }, serializationVersion);
+export async function encryptStringWithGeneratedKey({
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult & { generatedKey: string }> {
+  return encryptWithGeneratedKey({
+    options: { data: utf8ToBytes(data), strategy, iv },
+    serializationVersion,
+  });
 }
 
 /**
  * @deprecated This method should be replaced by encryptWithGeneratedKey.
  * This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
-export async function encryptBinaryWithGeneratedKey(
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & { generatedKey: string }> {
-  return encryptWithGeneratedKey(
-    { data: binaryStringToBytes(data), strategy, iv },
-    serializationVersion
-  );
+export async function encryptBinaryWithGeneratedKey({
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult & { generatedKey: string }> {
+  return encryptWithGeneratedKey({
+    options: { data: binaryStringToBytes(data), strategy, iv },
+    serializationVersion,
+  });
 }
 
-export async function encryptWithGeneratedKey(
-  options: IEncryptionOptionsWithoutKey,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & { generatedKey: string }> {
-  const key = EncryptionKey.generateRandomKey(options.keyLength || 32);
+export async function encryptWithGeneratedKey({
+  options,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  options: IEncryptionOptionsWithoutKey;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult & { generatedKey: string }> {
+  const key = EncryptionKey.generateRandom(options.keyLength || 32);
 
   let result: any;
   result = await encryptWithKey(
@@ -94,13 +104,19 @@ export async function encryptWithGeneratedKey(
   };
 }
 
-export async function encryptStringWithKeyDerivedFromString(
-  key: string,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult & IRandomKeyOptions & { key: EncryptionKey }> {
+export async function encryptStringWithKeyDerivedFromString({
+  key,
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  key: string;
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult & IRandomKeyOptions & { key: EncryptionKey }> {
   const derived = await generateDerivedKey({ key });
 
   let result: any;
@@ -139,13 +155,19 @@ export async function encryptStringWithKeyDerivedFromString(
  * encryptWithKey method. This method convert give data string to UTF-8 bytes utf8
  * before enctryptin it
  */
-export async function encryptStringWithKey(
-  key: EncryptionKey,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult> {
+export async function encryptStringWithKey({
+  key,
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  key: EncryptionKey;
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult> {
   if (!data || data === '') {
     return { encrypted: null, serialized: null };
   }
@@ -156,13 +178,19 @@ export async function encryptStringWithKey(
  * @deprecated This method should be replaced by
  * encryptWithKey method. This method convert give data to binary bytes
  */
-export async function encryptBinaryWithKey(
-  key: EncryptionKey,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string,
-  serializationVersion: SerializationFormat = SerializationFormat.latest_version
-): Promise<IEncryptionResult> {
+export async function encryptBinaryWithKey({
+  key,
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  key: EncryptionKey;
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult> {
   if (!data || data === '') {
     return { encrypted: null, serialized: null };
   }
@@ -204,12 +232,17 @@ const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1)
  * @deprecated This method should be replaced by
  * encryptWithKeyUsingArtefacts. This method convert give data string to UTF-8 bytes UTF-8 bytes
  */
-export function encryptStringWithKeyUsingArtefacts(
-  key: EncryptionKey,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string
-): {
+export function encryptStringWithKeyUsingArtefacts({
+  key,
+  data,
+  strategy,
+  iv,
+}: {
+  key: EncryptionKey;
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+}): {
   encrypted: string | null;
   artifacts?: any;
 } {
@@ -220,12 +253,17 @@ export function encryptStringWithKeyUsingArtefacts(
  * @deprecated This method should be replaced by
  * encryptWithKeyUsingArtefacts. This method convert give data string to UTF-8 bytes raw bytes
  */
-export function encryptBinaryWithKeyUsingArtefacts(
-  key: EncryptionKey,
-  data: string,
-  strategy: CipherStrategy,
-  iv?: string
-): {
+export function encryptBinaryWithKeyUsingArtefacts({
+  key,
+  data,
+  strategy,
+  iv,
+}: {
+  key: EncryptionKey;
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+}): {
   encrypted: string | null;
   artifacts?: any;
 } {

@@ -13,15 +13,4 @@ export * from './key-pairs/rsa';
 export * from './signing/rsa-signature';
 export * from './strategies';
 export * from './digests/hmac-digest';
-
-export {
-  binaryBufferToString,
-  decodeDerivationArtifacts,
-  decodeSafe64,
-  deSerializeDerivedKeyOptions,
-  encodeDerivationArtifacts,
-  encodeSafe64,
-  generateEncryptionVerificationArtifacts,
-  generateRandomKey,
-  stringAsBinaryBuffer,
-} from './util';
+export * from './util';

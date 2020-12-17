@@ -6,7 +6,6 @@ import {
   decodeSafe64,
   deSerialize,
   encode64,
-  generateRandomKey,
   serialize,
   stringAsBinaryBuffer,
 } from '../src/util';
@@ -73,13 +72,12 @@ describe('Serialize/Deserialize', () => {
       const yaml = decodeSafe64(artifacts);
       expect(containsNonUtf8Characters(yaml)).toEqual(false);
 
-      const encrypted = await encryptStringWithKey(
-        EncryptionKey.generateRandomKey(),
-        'This is some test data that will be encrypted',
-        CipherStrategy.AES_GCM,
-        undefined,
-        SerializationFormat.legacy
-      );
+      const encrypted = await encryptStringWithKey({
+        key: EncryptionKey.generateRandom(),
+        data: 'This is some test data that will be encrypted',
+        strategy: CipherStrategy.AES_GCM,
+        serializationVersion: SerializationFormat.legacy,
+      });
       const { serialized } = encrypted;
       if (serialized === null) {
         throw new Error('serialized should not be null here');
