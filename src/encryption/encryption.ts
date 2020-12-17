@@ -47,20 +47,14 @@ export interface IEncryptionResult {
   encrypted: string | null;
 }
 
-export async function encryptWithGeneratedKey({
-  options,
-  serializationVersion = SerializationFormat.latest_version,
-}: {
-  options: IEncryptionOptionsWithoutKey;
-  serializationVersion?: SerializationFormat;
-}): Promise<IEncryptionResult & { generatedKey: EncryptionKey }> {
-  const key = EncryptionKey.generateRandom(options.keyLength || 32);
+export async function encryptWithGeneratedKey(
+  { data, strategy, keyLength, iv }: IEncryptionOptionsWithoutKey,
+  serializationVersion: SerializationFormat = SerializationFormat.latest_version
+): Promise<IEncryptionResult & { generatedKey: EncryptionKey }> {
+  const key = EncryptionKey.generateRandom(keyLength || 32);
 
   let result: any;
-  result = await encryptWithKey(
-    { key, data: options.data, strategy: options.strategy, iv: options.iv },
-    serializationVersion
-  );
+  result = await encryptWithKey({ key, data, strategy, iv }, serializationVersion);
 
   return {
     ...result,

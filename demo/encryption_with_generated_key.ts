@@ -62,13 +62,13 @@ function encryptFile() {
   const file = $('encryptFileInput') as HTMLInputElement;
   const reader = new FileReader();
   reader.onload = async (result) => {
-    const encryptionResult = await encryptWithGeneratedKey({
-      options: {
+    const encryptionResult = await encryptWithGeneratedKey(
+      {
         data: binaryStringToBytes(reader.result as string),
         strategy: CipherStrategy.AES_GCM,
       },
-      serializationVersion: $SerializationFormat,
-    });
+      $SerializationFormat
+    );
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
     $set('encryptFileGeneratedKey', encryptionResult.generatedKey.serialize);
@@ -83,13 +83,13 @@ function encryptFileWithKey() {
   const file = $('encryptFileWithKeyInput') as HTMLInputElement;
   const reader = new FileReader();
   reader.onload = async (result) => {
-    const encryptionResult = await encryptWithGeneratedKey({
-      options: {
+    const encryptionResult = await encryptWithGeneratedKey(
+      {
         data: binaryStringToBytes(reader.result as string),
         strategy: CipherStrategy.AES_GCM,
       },
-      serializationVersion: $SerializationFormat,
-    });
+      $SerializationFormat
+    );
     $set('encryptFileWithKeyOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
     $set('encryptFileWithKey', encryptionResult.generatedKey.serialize);
@@ -140,13 +140,13 @@ function str2blob(str: string, contentType?: string) {
 async function encryptText() {
   const inText = $get('encryptTextInput');
 
-  const encryptionResult = await encryptWithGeneratedKey({
-    options: {
+  const encryptionResult = await encryptWithGeneratedKey(
+    {
       data: utf8ToBytes(inText),
       strategy: CipherStrategy.AES_GCM,
     },
-    serializationVersion: $SerializationFormat,
-  });
+    $SerializationFormat
+  );
 
   $set('encryptTextOutput', encryptionResult.serialized);
   $set('encryptGeneratedKey', encryptionResult.generatedKey.serialize);

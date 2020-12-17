@@ -15,19 +15,19 @@ The public facing API is designed to make it as easy as possible to encrypt some
 
 **If you want to encrypt with an arbitrary string as a key**:
 
-You can do so using `encryptStringWithKeyDerivedFromString` or `encryptBinaryWithKeyDerivedFromString`. This will return the serialized encrypted data along with some information about the encryption (such as key derivation information). `encryptStringWithKeyDerivedFromString` or `encryptBinaryWithKeyDerivedFromString` and `encryptStringWithGeneratedKey` or `encryptBinaryWithGeneratedKey` have two serialization formats:
+You can do so using `encryptWithKeyDerivedFromString`. This will return the serialized encrypted data along with some information about the encryption (such as key derivation information). `encryptWithKeyDerivedFromString` and `encryptWithGeneratedKey` have two serialization formats:
 a legacy format and a more efficient current format. current format is default format, In order to serialize a structure using the old format please use
 `SerializationFormat.legacy`
 
 ```ts
-import { CipherStrategy, encryptStringWithKeyDerivedFromString } from '@meeco/cryppo';
+import { CipherStrategy, encryptWithKeyDerivedFromString, utf8ToBytes } from '@meeco/cryppo';
 
 async function encryptData() {
-  const result = await encryptStringWithKeyDerivedFromString({
-    key: 'Password123!',
-    data: 'My Secret Data',
+  const result = await encryptWithKeyDerivedFromString({
+    passphrase: 'Password123!',
+    data: utf8ToBytes('My Secret Data'),
     strategy: CipherStrategy.AES_GCM,
-    serializationVersion: SerializationFormat = SerializationFormat.latest_version,
+    serializationVersion: SerializationFormat.latest_version,
   });
   console.log(result.serialized);
 }
@@ -35,38 +35,37 @@ async function encryptData() {
 
 **If you want to encrypt with a randomly generated key**
 
-You can do so using `encryptStringWithGeneratedKey` or `encryptBinmaryWithGeneratedKey`. This will return the generated key.
+You can do so using `encryptWithGeneratedKey`. This will return the generated key.
 
 ```ts
 async function encryptData() {
-  const result = await encryptStringWithGeneratedKey({
-    data: 'My Secret Data',
-    strategy: CipherStrategy.AES_GCM,
-    serializationVersion: SerializationFormat = SerializationFormat.latest_version,
+  const result = await encryptWithGeneratedKey({
+    {
+      data: utf8ToBytes('My Secret Data'),
+      strategy: CipherStrategy.AES_GCM,
+    }
+    SerializationFormat.latest_version,
   });
   console.log(result.serialized);
-  console.log(result.generatedKey);
+  console.log(result.generatedKey.serialize);
 }
 ```
 
 **If you want to encrypt with an existing key that is of the required length for the given strategy**
 
-You can do so using `encryptStringWithKey`
+You can do so using `encryptWithKey`
 
 ```ts
-import {
-  encryptStringWithKeyDerivedFromString,
-  generateRandomKey,
-  CipherStrategy,
-} from '@meeco/cryppo';
+import { encryptWithKey, generateRandomKey, CipherStrategy } from '@meeco/cryppo';
 
-async function encryptData() {
-  const result = await encryptStringWithKeyDerivedFromString({
-    key: generateRandomKey(32),
-    data: 'My Secret Data',
-    strategy: CipherStrategy.AES_GCM,
-    serializationVersion: SerializationFormat = SerializationFormat.latest_version,
-  });
+ const result = await encryptWithKey(
+        {
+          key: EncryptionKey.generateRandom(),
+          data: utf8ToBytes('This is some test data that will be encrypted'),
+          strategy: CipherStrategy.AES_GCM,
+        },
+        SerializationFormat.legacy
+      );
   console.log(result.serialized);
 }
 ```

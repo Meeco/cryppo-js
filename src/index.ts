@@ -13,4 +13,30 @@ export * from './key-pairs/rsa';
 export * from './signing/rsa-signature';
 export * from './strategies';
 export * from './digests/hmac-digest';
-export * from './util';
+export {
+  encode64,
+  decode64,
+  encodeUtf8,
+  utf8ToBytes,
+  bytesToUtf8,
+  utf16ToBytes,
+  bytesToUtf16,
+  binaryStringToBytes,
+  bytesToBinaryString,
+  binaryStringToBytesBuffer,
+  bytesBufferToBinaryString,
+  generateRandomBytesString,
+  serializeDerivedKeyOptions,
+  deSerializeDerivedKeyOptions,
+  serialize,
+  deSerialize,
+  encodeSafe64,
+  decodeSafe64,
+  encodeSafe64Bson,
+  decodeSafe64Bson,
+  encodeDerivationArtifacts,
+  decodeDerivationArtifacts,
+  generateEncryptionVerificationArtifacts,
+  keyLengthFromPublicKeyPem,
+  keyLengthFromPrivateKeyPem,
+} from './util';
