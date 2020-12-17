@@ -12,6 +12,7 @@ export * from './key-derivation/pbkdf2-hmac';
 export * from './key-pairs/rsa';
 export * from './signing/rsa-signature';
 export * from './strategies';
+export * from './encryption-key';
 export * from './digests/hmac-digest';
 export {
   encode64,

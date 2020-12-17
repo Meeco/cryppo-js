@@ -20,8 +20,6 @@ a legacy format and a more efficient current format. current format is default f
 `SerializationFormat.legacy`
 
 ```ts
-import { CipherStrategy, encryptWithKeyDerivedFromString, utf8ToBytes } from '@meeco/cryppo';
-
 async function encryptData() {
   const result = await encryptWithKeyDerivedFromString({
     passphrase: 'Password123!',
@@ -56,7 +54,6 @@ async function encryptData() {
 You can do so using `encryptWithKey`
 
 ```ts
-import { encryptWithKey, generateRandomKey, CipherStrategy } from '@meeco/cryppo';
 
  const result = await encryptWithKey(
         {
@@ -116,15 +113,15 @@ async function encryptDecryptData() {
 
 _Note: cryppo will use a derived key or the provided key and correct SerializationFormat based on the structure of the serialized data_.
 
-Call `decryptStringWithKey`
+Call `decryptWithKeyDerivedFromString`
 
 ```ts
 async function decryptData() {
-  const decrypted = await decryptStringWithKey({
+  const decrypted = await decryptWithKeyDerivedFromString({
     serialized: `Aes256Gcm.J9YhaGdIUBKa2dULbMU=.LS0tCml2OiAhYmluYXJ5IHwtCiAgd1JGK2QrRjYzRHJhbDRmdgphdDogIWJpbmFyeSB8LQogIGllS3JnK05iV0JVY2N3L3VVS2N6Rnc9PQphZDogbm9uZQo=.Pbkdf2Hmac.LS0tCml2OiAitIb79btSrS8k4KhbyfR_f79OkukiCmk6IDIxOTQ5Cmw6IDMyCmhhc2g6IFNIQTI1Ngo=`,
-    key: 'Password123!',
+    passphrase: 'Password123!',
   });
-  console.log(decrypted);
+  console.log(bytesToUtf8(decrypted!));
   // 'My Secret Data'
 }
 ```
