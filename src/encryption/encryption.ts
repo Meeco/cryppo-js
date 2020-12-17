@@ -4,13 +4,7 @@ import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
 import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
-import {
-  binaryStringToBytes,
-  binaryStringToBytesBuffer,
-  bytesToBinaryString,
-  serialize,
-  utf8ToBytes,
-} from '../util';
+import { binaryStringToBytesBuffer, serialize } from '../util';
 
 export interface IEncryptionOptionsWithoutKey {
   /***

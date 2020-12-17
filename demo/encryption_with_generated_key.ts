@@ -2,9 +2,6 @@ import { decryptWithKey, encryptWithGeneratedKey, encryptWithKey } from '../src/
 import { CipherStrategy } from '../src/strategies';
 import {
   encode64,
-  encodeSafe64,
-  decodeSafe64,
-  decodeSafe64Bson,
   binaryStringToBytes,
   bytesToBinaryString,
   utf8ToBytes,
@@ -61,7 +58,7 @@ $(`downloadDecrypted`)!.addEventListener('click', () => {
 function encryptFile() {
   const file = $('encryptFileInput') as HTMLInputElement;
   const reader = new FileReader();
-  reader.onload = async (result) => {
+  reader.onload = async () => {
     const encryptionResult = await encryptWithGeneratedKey(
       {
         data: binaryStringToBytes(reader.result as string),
@@ -82,7 +79,7 @@ function encryptFile() {
 function encryptFileWithKey() {
   const file = $('encryptFileWithKeyInput') as HTMLInputElement;
   const reader = new FileReader();
-  reader.onload = async (result) => {
+  reader.onload = async () => {
     const encryptionResult = await encryptWithGeneratedKey(
       {
         data: binaryStringToBytes(reader.result as string),

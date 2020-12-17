@@ -2,7 +2,6 @@ import { cipher, util } from 'node-forge';
 import {
   binaryStringToBytesBuffer,
   bytesToBinaryString,
-  bytesToUtf8,
   deSerialize,
   encodeUtf8,
 } from '../../src/util';

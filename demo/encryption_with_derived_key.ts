@@ -1,15 +1,10 @@
-import {
-  decryptWithKeyDerivedFromString,
-  encryptWithKeyDerivedFromString,
-  encryptWithKey,
-} from '../src/index';
+import { decryptWithKeyDerivedFromString, encryptWithKeyDerivedFromString } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import {
   binaryStringToBytes,
   bytesToBinaryString,
   bytesToUtf8,
   encode64,
-  encodeUtf8,
   utf8ToBytes,
 } from '../src/util';
 import { SerializationFormat } from '../src/serialization-versions';
