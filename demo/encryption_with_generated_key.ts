@@ -71,7 +71,7 @@ function encryptFile() {
     });
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
-    $set('encryptFileGeneratedKey', encodeSafe64(encryptionResult.generatedKey));
+    $set('encryptFileGeneratedKey', encryptionResult.generatedKey.serialize);
   };
   if (!file.files!.length) {
     return alert('Select a file first');
@@ -92,7 +92,7 @@ function encryptFileWithKey() {
     });
     $set('encryptFileWithKeyOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
-    $set('encryptFileWithKey', encodeSafe64(encryptionResult.generatedKey));
+    $set('encryptFileWithKey', encryptionResult.generatedKey.serialize);
   };
   if (!file.files!.length) {
     return alert('Select a file first');
@@ -149,7 +149,7 @@ async function encryptText() {
   });
 
   $set('encryptTextOutput', encryptionResult.serialized);
-  $set('encryptGeneratedKey', encodeSafe64(encryptionResult.generatedKey));
+  $set('encryptGeneratedKey', encryptionResult.generatedKey.serialize);
 }
 
 async function encryptWithKeyText() {

@@ -4,7 +4,13 @@ import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
 import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
-import { binaryStringToBytes, binaryStringToBytesBuffer, serialize, utf8ToBytes } from '../util';
+import {
+  binaryStringToBytes,
+  binaryStringToBytesBuffer,
+  bytesToBinaryString,
+  serialize,
+  utf8ToBytes,
+} from '../util';
 
 export interface IEncryptionOptionsWithoutKey {
   /***
@@ -47,7 +53,7 @@ export async function encryptWithGeneratedKey({
 }: {
   options: IEncryptionOptionsWithoutKey;
   serializationVersion?: SerializationFormat;
-}): Promise<IEncryptionResult & { generatedKey: string }> {
+}): Promise<IEncryptionResult & { generatedKey: EncryptionKey }> {
   const key = EncryptionKey.generateRandom(options.keyLength || 32);
 
   let result: any;
