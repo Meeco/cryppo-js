@@ -1,11 +1,10 @@
 import {
-  decryptBinaryWithKey,
-  decryptStringWithKey,
+  decryptWithKeyDerivedFromString,
   encryptBinaryWithKeyDerivedFromString,
   encryptStringWithKeyDerivedFromString,
 } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
-import { encode64 } from '../src/util';
+import { bytesToBinaryString, bytesToUtf8, encode64 } from '../src/util';
 import { SerializationFormat } from '../src/serialization-versions';
 
 const $ = document.getElementById.bind(document);
@@ -55,15 +54,13 @@ function encryptFile() {
   const file = $('encryptFileInput') as HTMLInputElement;
   const reader = new FileReader();
   const password = $get('encryptFilePassword');
-  reader.onload = async (result) => {
-    const encryptionResult = await encryptBinaryWithKeyDerivedFromString(
-      {
-        data: reader.result as string,
-        key: password,
-        strategy: CipherStrategy.AES_GCM,
-      },
-      $SerializationFormat
-    );
+  reader.onload = async () => {
+    const encryptionResult = await encryptBinaryWithKeyDerivedFromString({
+      data: reader.result as string,
+      key: password,
+      strategy: CipherStrategy.AES_GCM,
+      serializationVersion: $SerializationFormat,
+    });
     $set('encryptFileOutput', encryptionResult.serialized);
     $set('decryptFileInput', encryptionResult.serialized);
   };
@@ -78,19 +75,19 @@ async function decryptFile(download?: boolean) {
   const password = $get('decryptFilePassword');
 
   try {
-    const decrypted = await decryptBinaryWithKey({
-      key: password,
+    const decrypted = await decryptWithKeyDerivedFromString({
+      passphrase: password,
       serialized: inText,
     });
 
     if (download) {
-      const base64 = encode64(decrypted);
+      const base64 = encode64(bytesToUtf8(decrypted));
       window.open(`data:application/octet-stream;charset=utf-16le;base64,${base64}`, '_blank');
     } else {
-      $set('decryptFileOutput', decrypted);
+      $set('decryptFileOutput', bytesToBinaryString(decrypted));
       // // Optional : Render the output blob as an image using an object url
       // // https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
-      const blob = str2blob(decrypted);
+      const blob = str2blob(bytesToBinaryString(decrypted));
       const url = URL.createObjectURL(blob);
       $('imgOutput')!.setAttribute('src', url);
     }
@@ -114,14 +111,12 @@ async function encryptText() {
   const inText = $get('encryptTextInput');
   const password = $get('encryptTextPassword');
 
-  const encryptionResult = await encryptStringWithKeyDerivedFromString(
-    {
-      data: inText,
-      key: password,
-      strategy: CipherStrategy.AES_GCM,
-    },
-    $SerializationFormat
-  );
+  const encryptionResult = await encryptStringWithKeyDerivedFromString({
+    data: inText,
+    key: password,
+    strategy: CipherStrategy.AES_GCM,
+    serializationVersion: $SerializationFormat,
+  });
 
   $set('encryptTextOutput', encryptionResult.serialized);
 }
@@ -131,12 +126,12 @@ async function decryptText() {
   const password = $get('decryptTextPassword');
 
   try {
-    const decrypted = await decryptStringWithKey({
-      key: password,
+    const decrypted = await decryptWithKeyDerivedFromString({
+      passphrase: password,
       serialized: inText,
     });
 
-    $set('decryptTextOutput', decrypted);
+    $set('decryptTextOutput', bytesToUtf8(decrypted));
   } catch (ex) {
     $set('decryptTextOutput', `[DECRYPTION FAILED]`);
   }

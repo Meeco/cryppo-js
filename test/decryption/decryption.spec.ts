@@ -5,7 +5,7 @@ import {
 import { EncodingVersions } from '../../src/encoding-versions';
 import { EncryptionKey } from '../../src/encryption-key';
 import { CipherStrategy } from '../../src/strategies';
-import { binaryBufferToString, encodeSafe64 } from '../../src/util';
+import { bytesBufferToBinaryString, encodeSafe64 } from '../../src/util';
 describe('decryption', () => {
   it('can decrypt a serialized payload that includes key derivation artifacts', async (done) => {
     try {
@@ -32,11 +32,11 @@ describe('decryption', () => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
       const decrypted = await decryptStringWithKeyUsingArtefacts(key, 'Ç', CipherStrategy.AES_GCM, {
-        iv: binaryBufferToString(
+        iv: bytesBufferToBinaryString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),
         ad: 'none',
-        at: binaryBufferToString(
+        at: bytesBufferToBinaryString(
           new Uint8Array([105, 3, 81, 233, 134, 232, 125, 103, 71, 239, 206, 72, 171, 224, 186, 45])
         ),
       });
@@ -86,11 +86,11 @@ describe('decryption', () => {
     try {
       const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
       const decrypted = await decryptStringWithKeyUsingArtefacts(key, '', CipherStrategy.AES_GCM, {
-        iv: binaryBufferToString(
+        iv: bytesBufferToBinaryString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),
         ad: 'none',
-        at: binaryBufferToString(
+        at: bytesBufferToBinaryString(
           new Uint8Array([105, 3, 81, 233, 134, 232, 125, 103, 71, 239, 206, 72, 171, 224, 186, 45])
         ),
       });

@@ -4,7 +4,7 @@ import { IRandomKeyOptions } from '../key-derivation/derived-key';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
 import { SerializationFormat } from '../serialization-versions';
 import { CipherStrategy } from '../strategies';
-import { binaryStringToBytes, serialize, stringAsBinaryBuffer, utf8ToBytes } from '../util';
+import { binaryStringToBytes, binaryStringToBytesBuffer, serialize, utf8ToBytes } from '../util';
 
 export interface IEncryptionOptionsWithoutKey {
   /***
@@ -104,6 +104,10 @@ export async function encryptWithGeneratedKey({
   };
 }
 
+/**
+ * @deprecated This method should be replaced by
+ * encryptWithKey method. This method convert give data to binary bytes
+ */
 export async function encryptStringWithKeyDerivedFromString({
   key,
   data,
@@ -124,6 +128,44 @@ export async function encryptStringWithKeyDerivedFromString({
     {
       key: derived.key,
       data: utf8ToBytes(data),
+      strategy,
+      iv,
+    },
+    serializationVersion
+  );
+
+  const serializedKey = derived.options.serialize(serializationVersion);
+  result.serialized = `${result.serialized}.${serializedKey}`;
+  return {
+    ...result,
+    ...derived,
+  };
+}
+
+/**
+ * @deprecated This method should be replaced by
+ * encryptWithKey method. This method convert give data to binary bytes
+ */
+export async function encryptBinaryWithKeyDerivedFromString({
+  key,
+  data,
+  strategy,
+  iv,
+  serializationVersion = SerializationFormat.latest_version,
+}: {
+  key: string;
+  data: string;
+  strategy: CipherStrategy;
+  iv?: string;
+  serializationVersion?: SerializationFormat;
+}): Promise<IEncryptionResult & IRandomKeyOptions & { key: EncryptionKey }> {
+  const derived = await generateDerivedKey({ key });
+
+  let result: any;
+  result = await encryptWithKey(
+    {
+      key: derived.key,
+      data: binaryStringToBytes(data),
       strategy,
       iv,
     },
@@ -294,10 +336,10 @@ export function encryptWithKeyUsingArtefacts({
   cipher.update(util.createBuffer(data));
   cipher.finish();
   const artifacts: any = {
-    iv: stringAsBinaryBuffer(iv),
+    iv: binaryStringToBytesBuffer(iv),
   };
   if (cipher.mode.tag) {
-    artifacts.at = stringAsBinaryBuffer(cipher.mode.tag.data);
+    artifacts.at = binaryStringToBytesBuffer(cipher.mode.tag.data);
   }
   artifacts.ad = 'none';
   return {

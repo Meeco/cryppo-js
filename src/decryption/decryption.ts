@@ -1,11 +1,10 @@
 import { cipher, util } from 'node-forge';
 import {
-  binaryStringToBytes,
+  binaryStringToBytesBuffer,
   bytesToBinaryString,
   bytesToUtf8,
   deSerialize,
   encodeUtf8,
-  stringAsBinaryBuffer,
 } from '../../src/util';
 import { EncodingVersions } from '../encoding-versions';
 import { EncryptionKey } from '../encryption-key';
@@ -213,7 +212,7 @@ export function decryptWithKeyUsingArtefacts(
   const pass = decipher.finish();
   // pass is false if there was a failure (eg: authentication tag didn't match)
   if (pass) {
-    return stringAsBinaryBuffer(decipher.output.data);
+    return binaryStringToBytesBuffer(decipher.output.data);
   }
 
   throw new Error('Decryption failed');

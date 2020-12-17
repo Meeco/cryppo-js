@@ -25,9 +25,9 @@ export const utf16ToBytes = util.text.utf16.encode;
 export const bytesToUtf16 = util.text.utf16.decode;
 export const binaryStringToBytes = util.binary.raw.decode;
 export const bytesToBinaryString = util.binary.raw.encode;
-export const binaryStringToBufferBytes = (value: string) =>
+export const binaryStringToBytesBuffer = (value: string) =>
   _buffer.from(util.binary.raw.decode(value));
-export const bytesToBinaryStringBuffer = (val: Buffer | Uint8Array | ArrayBuffer) =>
+export const bytesBufferToBinaryString = (val: Buffer | Uint8Array | ArrayBuffer) =>
   util.createBuffer(val).data;
 
 export const generateRandomBytesString = (length = 32) => random.getBytesSync(length);
@@ -139,15 +139,6 @@ function decodeArtifactData(text: string) {
     // remove version byte before deserializing
     return BSON.deserialize(_buffer.from(text, 'base64').slice(1), { promoteBuffers: true });
   }
-}
-
-export function stringAsBinaryBuffer(val: string): Buffer | Uint8Array {
-  // We use the polyfill for browser coverage and compatibility with bson serialize
-  return _buffer.from(val, 'binary');
-}
-
-export function binaryBufferToString(val: Buffer | Uint8Array | ArrayBuffer): string {
-  return util.createBuffer(val).data;
 }
 
 /**

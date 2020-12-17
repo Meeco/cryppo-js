@@ -3,12 +3,12 @@ import { EncodingVersions } from '../encoding-versions';
 import { EncryptionKey } from '../encryption-key';
 import { SerializationFormat } from '../serialization-versions';
 import {
-  binaryBufferToString,
   binaryStringToBytes,
+  binaryStringToBytesBuffer,
+  bytesBufferToBinaryString,
   deSerializeDerivedKeyOptions,
   encodeUtf8,
   serializeDerivedKeyOptions,
-  stringAsBinaryBuffer,
 } from '../util';
 
 /**
@@ -87,7 +87,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     return new DerivedKeyOptions({
       // keys taken from ruby lib
       strategy: derivationStrategy,
-      salt: binaryBufferToString(serializationArtifacts.iv),
+      salt: bytesBufferToBinaryString(serializationArtifacts.iv),
       iterations: (<any>serializationArtifacts).i,
       length: (<any>serializationArtifacts).l,
       hash: (<any>serializationArtifacts).hash,
@@ -116,7 +116,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     return serializeDerivedKeyOptions(
       this.strategy,
       {
-        iv: stringAsBinaryBuffer(this.salt),
+        iv: binaryStringToBytesBuffer(this.salt),
         i: this.iterations,
         l: this.length,
         hash: this.hash,

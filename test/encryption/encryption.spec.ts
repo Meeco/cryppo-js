@@ -1,5 +1,5 @@
 import {
-  binaryBufferToString,
+  bytesBufferToBinaryString,
   decodeSafe64,
   decryptSerializedWithPrivateKey,
   decryptWithPrivateKey,
@@ -76,7 +76,7 @@ describe('Encryption', () => {
         key,
         data,
         strategy: CipherStrategy.AES_GCM,
-        iv: binaryBufferToString(
+        iv: bytesBufferToBinaryString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),
       });
@@ -114,7 +114,7 @@ describe('Encryption', () => {
         key,
         data,
         strategy: CipherStrategy.AES_GCM,
-        iv: binaryBufferToString(
+        iv: bytesBufferToBinaryString(
           new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
         ),
       });

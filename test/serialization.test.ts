@@ -2,12 +2,12 @@ import { CipherStrategy, DerivedKeyOptions, encryptStringWithKey } from '../src'
 import { EncryptionKey } from '../src/encryption-key';
 import { SerializationFormat } from '../src/serialization-versions';
 import {
+  binaryStringToBytesBuffer,
   decode64,
   decodeSafe64,
   deSerialize,
   encode64,
   serialize,
-  stringAsBinaryBuffer,
 } from '../src/util';
 
 describe('Serialize/Deserialize', () => {
@@ -32,8 +32,8 @@ describe('Serialize/Deserialize', () => {
           encryptionStrategy,
           decode64(b64EncryptedData),
           {
-            iv: stringAsBinaryBuffer(iv),
-            at: stringAsBinaryBuffer(at),
+            iv: binaryStringToBytesBuffer(iv),
+            at: binaryStringToBytesBuffer(at),
             ad,
           },
           version
@@ -47,8 +47,8 @@ describe('Serialize/Deserialize', () => {
       expect(deserialized.decodedPairs.length).toEqual(2);
       expect(encode64(deserialized.decodedPairs[0])).toEqual(b64EncryptedData);
       expect(deserialized.decodedPairs[1]).toEqual({
-        iv: stringAsBinaryBuffer(iv),
-        at: stringAsBinaryBuffer(at),
+        iv: binaryStringToBytesBuffer(iv),
+        at: binaryStringToBytesBuffer(at),
         ad,
       });
     });
