@@ -1,5 +1,4 @@
 import { generateDerivedKey } from '../../src/key-derivation/pbkdf2-hmac';
-import { decode64 } from '../../src/util';
 
 describe('PBKDF2-HMAC', () => {
   it('generates the correct key', async (cb) => {
