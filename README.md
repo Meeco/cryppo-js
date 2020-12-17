@@ -64,7 +64,7 @@ import { encryptWithKey, generateRandomKey, CipherStrategy } from '@meeco/cryppo
           data: utf8ToBytes('This is some test data that will be encrypted'),
           strategy: CipherStrategy.AES_GCM,
         },
-        SerializationFormat.legacy
+        SerializationFormat.latest_version
       );
   console.log(result.serialized);
 }

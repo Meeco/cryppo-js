@@ -2,7 +2,7 @@ import { random } from 'node-forge';
 import { binaryStringToBytes, bytesToBinaryString, decodeSafe64, encodeSafe64 } from './util';
 
 /**
- * A key that can be used to encrypt and decrypt data
+ * SymmetricKey that can be used to encrypt and decrypt data
  * This wrapper ensures that keys can be safely serialized as JSON (by encoding them as URL-Safe Base64)
  * and avoids confusion when dealing with converting to and from this encoded format.
  */

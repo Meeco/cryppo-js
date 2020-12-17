@@ -16,8 +16,6 @@ interface IEncryptionOptions {
   ad: string;
 }
 
-//#region  decrypt using drived key
-
 export async function decryptWithKeyDerivedFromString({
   serialized,
   passphrase,
@@ -38,9 +36,6 @@ export async function decryptWithKeyDerivedFromString({
   });
 }
 
-//#endregion
-
-//#region  decrypt using key
 export async function decryptWithKey({
   serialized,
   key,
@@ -87,8 +82,6 @@ export async function decryptWithKey({
   return output;
 }
 
-//#endregion
-
 /**
  * Determine if we need to use a derived key or not based on whether or not
  * we have key derivation options in the serialized payload.
@@ -106,8 +99,6 @@ function _deriveKeyWithOptions({
   const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions);
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
-
-//#region  decrypt using Artefact
 
 export function decryptWithKeyUsingArtefacts(
   key: EncryptionKey,
@@ -137,5 +128,3 @@ export function decryptWithKeyUsingArtefacts(
 
   throw new Error('Decryption failed');
 }
-
-//#endregion decrypt using Artefact

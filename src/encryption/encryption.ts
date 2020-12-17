@@ -56,9 +56,6 @@ export async function encryptWithGeneratedKey(
   };
 }
 
-//#endregion encrypt using generated key
-
-//#region  encrypt using derived key
 export async function encryptWithKeyDerivedFromString({
   passphrase,
   data,
@@ -93,10 +90,6 @@ export async function encryptWithKeyDerivedFromString({
   };
 }
 
-//#endregion encrypt using derived key
-
-//#region  encrypt using key
-
 export async function encryptWithKey(
   { key, data, strategy, iv }: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
@@ -126,10 +119,6 @@ export async function encryptWithKey(
     serialized,
   };
 }
-
-//#endregion encrypt using key
-
-//#region  encrypt using Artefact
 
 /**
  * UpperCamelCase helper
@@ -166,5 +155,3 @@ export function encryptWithKeyUsingArtefacts({
     artifacts,
   };
 }
-
-//#endregion encrypt using Artefact
