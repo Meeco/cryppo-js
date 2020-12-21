@@ -56,13 +56,14 @@ export async function encryptWithPublicKey(
   };
 }
 
-export type RsaEncryptionScheme =
-  | 'RSAES-PKCS1-V1_5'
-  | 'RSA-OAEP'
-  | 'RAW'
-  | 'NONE'
-  | null
-  | undefined;
+export type RsaEncryptionScheme = 'RSA-OAEP';
+// compatiblity not tested with other cryppo
+// | 'RSAES-PKCS1-V1_5'
+// | 'RSA-OAEP'
+// | 'RAW'
+// | 'NONE'
+// | null
+// | undefined;
 
 export async function decryptSerializedWithPrivateKey({
   password,

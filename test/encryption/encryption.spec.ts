@@ -38,7 +38,7 @@ describe('Encryption', () => {
         // Chunks of the base64'd YAML (namely, the authData and leading yaml characters) will match
         // and the full length of the yaml should always be the same.
         // Also encludes the key derivation algorithm and artifacts at the end
-        /(Aes256Gcm)\..{24}\.LS0tCml2OiAhYmluYXJ5IHwtCiAg(.){87}9CmFkOiBub25lCg==\.Pbkdf2Hmac\.(.)+/
+        /(Aes256Gcm)\..{24}\.LS0tCml2OiAhYmluYXJ5IHwtCiAg(.){75}9PQphZDogbm9uZQo=\.Pbkdf2Hmac\.(.)+/
       );
       done();
     } catch (e) {

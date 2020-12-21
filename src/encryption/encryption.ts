@@ -139,7 +139,7 @@ export function encryptWithKeyUsingArtefacts({
   }
 
   const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key.bytes));
-  iv = iv || random.getBytesSync(16);
+  iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
   cipher.update(util.createBuffer(data));
   cipher.finish();
