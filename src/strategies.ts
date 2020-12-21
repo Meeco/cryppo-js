@@ -1,12 +1,13 @@
 export enum CipherStrategy {
-  AES_ECB = 'AES-ECB',
-  AES_CBC = 'AES-CBC',
-  AES_CFB = 'AES-CFB',
-  AES_OFB = 'AES-OFB',
-  AES_CTR = 'AES-CTR',
   AES_GCM = 'AES-GCM',
-  DES_ECB = 'DES-ECB',
-  DES_CBC = 'DES-CBC',
+  // AES_ECB = 'AES-ECB',
+  // Require 16 bytes IV And not tested crosscompatiblity with other cryppo
+  // AES_CBC = 'AES-CBC',
+  // AES_CFB = 'AES-CFB',
+  // AES_OFB = 'AES-OFB',
+  // AES_CTR = 'AES-CTR',
+  // DES_ECB = 'DES-ECB',
+  // DES_CBC = 'DES-CBC',
   // Not currently suppoted as they have different key size (256 not supported)
   // THREE_DES_ECB = '3DES-ECB',
   // THREE_DES_CBC = '3DES-CBC',
