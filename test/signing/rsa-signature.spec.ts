@@ -1,11 +1,11 @@
 import { util } from 'node-forge';
 import { generateRSAKeyPair } from '../../src/key-pairs/rsa';
 import {
-  loadStringRsaSignature,
-  signStringWithPrivateKey,
-  verifyStringWithPublicKey,
+  loadRsaSignature,
+  signWithPrivateKey,
+  verifyWithPublicKey,
 } from '../../src/signing/rsa-signature';
-import { encodeSafe64 } from '../../src/util';
+import { encodeSafe64, utf8ToBytes } from '../../src/util';
 
 describe('signing', () => {
   const data =
@@ -21,7 +21,7 @@ describe('signing', () => {
     } catch (ex) {}
     try {
       const keyPair = await generateRSAKeyPair(2048);
-      const signatureObj = signStringWithPrivateKey(keyPair.privateKey, data);
+      const signatureObj = signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
       const serializedPayload = signatureObj.serialized;
       expect(serializedPayload.split('.')[3]).toEqual(encodeSafe64(util.encodeUtf8(data)));
       expect(serializedPayload).toMatch(/Rsa2048\./);
@@ -33,10 +33,10 @@ describe('signing', () => {
   it('can load a signature then verify it', async (done) => {
     try {
       const keyPair = await generateRSAKeyPair(2048);
-      const signatureObj = signStringWithPrivateKey(keyPair.privateKey, data);
+      const signatureObj = signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
       const serializedPayload = signatureObj.serialized;
-      const loadedSignature = loadStringRsaSignature(serializedPayload);
-      expect(verifyStringWithPublicKey(keyPair.publicKey, loadedSignature)).toEqual(true);
+      const loadedSignature = loadRsaSignature(serializedPayload);
+      expect(verifyWithPublicKey(keyPair.publicKey, loadedSignature)).toEqual(true);
       done();
     } catch (err) {
       done(err);
