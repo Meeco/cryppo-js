@@ -1,4 +1,4 @@
-import { pki, md } from 'node-forge';
+import { md, pki } from 'node-forge';
 import { SerializationFormat } from '../serialization-versions';
 import { deSerialize, keyLengthFromPublicKeyPem, serialize } from '../util';
 
@@ -97,7 +97,6 @@ export async function decryptWithPrivateKey({
   encrypted: string;
   scheme?: RsaEncryptionScheme;
 }) {
-
   const pk = pki.decryptRsaPrivateKey(privateKeyPem, password) as pki.rsa.PrivateKey;
   const schemeOptions = { md: md.sha256.create() };
   return pk.decrypt(encrypted, scheme, schemeOptions);
