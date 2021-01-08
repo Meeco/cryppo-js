@@ -85,9 +85,6 @@ export async function decryptSerializedWithPrivateKey({
   });
 }
 
-/**
- * @deprecated
- */
 export async function decryptWithPrivateKey({
   password,
   privateKeyPem,

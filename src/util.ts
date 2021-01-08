@@ -20,11 +20,37 @@ export const encode64 = util.encode64;
 export const decode64 = util.decode64;
 export const encodeUtf8 = util.encodeUtf8;
 export const utf8ToBytes = util.text.utf8.encode;
-export const bytesToUtf8 = util.text.utf8.decode;
 export const utf16ToBytes = util.text.utf16.encode;
-export const bytesToUtf16 = util.text.utf16.decode;
 export const binaryStringToBytes = util.binary.raw.decode;
-export const bytesToBinaryString = util.binary.raw.encode;
+
+export const bytesToBinaryString = (bytes: Uint8Array) => {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return binary;
+};
+
+export const bytesToUtf16 = (bytes: Uint8Array) => {
+  let binary = '';
+  const utf16Bytes = new Uint16Array(bytes.buffer);
+  const len = utf16Bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(utf16Bytes[i]);
+  }
+  return binary;
+};
+
+export const bytesToUtf8 = (bytes: Uint8Array) => {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return util.decodeUtf8(binary);
+};
+
 export const binaryStringToBytesBuffer = (value: string) =>
   _buffer.from(util.binary.raw.decode(value));
 export const bytesBufferToBinaryString = (val: Buffer | Uint8Array | ArrayBuffer) =>
