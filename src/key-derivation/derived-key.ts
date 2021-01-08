@@ -126,15 +126,15 @@ export class DerivedKeyOptions implements IDerivedKey {
   }
 
   public deriveKey(
-    key: string,
+    passphrase: string,
     encodingVersion: EncodingVersions = EncodingVersions.latest_version
   ): Promise<EncryptionKey> {
     const hash: string = this.hash.toLocaleLowerCase();
     const digest = md[hash as 'sha256'].create();
-    key = encodingVersion === EncodingVersions.legacy ? key : encodeUtf8(key);
+    passphrase = encodingVersion === EncodingVersions.legacy ? passphrase : encodeUtf8(passphrase);
     return new Promise((resolve, reject) => {
       return pkcs5.pbkdf2(
-        key,
+        passphrase,
         this.salt,
         this.iterations,
         this.length,

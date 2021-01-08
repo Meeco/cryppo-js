@@ -1,3 +1,4 @@
+import { bytesToUtf8, utf8ToBytes } from '../../src';
 import {
   decryptWithPrivateKey,
   encryptPrivateKeyWithPassword,
@@ -93,7 +94,7 @@ describe('RSA Keypair Generation', () => {
         const encrypted = await encryptWithPublicKey(
           {
             publicKeyPem: PUBLIC_KEY,
-            data: SECRET,
+            data: utf8ToBytes(SECRET),
           },
           version
         );
@@ -109,7 +110,7 @@ describe('RSA Keypair Generation', () => {
         const result = await encryptWithPublicKey(
           {
             publicKeyPem: PUBLIC_KEY,
-            data: SECRET,
+            data: utf8ToBytes(SECRET),
           },
           version
         );
@@ -118,7 +119,7 @@ describe('RSA Keypair Generation', () => {
           encrypted,
           privateKeyPem: PRIVATE_KEY,
         });
-        expect(decrypted).toEqual(SECRET);
+        expect(bytesToUtf8(decrypted)).toEqual(SECRET);
         done();
       } catch (ex) {
         done(ex);
@@ -135,7 +136,7 @@ describe('RSA Keypair Generation', () => {
         const result = await encryptWithPublicKey(
           {
             publicKeyPem: PUBLIC_KEY,
-            data: SECRET,
+            data: utf8ToBytes(SECRET),
           },
           version
         );
@@ -145,7 +146,7 @@ describe('RSA Keypair Generation', () => {
           password,
           privateKeyPem: encryptedKey,
         });
-        expect(decrypted).toEqual(SECRET);
+        expect(bytesToUtf8(decrypted)).toEqual(SECRET);
         done();
       } catch (ex) {
         done(ex);

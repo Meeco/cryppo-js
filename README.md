@@ -85,7 +85,7 @@ async function encryptDecryptData() {
 
   const encrypted = await encryptWithPublicKey({
     publicKey,
-    data: 'My Super Secret Data',
+    data: utf8ToBytes('My Super Secret Data'),
     serializationFormat: SerializationFormat = SerializationFormat.latest_version
   });
 
@@ -94,7 +94,7 @@ async function encryptDecryptData() {
     encrypted,
     privateKey
   )
-  console.log(decryptedData); // 'My Super Secret Data''
+  console.log(bytesToUtf8(decryptedData)); // 'My Super Secret Data''
 
   // Using encrypted private key and password
   const decryptedDataWithEncryptedPrivateKey = await decryptWithPrivateKey(

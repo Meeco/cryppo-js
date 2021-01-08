@@ -26,7 +26,7 @@ export async function decryptWithKeyDerivedFromString({
   encodingVersion?: EncodingVersions;
 }): Promise<Uint8Array | null> {
   const derivedKey = await _deriveKeyWithOptions({
-    key: passphrase,
+    passphrase,
     serializedOptions: serialized,
     encodingVersion,
   });
@@ -67,7 +67,7 @@ export async function decryptWithKey({
       ) {
         // Decryption failed with utf-8 key style - retry with legacy utf-16 key format
         legacyKey = await _deriveKeyWithOptions({
-          key: bytesToBinaryString(key.bytes),
+          passphrase: bytesToBinaryString(key.bytes),
           serializedOptions: serialized,
           encodingVersion: EncodingVersions.legacy,
         });
@@ -88,16 +88,16 @@ export async function decryptWithKey({
  */
 // tslint:disable-next-line: max-line-length
 function _deriveKeyWithOptions({
-  key,
+  passphrase,
   serializedOptions,
   encodingVersion = EncodingVersions.latest_version,
 }: {
-  key: string;
+  passphrase: string;
   serializedOptions: string;
   encodingVersion?: EncodingVersions;
 }) {
   const derivedKeyOptions = DerivedKeyOptions.fromSerialized(serializedOptions);
-  return derivedKeyOptions.deriveKey(key, encodingVersion);
+  return derivedKeyOptions.deriveKey(passphrase, encodingVersion);
 }
 
 export function decryptWithKeyUsingArtefacts(
