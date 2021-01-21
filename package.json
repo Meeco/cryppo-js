@@ -42,7 +42,7 @@
   "author": "Meeco",
   "license": "MIT",
   "dependencies": {
-    "bson": "^4.0.4",
+    "bson": "4.1.0",
     "buffer": "^5.1.0",
     "node-forge": "0.10.0",
     "yaml": "^1.6.0"
