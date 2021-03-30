@@ -58,7 +58,14 @@ export async function decryptWithKey({
     const strategy = strategyToAlgorithm(encryptionStrategy);
 
     try {
-      output = decryptWithKeyUsingArtefacts(legacyKey ? legacyKey : key, data, strategy, artifacts);
+      const decrypted = decryptWithKeyUsingArtefacts(
+        legacyKey ? legacyKey : key,
+        data,
+        strategy,
+        artifacts
+      );
+      // ensure correct type
+      output = decrypted ? new Uint8Array(decrypted) : null;
     } catch (err) {
       if (
         !legacyKey &&
@@ -105,7 +112,7 @@ export function decryptWithKeyUsingArtefacts(
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionOptions
-) {
+): Buffer | null {
   if (encryptedData === '') {
     return null;
   }
