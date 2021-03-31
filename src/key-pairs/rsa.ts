@@ -39,6 +39,9 @@ export function encryptPrivateKeyWithPassword({
   return pki.encryptRsaPrivateKey(publicKey, encodeUtf8(password));
 }
 
+/**
+ * @param data Binary string or byte array.
+ */
 export async function encryptWithPublicKey(
   {
     publicKeyPem,
@@ -46,14 +49,19 @@ export async function encryptWithPublicKey(
     scheme = 'RSA-OAEP',
   }: {
     publicKeyPem: string;
-    data: Uint8Array;
+    data: string | Uint8Array;
     scheme?: RsaEncryptionScheme;
     // tslint:disable-next-line: max-line-length
   },
   serializationFormat: SerializationFormat = SerializationFormat.latest_version
-) {
+): Promise<{ encrypted: string; serialized: string }> {
   const pk = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
-  const encrypted = pk.encrypt(bytesToBinaryString(data), scheme);
+  let encrypted: string;
+  if (typeof data === 'string') {
+    encrypted = pk.encrypt(data, scheme);
+  } else {
+    encrypted = pk.encrypt(bytesToBinaryString(data), scheme);
+  }
 
   const bitLength = keyLengthFromPublicKeyPem(publicKeyPem);
   const serialized = serialize(`Rsa${bitLength}`, encrypted, <any>{}, serializationFormat);
