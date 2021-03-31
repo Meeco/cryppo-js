@@ -1,4 +1,4 @@
-import { bytesToUtf8, utf8ToBytes } from '../../src';
+import { utf8ToBytes } from '../../src';
 import {
   decryptWithPrivateKey,
   encryptPrivateKeyWithPassword,
@@ -119,7 +119,7 @@ describe('RSA Keypair Generation', () => {
           encrypted,
           privateKeyPem: PRIVATE_KEY,
         });
-        expect(bytesToUtf8(decrypted)).toEqual(SECRET);
+        expect(decrypted).toEqual(SECRET);
         done();
       } catch (ex) {
         done(ex);
@@ -146,7 +146,7 @@ describe('RSA Keypair Generation', () => {
           password,
           privateKeyPem: encryptedKey,
         });
-        expect(bytesToUtf8(decrypted)).toEqual(SECRET);
+        expect(decrypted).toEqual(SECRET);
         done();
       } catch (ex) {
         done(ex);

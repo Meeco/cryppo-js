@@ -34,7 +34,7 @@ export function encryptPrivateKeyWithPassword({
 }: {
   privateKeyPem: string;
   password: string;
-}) {
+}): string {
   const publicKey = pki.privateKeyFromPem(privateKeyPem);
   return pki.encryptRsaPrivateKey(publicKey, encodeUtf8(password));
 }
@@ -90,7 +90,7 @@ export async function decryptSerializedWithPrivateKey({
   privateKeyPem: string;
   serialized: string;
   scheme?: RsaEncryptionScheme;
-}) {
+}): Promise<string> {
   const encrypted = deSerialize(serialized).decodedPairs[0];
   return decryptWithPrivateKey({
     password,
@@ -110,9 +110,8 @@ export async function decryptWithPrivateKey({
   privateKeyPem: string;
   encrypted: string;
   scheme?: RsaEncryptionScheme;
-}) {
+}): Promise<string> {
   const pass = password ? encodeUtf8(password) : password;
   const pk = pki.decryptRsaPrivateKey(privateKeyPem, pass) as pki.rsa.PrivateKey;
-  const binaryString = pk.decrypt(encrypted, scheme);
-  return binaryStringToBytes(binaryString);
+  return pk.decrypt(encrypted, scheme);
 }

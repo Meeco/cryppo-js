@@ -1,6 +1,5 @@
 import {
   bytesBufferToBinaryString,
-  bytesToUtf8,
   decodeSafe64,
   decryptSerializedWithPrivateKey,
   decryptWithPrivateKey,
@@ -151,7 +150,7 @@ describe('Encryption', () => {
         privateKeyPem,
       });
 
-      expect(bytesToUtf8(decrypted)).toEqual('My super secret data');
+      expect(decrypted).toEqual('My super secret data');
     });
 
     it('decrypts serialized encrypted data with RSA private key', async () => {
@@ -160,7 +159,7 @@ describe('Encryption', () => {
         serialized: rsaEncryptedSerialized,
       });
 
-      expect(bytesToUtf8(decrypted)).toEqual('My super secret data');
+      expect(decrypted).toEqual('My super secret data');
     });
   });
 });
