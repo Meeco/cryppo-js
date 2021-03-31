@@ -16,17 +16,26 @@ interface IEncryptionOptions {
   ad: string;
 }
 
+/**
+ * @param passphrase Optional alias for [[key]]
+ */
 export async function decryptWithKeyDerivedFromString({
   serialized,
+  key,
   passphrase,
   encodingVersion = EncodingVersions.latest_version,
 }: {
   serialized: string;
-  passphrase: string;
+  key?: string;
+  passphrase?: string;
   encodingVersion?: EncodingVersions;
 }): Promise<Uint8Array | null> {
+  const phrase = key || passphrase;
+  if (!phrase) {
+    throw Error('Missing passphrase');
+  }
   const derivedKey = await _deriveKeyWithOptions({
-    passphrase,
+    passphrase: phrase,
     serializedOptions: serialized,
     encodingVersion,
   });
