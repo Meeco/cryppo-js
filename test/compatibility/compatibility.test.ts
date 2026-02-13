@@ -23,66 +23,51 @@ import Compat from './compat.json';
 describe('compatiblity test for all cryppo port', () => {
   Object.values(Compat.encryption_with_derived_key).forEach((objToValidate: any, index) => {
     it(`${index}. can successfully decrypt with AES-GCM Encryption and
-        legacy & latest serialization version`, async (done) => {
-      try {
-        const decryptedWithSourceKey = await decryptWithKeyDerivedFromString({
-          serialized: objToValidate.serialized,
-          passphrase: objToValidate.passphrase,
-        });
-        expect(bytesToUtf8(decryptedWithSourceKey!)).toEqual(
-          objToValidate.expected_decryption_result
-        );
-
-        done();
-      } catch (err) {
-        done(err);
-      }
+        legacy & latest serialization version`, async () => {
+      const decryptedWithSourceKey = await decryptWithKeyDerivedFromString({
+        serialized: objToValidate.serialized,
+        passphrase: objToValidate.passphrase,
+      });
+      expect(bytesToUtf8(decryptedWithSourceKey!)).toEqual(
+        objToValidate.expected_decryption_result
+      );
     });
   });
 
   Object.values(Compat.signatures).forEach((objToValidate: any, index) => {
-    it(`${index}. can successfully verify RSA signature with public key pem and serialized signature`, async (done) => {
-      try {
-        const encryptionResult = await loadRsaSignature(objToValidate.serialized_signature);
-        const verify = await verifyWithPublicKey(objToValidate.public_pem, encryptionResult);
-        expect(verify).toEqual(true);
-        done();
-      } catch (err) {
-        done(err);
-      }
+    it(`${index}. can successfully verify RSA signature with public key pem and serialized signature`, async () => {
+      const encryptionResult = await loadRsaSignature(objToValidate.serialized_signature);
+      const verify = await verifyWithPublicKey(objToValidate.public_pem, encryptionResult);
+      expect(verify).toEqual(true);
     });
   });
 
   Object.values(Compat.encryption_with_key).forEach((objToValidate: any, index) => {
-    it(`${index}. can successfully decrypt using key`, async (done) => {
-      try {
-        let encryptionResult;
+    it(`${index}. can successfully decrypt using key`, async () => {
+      let encryptionResult;
 
-        switch (objToValidate.encryption_strategy) {
-          case 'Rsa4096':
-            encryptionResult = await decryptSerializedWithPrivateKey({
-              privateKeyPem: objToValidate.key,
-              serialized: objToValidate.serialized,
-            });
-            break;
-          case 'Aes256Gcm':
-            const key = EncryptionKey.fromSerialized(objToValidate.key);
-            encryptionResult = await decryptWithKey({
-              serialized: objToValidate.serialized,
-              key,
-            });
-            break;
+      switch (objToValidate.encryption_strategy) {
+        case 'Rsa4096':
+          encryptionResult = await decryptSerializedWithPrivateKey({
+            privateKeyPem: objToValidate.key,
+            serialized: objToValidate.serialized,
+          });
+          break;
+        case 'Aes256Gcm': {
+          const key = EncryptionKey.fromSerialized(objToValidate.key);
+          encryptionResult = await decryptWithKey({
+            serialized: objToValidate.serialized,
+            key,
+          });
+          break;
         }
-
-        expect(
-          typeof encryptionResult === 'string'
-            ? encryptionResult
-            : bytesToUtf8(encryptionResult as Uint8Array)
-        ).toEqual(objToValidate.expected_decryption_result);
-        done();
-      } catch (err) {
-        done(err);
       }
+
+      expect(
+        typeof encryptionResult === 'string'
+          ? encryptionResult
+          : bytesToUtf8(encryptionResult as Uint8Array)
+      ).toEqual(objToValidate.expected_decryption_result);
     });
   });
 });
@@ -111,6 +96,7 @@ describe('Backwards and forwards copmatibility', () => {
     // Prints as 'Helloøã'
     const expected = decodeSafe64('SGVsbG_44wA=');
 
+    // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
     expect(util.createBuffer(decrypted!).data).toEqual(expected);
   });
 

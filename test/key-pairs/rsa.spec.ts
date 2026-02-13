@@ -7,31 +7,29 @@ import {
 import { SerializationFormat } from '../../src/serialization-versions';
 
 describe('RSA Keypair Generation', () => {
-  it('generates RSA Keypairs', async (done) => {
+  it('generates RSA Keypairs', async () => {
     // RSA key generation can take a while...
     const timeout = 20000;
     try {
       jest.setTimeout(timeout);
-    } catch (ex) {}
+    } catch {
+      /* expected */
+    }
     try {
       jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
-    } catch (ex) {}
-    try {
-      const headPublic = `-----BEGIN PUBLIC KEY-----`;
-      const headPrivate = `-----BEGIN RSA PRIVATE KEY-----`;
-      // For testing purposes 4086 bit takes too long, 2048 keeps test under a second or two
-      const { publicKey, privateKey } = await generateRSAKeyPair(2048);
-      expect(publicKey.slice(0, headPublic.length)).toEqual(headPublic);
-      expect(publicKey.length).toEqual(460);
-      expect(privateKey.slice(0, headPrivate.length)).toEqual(headPrivate);
-
-      // Not exactly sure why it varies but it's always one of the two
-      expect([1706, 1702]).toContain(privateKey.length);
-
-      done();
-    } catch (err) {
-      done(err);
+    } catch {
+      /* expected */
     }
+    const headPublic = `-----BEGIN PUBLIC KEY-----`;
+    const headPrivate = `-----BEGIN RSA PRIVATE KEY-----`;
+    // For testing purposes 4086 bit takes too long, 2048 keeps test under a second or two
+    const { publicKey, privateKey } = await generateRSAKeyPair(2048);
+    expect(publicKey.slice(0, headPublic.length)).toEqual(headPublic);
+    expect(publicKey.length).toEqual(460);
+    expect(privateKey.slice(0, headPrivate.length)).toEqual(headPrivate);
+
+    // Not exactly sure why it varies but it's always one of the two
+    expect([1706, 1702]).toContain(privateKey.length);
   });
 
   const PUBLIC_KEY = `
@@ -88,68 +86,53 @@ describe('RSA Keypair Generation', () => {
   });
 
   Object.values(SerializationFormat).forEach((version) => {
-    it(`encrypts data with public keys with ${version}`, async (done) => {
-      try {
-        const encrypted = await encryptWithPublicKey(
-          {
-            publicKeyPem: PUBLIC_KEY,
-            data: SECRET,
-          },
-          version
-        );
-        expect(encrypted).not.toEqual(SECRET);
-        done();
-      } catch (ex) {
-        done(ex);
-      }
+    it(`encrypts data with public keys with ${version}`, async () => {
+      const encrypted = await encryptWithPublicKey(
+        {
+          publicKeyPem: PUBLIC_KEY,
+          data: SECRET,
+        },
+        version
+      );
+      expect(encrypted).not.toEqual(SECRET);
     });
 
-    it(`decrypts data with private keys that do not have passwords with ${version}`, async (done) => {
-      try {
-        const result = await encryptWithPublicKey(
-          {
-            publicKeyPem: PUBLIC_KEY,
-            data: SECRET,
-          },
-          version
-        );
-        const { encrypted } = result;
-        const decrypted = await decryptWithPrivateKey({
-          encrypted,
-          privateKeyPem: PRIVATE_KEY,
-        });
-        expect(decrypted).toEqual(SECRET);
-        done();
-      } catch (ex) {
-        done(ex);
-      }
+    it(`decrypts data with private keys that do not have passwords with ${version}`, async () => {
+      const result = await encryptWithPublicKey(
+        {
+          publicKeyPem: PUBLIC_KEY,
+          data: SECRET,
+        },
+        version
+      );
+      const { encrypted } = result;
+      const decrypted = await decryptWithPrivateKey({
+        encrypted,
+        privateKeyPem: PRIVATE_KEY,
+      });
+      expect(decrypted).toEqual(SECRET);
     });
 
-    it(`decrypts data with private keys that have a password with ${version}`, async (done) => {
-      try {
-        const password = `I ain't sayin' nothin'`;
-        const encryptedKey = encryptPrivateKeyWithPassword({
-          privateKeyPem: PRIVATE_KEY,
-          password,
-        });
-        const result = await encryptWithPublicKey(
-          {
-            publicKeyPem: PUBLIC_KEY,
-            data: SECRET,
-          },
-          version
-        );
-        const { encrypted } = result;
-        const decrypted = await decryptWithPrivateKey({
-          encrypted,
-          password,
-          privateKeyPem: encryptedKey,
-        });
-        expect(decrypted).toEqual(SECRET);
-        done();
-      } catch (ex) {
-        done(ex);
-      }
+    it(`decrypts data with private keys that have a password with ${version}`, async () => {
+      const password = `I ain't sayin' nothin'`;
+      const encryptedKey = encryptPrivateKeyWithPassword({
+        privateKeyPem: PRIVATE_KEY,
+        password,
+      });
+      const result = await encryptWithPublicKey(
+        {
+          publicKeyPem: PUBLIC_KEY,
+          data: SECRET,
+        },
+        version
+      );
+      const { encrypted } = result;
+      const decrypted = await decryptWithPrivateKey({
+        encrypted,
+        password,
+        privateKeyPem: encryptedKey,
+      });
+      expect(decrypted).toEqual(SECRET);
     });
   });
 });
