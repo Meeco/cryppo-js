@@ -9,27 +9,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 13.x
-      - run: npm install
+          node-version: 22.x
+      - run: npm ci
       - run: npm test
         env:
           CI: true
-      - run: npm run browser
   publish:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 13.x
+          node-version: 22.x
           registry-url: https://registry.npmjs.org/
       - run: npm config set package-lock false
-      - run: npm install
+      - run: npm ci
       - run: |
           npm config set //registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN
           npm config set scope "@meeco"

@@ -16,6 +16,7 @@ karma.conf.js
 jest.config.js
 tsconfig.json
 tslint.json
+eslint.config.mjs
 Jenkinsfile
 
 dist/demo
