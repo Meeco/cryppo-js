@@ -41,7 +41,6 @@ export async function encryptWithPublicKey(
     publicKeyPem: string;
     data: string;
     scheme?: RsaEncryptionScheme;
-    // tslint:disable-next-line: max-line-length
   },
   serializationFormat: SerializationFormat = SerializationFormat.latest_version
 ) {

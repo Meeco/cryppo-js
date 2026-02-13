@@ -1,13 +1,11 @@
-import * as BSON from 'bson';
+import { BSON } from 'bson';
 import { Buffer as _buffer } from 'buffer';
 import { pki, random, util } from 'node-forge';
-import * as YAML from 'yaml';
+import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
 import { IEncryptionArtifacts } from './encryption/encryption';
 import { ICryppoSerializationArtifacts, IDerivedKey } from './key-derivation/derived-key';
 import { SerializationFormat } from './serialization-versions';
 
-// Adds support for binary types
-YAML.defaultOptions.schema = 'yaml-1.1';
 // 65 is the version byte for encryption artefacts encoded with BSON
 const ENCRYPTION_ARTEFACTS_CURRENT_VERSION = 'A';
 // 75 is the version byte for derivation artefacts encoded with BSON
@@ -54,6 +52,7 @@ export const bytesToUtf8 = (bytes: Uint8Array) => {
 export const binaryStringToBytesBuffer = (value: string) =>
   _buffer.from(util.binary.raw.decode(value));
 export const bytesBufferToBinaryString = (val: Buffer | Uint8Array | ArrayBuffer) =>
+  // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
   util.createBuffer(val).data;
 
 export const generateRandomBytesString = (length = 32) => random.getBytesSync(length);
@@ -74,9 +73,10 @@ export function serializeDerivedKeyOptions(
   }
 }
 
-export function deSerializeDerivedKeyOptions(
-  serialized: string
-): { derivationStrategy: string; serializationArtifacts: IEncryptionArtifacts } {
+export function deSerializeDerivedKeyOptions(serialized: string): {
+  derivationStrategy: string;
+  serializationArtifacts: IEncryptionArtifacts;
+} {
   let items = serialized.split('.');
   // We might get passed an entire encrypted string in which case we just want the key and strategy
   if (items.length > 2) {
@@ -115,7 +115,7 @@ function encodeYaml(data: any) {
   // with Ruby Cryppo. They technically should not be required and there should
   // be a flag to disable them.
   const pad = `---\n`;
-  return pad + YAML.stringify(data).replace(/!!binary/g, '!binary');
+  return pad + yamlStringify(data, { schema: 'yaml-1.1' }).replace(/!!binary/g, '!binary');
 }
 
 export interface IDecoded {
@@ -155,11 +155,10 @@ export function deSerialize(serialized: string): IDecoded {
   };
 }
 
-// tslint:disable-next-line: max-line-length
 function decodeArtifactData(text: string) {
   if (decodeSafe64(text).startsWith('---')) {
     text = decodeSafe64(text);
-    return YAML.parse(text.replace(/ !binary/g, ' !!binary'));
+    return yamlParse(text.replace(/ !binary/g, ' !!binary'), { schema: 'yaml-1.1' });
   } else {
     text = decodeSafe64Bson(text);
     // remove version byte before deserializing
@@ -190,12 +189,14 @@ export function decodeSafe64(base64: string) {
   // Don't bother concatenating an '=' to the result - see above
 }
 
-// tslint:disable-next-line: max-line-length
 export function encodeSafe64Bson(
   versionByte: string,
   artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts
 ) {
-  const bsonSerialized = _buffer.concat([_buffer.from(versionByte), BSON.serialize(artifacts)]);
+  const bsonSerialized = _buffer.concat([
+    _buffer.from(versionByte),
+    _buffer.from(BSON.serialize(artifacts)),
+  ]);
   const base64Data = bsonSerialized.toString('base64');
   return base64Data
     .replace(/\+/g, '-') // Convert '+' to '-'

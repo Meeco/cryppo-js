@@ -5,7 +5,7 @@ import {
   decodeSafe64,
   encodeSafe64,
   keyLengthFromPrivateKeyPem,
-} from '../../src/util';
+} from '../util';
 
 export interface ISignature {
   signature: string;

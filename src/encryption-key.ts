@@ -49,7 +49,7 @@ export class EncryptionKey {
     return encodeSafe64(bytesToBinaryString(this.value));
   }
 
-  get bytes() {
+  get bytes(): Uint8Array {
     return this.value;
   }
 }
