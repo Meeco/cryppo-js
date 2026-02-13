@@ -6,7 +6,6 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-
     "build": "rm -rf dist && tsc -p tsconfig.build.cjs.json && tsc -p tsconfig.build.esm.json",
     "format:check": "prettier -c \"src/**/*.ts\" \"test/**/*.ts\" \"demo/**/*.*\" *.json README.md",
     "format:write": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"demo/**/*.*\" *.json README.md",
