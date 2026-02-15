@@ -5,7 +5,6 @@
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  reporters: ['default', 'jest-junit'],
   roots: ['<rootDir>'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }]
