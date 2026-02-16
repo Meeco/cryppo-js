@@ -1,7 +1,7 @@
 import { generateDerivedKey } from '../../src/key-derivation/pbkdf2-hmac';
 
 describe('PBKDF2-HMAC', () => {
-  it('generates the correct key', async (cb) => {
+  it('generates the correct key', async () => {
     const expectedKey = `1rMApWtrHGQe4coUBxvCzbSo5KWAavLDXT5ajVWDP3E=`;
     const derivedKey = await generateDerivedKey({
       passphrase: `GreatPassphrase#2001!`,
@@ -11,6 +11,5 @@ describe('PBKDF2-HMAC', () => {
       length: 32,
     });
     expect(derivedKey.key.serialize).toEqual(expectedKey);
-    cb();
   });
 });

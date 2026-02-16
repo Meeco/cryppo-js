@@ -34,7 +34,6 @@ describe('DerivedKey', () => {
   });
 
   it('can build derivation options from a serialized string', () => {
-    // tslint:disable-next-line
     const serialized = `Pbkdf2Hmac.LS0tCml2OiAhYmluYXJ5IHwtCiAgd1dSeWk1MkdrckFJcS9mZWJQcjlEUml1V1prPQppOiAyMDU4NQpsOiAzMgo=`;
     // From ruby string "\xC1dr\x8B\x9D\x86\x92\xB0\b\xAB\xF7\xDEl\xFA\xFD\r\x18\xAEY\x99"`
     const salt = decode64('wWRyi52GkrAIq/febPr9DRiuWZk=');
@@ -45,17 +44,12 @@ describe('DerivedKey', () => {
     expect((<any>derived).hash).toEqual('SHA256');
   });
 
-  it('can generate the same key multiple times by serializing and deserializing', async (done) => {
-    try {
-      const derived = DerivedKeyOptions.randomFromOptions({});
-      const derivedKey = await derived.deriveKey('my key');
-      const serialized = derived.serialize(SerializationFormat.legacy);
-      const derivedTwo = DerivedKeyOptions.fromSerialized(serialized);
-      const secondKey = await derivedTwo.deriveKey('my key');
-      expect(secondKey).toEqual(derivedKey);
-      done();
-    } catch (err) {
-      done(err);
-    }
+  it('can generate the same key multiple times by serializing and deserializing', async () => {
+    const derived = DerivedKeyOptions.randomFromOptions({});
+    const derivedKey = await derived.deriveKey('my key');
+    const serialized = derived.serialize(SerializationFormat.legacy);
+    const derivedTwo = DerivedKeyOptions.fromSerialized(serialized);
+    const secondKey = await derivedTwo.deriveKey('my key');
+    expect(secondKey).toEqual(derivedKey);
   });
 });

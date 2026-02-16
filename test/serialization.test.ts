@@ -19,9 +19,7 @@ describe('Serialize/Deserialize', () => {
   const ad = 'none';
   const encryptionStrategy = 'Aes256Gcm';
 
-  // tslint:disable-next-line
   const testLegacySerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.LS0tCml2OiAhYmluYXJ5IHwtCiAgTDI0cjlMQVJGTUxqMGk5SwphdDogIWJpbmFyeSB8LQogIDlWdDJwQk5zd2EwaGs2N3JPNEswdUE9PQphZDogbm9uZQo=`;
-  // tslint:disable-next-line: max-line-length
   const testBsonSerialized = `Aes256Gcm.J3pTWPyK5Y2t_JvK-Q9r90IBu7g=.QUAAAAAFaXYADAAAAAAvbiv0sBEUwuPSL0oFYXQAEAAAAAD1W3akE2zBrSGTrus7grS4AmFkAAUAAABub25lAAA=`;
 
   Object.values(SerializationFormat).forEach((version) => {
@@ -55,42 +53,37 @@ describe('Serialize/Deserialize', () => {
     });
   });
 
-  it('serializes binary data to base64 to comply with YAML specification', async (done) => {
-    try {
-      const containsNonUtf8Characters = (str: string) => {
-        for (let i = 0; i < str.length; i++) {
-          if (str.charCodeAt(i) > 127) {
-            return true;
-          }
+  it('serializes binary data to base64 to comply with YAML specification', async () => {
+    const containsNonUtf8Characters = (str: string) => {
+      for (let i = 0; i < str.length; i++) {
+        if (str.charCodeAt(i) > 127) {
+          return true;
         }
-        return false;
-      };
-
-      const derived = DerivedKeyOptions.randomFromOptions({});
-      const encodedSerialized = derived.serialize(SerializationFormat.legacy);
-      const [, artifacts] = encodedSerialized.split('.');
-
-      const yaml = decodeSafe64(artifacts);
-      expect(containsNonUtf8Characters(yaml)).toEqual(false);
-
-      const encrypted = await encryptWithKey(
-        {
-          key: EncryptionKey.generateRandom(),
-          data: utf8ToBytes('This is some test data that will be encrypted'),
-          strategy: CipherStrategy.AES_GCM,
-        },
-        SerializationFormat.legacy
-      );
-      const { serialized } = encrypted;
-      if (serialized === null) {
-        throw new Error('serialized should not be null here');
       }
-      const [, , encoded] = serialized.split('.');
-      const parsed = decodeSafe64(encoded);
-      expect(containsNonUtf8Characters(parsed)).toEqual(false);
-      done();
-    } catch (err) {
-      done(err);
+      return false;
+    };
+
+    const derived = DerivedKeyOptions.randomFromOptions({});
+    const encodedSerialized = derived.serialize(SerializationFormat.legacy);
+    const [, artifacts] = encodedSerialized.split('.');
+
+    const yaml = decodeSafe64(artifacts);
+    expect(containsNonUtf8Characters(yaml)).toEqual(false);
+
+    const encrypted = await encryptWithKey(
+      {
+        key: EncryptionKey.generateRandom(),
+        data: utf8ToBytes('This is some test data that will be encrypted'),
+        strategy: CipherStrategy.AES_GCM,
+      },
+      SerializationFormat.legacy
+    );
+    const { serialized } = encrypted;
+    if (serialized === null) {
+      throw new Error('serialized should not be null here');
     }
+    const [, , encoded] = serialized.split('.');
+    const parsed = decodeSafe64(encoded);
+    expect(containsNonUtf8Characters(parsed)).toEqual(false);
   });
 });

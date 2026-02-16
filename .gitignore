@@ -1,7 +1,5 @@
 node_modules
-# Parcel
 .cache/
 dist/
 .rts2_cache*/
 coverage/
-junit.xml

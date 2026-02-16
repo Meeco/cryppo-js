@@ -1,3 +1,4 @@
+import './styles.css';
 import { decryptWithKey, encryptWithGeneratedKey, encryptWithKey } from '../src/index';
 import { CipherStrategy } from '../src/strategies';
 import {

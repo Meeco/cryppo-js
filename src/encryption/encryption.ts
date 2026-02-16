@@ -47,8 +47,7 @@ export async function encryptWithGeneratedKey(
 ): Promise<IEncryptionResult & { generatedKey: EncryptionKey }> {
   const key = EncryptionKey.generateRandom(keyLength || 32);
 
-  let result: any;
-  result = await encryptWithKey({ key, data, strategy, iv }, serializationVersion);
+  const result: any = await encryptWithKey({ key, data, strategy, iv }, serializationVersion);
 
   return {
     ...result,
@@ -71,8 +70,7 @@ export async function encryptWithKeyDerivedFromString({
 }): Promise<IEncryptionResult & IRandomKeyOptions & { key: EncryptionKey }> {
   const derived = await generateDerivedKey({ passphrase });
 
-  let result: any;
-  result = await encryptWithKey(
+  const result: any = await encryptWithKey(
     {
       key: derived.key,
       data,
@@ -94,8 +92,6 @@ export async function encryptWithKey(
   { key, data, strategy, iv }: IEncryptionOptions,
   serializationVersion: SerializationFormat = SerializationFormat.latest_version
 ): Promise<IEncryptionResult> {
-  let output: any;
-
   if (!data || data.length === 0) {
     return {
       encrypted: null,
@@ -103,7 +99,7 @@ export async function encryptWithKey(
     };
   }
 
-  output = encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
+  const output: any = encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
 
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.bytes.length * 8;
@@ -125,12 +121,7 @@ export async function encryptWithKey(
  */
 const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1).toLowerCase();
 
-export function encryptWithKeyUsingArtefacts({
-  key,
-  data,
-  strategy,
-  iv,
-}: IEncryptionOptions): {
+export function encryptWithKeyUsingArtefacts({ key, data, strategy, iv }: IEncryptionOptions): {
   encrypted: string | null;
   artifacts?: any;
 } {
@@ -138,9 +129,11 @@ export function encryptWithKeyUsingArtefacts({
     return { encrypted: null };
   }
 
+  // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
   const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key.bytes));
   iv = iv || random.getBytesSync(12);
   cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
+  // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
   cipher.update(util.createBuffer(data));
   cipher.finish();
   const artifacts: any = {

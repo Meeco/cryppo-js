@@ -3,7 +3,6 @@ import {
   decodeSafe64,
   decryptSerializedWithPrivateKey,
   decryptWithPrivateKey,
-  encodeSafe64,
   encryptWithPublicKey,
   utf8ToBytes,
 } from '../../src';
@@ -16,118 +15,97 @@ import {
 import { SerializationFormat } from '../../src/serialization-versions';
 import { CipherStrategy } from '../../src/strategies';
 
+// Note: Test fixture keys were regenerated as proper 32-byte base64 strings for node-forge 1.3.x,
+// which strictly enforces AES-256 key length. The old keys (binary string literals passed through
+// encodeSafe64) were only 25-29 bytes and silently accepted by node-forge 0.10.0.
+// Expected ciphertext, IVs, and serialized outputs were updated to match the new keys.
+
 describe('Encryption', () => {
-  it('encrypts data with AES-256 GCM Encryption using a string key including derivation artifacts', async (done) => {
-    try {
-      const passphrase = 'correct horse battery staple';
-      const data = utf8ToBytes('some secret data');
-      const result = await encryptWithKeyDerivedFromString({
-        passphrase,
-        data,
-        strategy: CipherStrategy.AES_GCM,
-        serializationVersion: SerializationFormat.legacy,
-      });
-      expect(result.key).toBeTruthy();
-      expect(result.key.bytes.length).toEqual(32);
-      expect(result.encrypted?.length).toEqual(16);
-      // Actual length will vary based on key derivation variance
-      expect(result.serialized?.length).toBeGreaterThan(200);
-      expect(result.serialized).toMatch(
-        // Head (encryption strategy) should be the same
-        // Encrypted data is always 24 characters
-        // Chunks of the base64'd YAML (namely, the authData and leading yaml characters) will match
-        // and the full length of the yaml should always be the same.
-        // Also encludes the key derivation algorithm and artifacts at the end
-        /(Aes256Gcm)\..{24}\.LS0tCml2OiAhYmluYXJ5IHwtCiAg(.){75}9PQphZDogbm9uZQo=\.Pbkdf2Hmac\.(.)+/
-      );
-      done();
-    } catch (e) {
-      done(e);
-    }
+  it('encrypts data with AES-256 GCM Encryption using a string key including derivation artifacts', async () => {
+    const passphrase = 'correct horse battery staple';
+    const data = utf8ToBytes('some secret data');
+    const result = await encryptWithKeyDerivedFromString({
+      passphrase,
+      data,
+      strategy: CipherStrategy.AES_GCM,
+      serializationVersion: SerializationFormat.legacy,
+    });
+    expect(result.key).toBeTruthy();
+    expect(result.key.bytes.length).toEqual(32);
+    expect(result.encrypted?.length).toEqual(16);
+    // Actual length will vary based on key derivation variance
+    expect(result.serialized?.length).toBeGreaterThan(200);
+    expect(result.serialized).toMatch(
+      // Head (encryption strategy) should be the same
+      // Encrypted data is always 24 characters
+      // Chunks of the base64'd YAML (namely, the authData and leading yaml characters) will match
+      // and the full length of the yaml should always be the same.
+      // Also encludes the key derivation algorithm and artifacts at the end
+      /(Aes256Gcm)\..{24}\.LS0tCml2OiAhYmluYXJ5IHwtCiAg(.){75}9PQphZDogbm9uZQo=\.Pbkdf2Hmac\.(.)+/
+    );
   });
 
-  it('encrypts data using a provided key', async (done) => {
-    try {
-      const key = EncryptionKey.fromSerialized(encodeSafe64(`øù@!L DRûÿ­ÙSAaÍÖ¡Ï9£S2îÏ`));
-      const data = utf8ToBytes('some secret data');
-      const result = await encryptWithKey(
-        {
-          key,
-          data,
-          strategy: CipherStrategy.AES_GCM,
-          iv: 'û¶¦ËüqIû',
-        },
-        SerializationFormat.legacy
-      );
-      // Known IV and known key should produce the same results
-      expect(result.serialized).toEqual(
-        // As above although we don't need key derivation artifacts
-        // tslint:disable-next-line
-        `Aes256Gcm.njxkD8E8FUblb27R6hvN_Q==.LS0tCml2OiAhYmluYXJ5IHwtCiAgKzdhbXl4cjhBWEdQRlVuNwphdDogIWJpbmFyeSB8LQogIHQxa2hBTXBjSStjcENrcWNZUTVxWUE9PQphZDogbm9uZQo=`
-      );
-      done();
-    } catch (e) {
-      done(e);
-    }
-  });
-
-  it('can encrypt with key using encryption artifacts', async (done) => {
-    try {
-      const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
-      const data = utf8ToBytes('1');
-      const result = await encryptWithKeyUsingArtefacts({
+  it('encrypts data using a provided key', async () => {
+    const key = EncryptionKey.fromSerialized('zakv8AwKvG4xQtUmw9o6TzJXQ0WOXwfjgC7m5VP0Q9A=');
+    const data = utf8ToBytes('some secret data');
+    const result = await encryptWithKey(
+      {
         key,
         data,
         strategy: CipherStrategy.AES_GCM,
-        iv: bytesBufferToBinaryString(
-          new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
-        ),
-      });
-      // Known IV and known key should produce the same results
-      expect(result.encrypted).toEqual('Ç');
-      done();
-    } catch (e) {
-      done(e);
-    }
+        iv: '¦önN¨T\u0015µ£ciÝ',
+      },
+      SerializationFormat.legacy
+    );
+    // Known IV and known key should produce the same results
+    expect(result.serialized).toEqual(
+      // As above although we don't need key derivation artifacts
+      `Aes256Gcm.YQAnT0zehB5dsDgSnqWLgg==.LS0tCml2OiAhYmluYXJ5IHwtCiAgcHZadVRxaFVGYldqWTJuZAphdDogIWJpbmFyeSB8LQogIGVjb1VUeWUvd0QvVUpBOEt1NElQRlE9PQphZDogbm9uZQo=`
+    );
   });
 
-  it('returns null if an empty string is passed in to encryptStringWithKey', async (done) => {
-    try {
-      const key = EncryptionKey.fromSerialized(encodeSafe64(`øù@!L DRûÿ­ÙSAaÍÖ¡Ï9£S2îÏ`));
-      const data = utf8ToBytes('');
-      const result = await encryptWithKey(
-        {
-          key,
-          data,
-          strategy: CipherStrategy.AES_GCM,
-          iv: 'û¶¦ËüqIû',
-        },
-        SerializationFormat.legacy
-      );
-      expect(result.serialized).toEqual(null);
-      done();
-    } catch (e) {
-      done(e);
-    }
+  it('can encrypt with key using encryption artifacts', async () => {
+    const key = EncryptionKey.fromSerialized('uplv9pBZAR28LQYu23aRbnVhZrLyOTIEuTx8ooPtmsY=');
+    const data = utf8ToBytes('1');
+    const result = await encryptWithKeyUsingArtefacts({
+      key,
+      data,
+      strategy: CipherStrategy.AES_GCM,
+      iv: bytesBufferToBinaryString(
+        new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
+      ),
+    });
+    // Known IV and known key should produce the same results
+    expect(result.encrypted).toEqual('\t');
   });
 
-  it('returns null if an empty string is passed in to encryptStringWithKeyUsingArtefacts', async (done) => {
-    try {
-      const key = EncryptionKey.fromSerialized(encodeSafe64(`Îw0áï±OêsµCåfõ©bãë-ÒæÜ.E'Hµ®¨`));
-      const data = utf8ToBytes('');
-      const result = await encryptWithKeyUsingArtefacts({
+  it('returns null if an empty string is passed in to encryptStringWithKey', async () => {
+    const key = EncryptionKey.fromSerialized('zakv8AwKvG4xQtUmw9o6TzJXQ0WOXwfjgC7m5VP0Q9A=');
+    const data = utf8ToBytes('');
+    const result = await encryptWithKey(
+      {
         key,
         data,
         strategy: CipherStrategy.AES_GCM,
-        iv: bytesBufferToBinaryString(
-          new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
-        ),
-      });
-      expect(result.encrypted).toBeNull();
-      done();
-    } catch (e) {
-      done(e);
-    }
+        iv: '¦önN¨T\u0015µ£ciÝ',
+      },
+      SerializationFormat.legacy
+    );
+    expect(result.serialized).toEqual(null);
+  });
+
+  it('returns null if an empty string is passed in to encryptStringWithKeyUsingArtefacts', async () => {
+    const key = EncryptionKey.fromSerialized('uplv9pBZAR28LQYu23aRbnVhZrLyOTIEuTx8ooPtmsY=');
+    const data = utf8ToBytes('');
+    const result = await encryptWithKeyUsingArtefacts({
+      key,
+      data,
+      strategy: CipherStrategy.AES_GCM,
+      iv: bytesBufferToBinaryString(
+        new Uint8Array([13, 120, 218, 57, 166, 132, 154, 162, 228, 63, 63, 143])
+      ),
+    });
+    expect(result.encrypted).toBeNull();
   });
 
   describe('RSA', () => {

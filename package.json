@@ -1,31 +1,38 @@
 {
   "name": "@meeco/cryppo",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "In-browser encryption and decryption. Clone of Ruby Cryppo",
   "engines": {
-    "node": ">=12.4.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
-    "browser": "karma start",
-    "build": "rm -rf dist && tsc && bili src/index.ts --format cjs --format es --module-name cryppo",
-    "demo": "npm start",
+    "build": "rm -rf dist && tsc -p tsconfig.build.cjs.json && tsc -p tsconfig.build.esm.json",
     "format:check": "prettier -c \"src/**/*.ts\" \"test/**/*.ts\" \"demo/**/*.*\" *.json README.md",
     "format:write": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"demo/**/*.*\" *.json README.md",
-    "lint": "tslint --project tsconfig.json",
+    "lint": "eslint src/ test/",
+    "lint:check": "eslint src/ test/",
     "posttest": "npm run lint && npm run format:check",
     "prebuild": "npm run lint",
     "prepack": "npm run build",
     "prepublishOnly": "npm run build",
-    "start": "parcel serve demo/encryption_with_derived_key.html",
-    "test": "jest"
+    "start": "vite",
+    "demo": "npm start",
+    "test": "vitest run"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
   "source": "src/index.ts",
-  "main": "dist/src/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:Meeco/cryppo-js.git"
@@ -42,42 +49,21 @@
   "author": "Meeco",
   "license": "MIT",
   "dependencies": {
-    "bson": "^4.0.4",
-    "buffer": "^5.1.0",
-    "node-forge": "0.10.0",
-    "yaml": "^1.6.0"
+    "bson": "^7.2.0",
+    "buffer": "^6.0.3",
+    "node-forge": "^1.3.1",
+    "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@types/bson": "^4.0.2",
-    "@types/jest": "^24.0.15",
-    "@types/node-forge": "0.9.5",
-    "@types/yaml": "^1.0.2",
-    "bili": "^4.10.1",
-    "jasmine-core": "^3.4.0",
-    "jest": "^24.8.0",
-    "jest-junit": "^6.4.0",
-    "karma": "^5.1.1",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-edge-launcher": "^0.4.2",
-    "karma-firefox-launcher": "^1.3.0",
-    "karma-ie-launcher": "^1.0.0",
-    "karma-jasmine": "^3.3.1",
-    "karma-jasmine-html-reporter": "^1.5.4",
-    "karma-mocha-reporter": "^2.2.5",
-    "karma-safari-launcher": "^1.0.0",
-    "karma-typescript": "^5.0.3",
-    "karma-typescript-es6-transform": "^5.0.3",
-    "parcel-bundler": "^1.12.4",
-    "prettier": "^2.0.5",
-    "rollup-plugin-typescript2": "^0.26.0",
-    "sass": "^1.22.2",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.20.1",
-    "typescript": "^3.9.5"
-  },
-  "jest": {
-    "testMatch": [
-      "(/^test/.*|\\.(test|spec))\\.(ts)$"
-    ]
+    "@eslint/js": "^9.39.2",
+    "@types/node": "^22.19.11",
+    "@types/node-forge": "^1.3.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.55.0",
+    "vite": "^7.3.1",
+    "vitest": "^3.1.4"
   }
 }

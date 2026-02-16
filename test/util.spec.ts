@@ -6,7 +6,7 @@ import {
 } from '../src/util';
 
 describe('utils', () => {
-  it('can encode derivation artifacts', async (done) => {
+  it('can encode derivation artifacts', async () => {
     const result = await generateDerivedKey({
       passphrase: `GreatPassphrase#2001!`,
       useSalt: `\xF8\xD4g)|=q\x04!\xA2\xF9\xF1\xB0P\xB1@*QE%`,
@@ -14,8 +14,7 @@ describe('utils', () => {
       iterationVariance: 0,
       length: 32,
     });
-    const encoded = encodeDerivationArtifacts(result.options);
-    done();
+    encodeDerivationArtifacts(result.options);
   });
 
   it('can decode encoded derivation artifacts', () => {

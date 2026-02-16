@@ -7,7 +7,7 @@ TypeScript version of [Cryppo](https://github.com/Meeco/cryppo) allowing easy en
 - `npm install`
 - `npm start`
 
-Will run the project in `demo/` using parcel. Visit [http://localhost:1234](http://localhost:1234) to show.
+Will run the project in `demo/` using Vite. Visit [http://localhost:5173](http://localhost:5173) to show.
 
 ## Encrypting Data (Symmetric Key Encryption)
 

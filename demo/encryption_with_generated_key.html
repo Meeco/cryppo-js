@@ -1,12 +1,9 @@
 <html>
-  <head>
-    <link rel="stylesheet" href="./styles.scss" />
-  </head>
   <body>
     <ul class="nav">
-      <li><a href="/">Passphrase</a></li>
-      <li><a href="/encryption_with_generated_key.html">Key</a></li>
-      <li><a href="/encryption_with_signature.html">RSA</a></li>
+      <li><a href="/demo/encryption_with_derived_key.html">Passphrase</a></li>
+      <li><a href="/demo/encryption_with_generated_key.html">Key</a></li>
+      <li><a href="/demo/encryption_with_signature.html">RSA</a></li>
     </ul>
     <h1 class="center">Encryption With Generated Key</h1>
     <fieldset>
@@ -96,7 +93,7 @@
       <textarea id="decryptTextOutput" placeholder="Decrypted text will output here"></textarea>
     </fieldset>
 
-    <div style="text-align: right; padding: 2rem;">
+    <div style="text-align: right; padding: 2rem">
       <p>
         <label for="serializationVersionSelection">Serialization Format:</label>
 
@@ -107,6 +104,6 @@
       </p>
     </div>
 
-    <script src="./encryption_with_generated_key.ts"></script>
+    <script type="module" src="./encryption_with_generated_key.ts"></script>
   </body>
 </html>

@@ -79,9 +79,7 @@ export class DerivedKeyOptions implements IDerivedKey {
     });
   }
 
-  // tslint:disable-next-line: max-line-length
   public static fromSerialized(serialized: string): DerivedKeyOptions {
-    // tslint:disable-next-line: max-line-length
     const { derivationStrategy, serializationArtifacts } = deSerializeDerivedKeyOptions(serialized);
 
     return new DerivedKeyOptions({

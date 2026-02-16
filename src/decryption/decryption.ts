@@ -1,14 +1,9 @@
 import { cipher, util } from 'node-forge';
-import {
-  binaryStringToBytesBuffer,
-  bytesToBinaryString,
-  deSerialize,
-  encodeUtf8,
-} from '../../src/util';
 import { EncodingVersions } from '../encoding-versions';
 import { EncryptionKey } from '../encryption-key';
 import { DerivedKeyOptions } from '../key-derivation/derived-key';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies';
+import { binaryStringToBytesBuffer, bytesToBinaryString, deSerialize, encodeUtf8 } from '../util';
 
 interface IEncryptionOptions {
   iv: string;
@@ -93,7 +88,6 @@ export async function decryptWithKey({
  * Determine if we need to use a derived key or not based on whether or not
  * we have key derivation options in the serialized payload.
  */
-// tslint:disable-next-line: max-line-length
 function _deriveKeyWithOptions({
   key,
   serializedOptions,
@@ -116,6 +110,7 @@ export function decryptWithKeyUsingArtefacts(
   if (encryptedData === '') {
     return null;
   }
+  // @ts-expect-error node-forge createDecipher accepts Uint8Array at runtime
   const decipher = cipher.createDecipher(strategy, util.createBuffer(key.bytes));
   const tagLength = 128;
   const tag = util.createBuffer(at); // authentication tag from encryption
