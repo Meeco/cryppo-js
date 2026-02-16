@@ -8,18 +8,6 @@ import { SerializationFormat } from '../../src/serialization-versions';
 
 describe('RSA Keypair Generation', () => {
   it('generates RSA Keypairs', async () => {
-    // RSA key generation can take a while...
-    const timeout = 20000;
-    try {
-      jest.setTimeout(timeout);
-    } catch {
-      /* expected */
-    }
-    try {
-      jasmine.DEFAULT_TIMEOUT_INTERVAL = timeout;
-    } catch {
-      /* expected */
-    }
     const headPublic = `-----BEGIN PUBLIC KEY-----`;
     const headPrivate = `-----BEGIN RSA PRIVATE KEY-----`;
     // For testing purposes 4086 bit takes too long, 2048 keeps test under a second or two
@@ -30,7 +18,7 @@ describe('RSA Keypair Generation', () => {
 
     // Not exactly sure why it varies but it's always one of the two
     expect([1706, 1702]).toContain(privateKey.length);
-  });
+  }, 20000);
 
   const PUBLIC_KEY = `
     -----BEGIN PUBLIC KEY-----

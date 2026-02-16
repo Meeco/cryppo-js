@@ -115,7 +115,7 @@ describe('Backwards and forwards copmatibility', () => {
   });
 
   // Node only
-  if (process?.env?.JEST_WORKER_ID !== undefined) {
+  if (process?.env?.VITEST_POOL_ID !== undefined) {
     it('can decrypt binary files encrypted with older cryppo-js versions (~0.11.0)', async () => {
       const serialized = readFileSync(join(__dirname, 'encrypted.example.png'), 'binary');
       const expected = readFileSync(join(__dirname, 'decrypted.png'), 'binary');

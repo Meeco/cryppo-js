@@ -12,7 +12,7 @@ coverage/
 .rts2*
 
 karma.conf.js
-jest.config.js
+vite.config.ts
 tsconfig.json
 tslint.json
 eslint.config.mjs
