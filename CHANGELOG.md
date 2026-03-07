@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1 (07.03.2026)
+
+- Fix published Node ESM output
+- Add dist package metadata generation required for valid dual CJS + ESM package output
+
 ## 3.0.0 (13.02.2026)
 
 - **BREAKING**: Minimum Node.js version raised from 12.4 to 22
