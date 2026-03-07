@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { util } from 'node-forge';
+import forge from 'node-forge';
 import { join } from 'path';
 import { generateRSAKeyPair } from '../../src/key-pairs/rsa';
 import {
@@ -13,6 +13,8 @@ import {
   encodeSafe64,
   utf8ToBytes,
 } from '../../src/util';
+
+const { util } = forge;
 
 describe('signing', () => {
   const data =

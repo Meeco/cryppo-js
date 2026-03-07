@@ -1,7 +1,7 @@
-import { md, pkcs5, random } from 'node-forge';
-import { EncodingVersions } from '../encoding-versions';
-import { EncryptionKey } from '../encryption-key';
-import { SerializationFormat } from '../serialization-versions';
+import forge from 'node-forge';
+import { EncodingVersions } from '../encoding-versions.js';
+import { EncryptionKey } from '../encryption-key.js';
+import { SerializationFormat } from '../serialization-versions.js';
 import {
   binaryStringToBytes,
   binaryStringToBytesBuffer,
@@ -9,7 +9,9 @@ import {
   deSerializeDerivedKeyOptions,
   encodeUtf8,
   serializeDerivedKeyOptions,
-} from '../util';
+} from '../util.js';
+
+const { md, pkcs5, random } = forge;
 
 /**
  * Most of these values are copied directly from the Ruby library

@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { util } from 'node-forge';
+import forge from 'node-forge';
 import { join } from 'path';
 import {
   CipherStrategy,
@@ -19,6 +19,8 @@ import {
   utf8ToBytes,
 } from '../../src/util';
 import Compat from './compat.json';
+
+const { util } = forge;
 
 describe('compatiblity test for all cryppo port', () => {
   Object.values(Compat.encryption_with_derived_key).forEach((objToValidate: any, index) => {

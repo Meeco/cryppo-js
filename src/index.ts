@@ -5,15 +5,15 @@ if (typeof window !== 'undefined' && typeof (<any>window).global === 'undefined'
   (<any>window).global = window;
 }
 
-export * from './decryption/decryption';
-export * from './encryption/encryption';
-export * from './key-derivation/derived-key';
-export * from './key-derivation/pbkdf2-hmac';
-export * from './key-pairs/rsa';
-export * from './signing/rsa-signature';
-export * from './strategies';
-export * from './encryption-key';
-export * from './digests/hmac-digest';
+export * from './decryption/decryption.js';
+export * from './encryption/encryption.js';
+export * from './key-derivation/derived-key.js';
+export * from './key-derivation/pbkdf2-hmac.js';
+export * from './key-pairs/rsa.js';
+export * from './signing/rsa-signature.js';
+export * from './strategies.js';
+export * from './encryption-key.js';
+export * from './digests/hmac-digest.js';
 export {
   encode64,
   decode64,
@@ -40,4 +40,4 @@ export {
   generateEncryptionVerificationArtifacts,
   keyLengthFromPublicKeyPem,
   keyLengthFromPrivateKeyPem,
-} from './util';
+} from './util.js';

@@ -1,11 +1,14 @@
-import { md, pki } from 'node-forge';
+import forge from 'node-forge';
+import type { pki as ForgePki } from 'node-forge';
 import {
   binaryStringToBytes,
   bytesToBinaryString,
   decodeSafe64,
   encodeSafe64,
   keyLengthFromPrivateKeyPem,
-} from '../util';
+} from '../util.js';
+
+const { md, pki } = forge;
 
 export interface ISignature {
   signature: string;
@@ -16,7 +19,7 @@ export interface ISignature {
 
 export function signWithPrivateKey(privateKeyPem: string, data: Uint8Array): ISignature {
   const mdDigest = md.sha256.create();
-  const key = pki.privateKeyFromPem(privateKeyPem) as pki.rsa.PrivateKey;
+  const key = pki.privateKeyFromPem(privateKeyPem) as ForgePki.rsa.PrivateKey;
   mdDigest.update(bytesToBinaryString(data));
   const signature = key.sign(mdDigest);
   const keySize = keyLengthFromPrivateKeyPem(privateKeyPem);
@@ -52,7 +55,7 @@ export function loadRsaSignature(serializedPayload: string): ISignature {
 }
 
 export function verifyWithPublicKey(publicKeyPem: string, signatureObj: ISignature) {
-  const key = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
+  const key = pki.publicKeyFromPem(publicKeyPem) as ForgePki.rsa.PublicKey;
   const mdDigest = md.sha256.create();
   mdDigest.update(bytesToBinaryString(signatureObj.data));
   return key.verify(mdDigest.digest().bytes(), signatureObj.signature);

@@ -1,10 +1,13 @@
 import { BSON } from 'bson';
 import { Buffer as _buffer } from 'buffer';
-import { pki, random, util } from 'node-forge';
+import forge from 'node-forge';
+import type { pki as ForgePki } from 'node-forge';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
-import { IEncryptionArtifacts } from './encryption/encryption';
-import { ICryppoSerializationArtifacts, IDerivedKey } from './key-derivation/derived-key';
-import { SerializationFormat } from './serialization-versions';
+import { IEncryptionArtifacts } from './encryption/encryption.js';
+import { ICryppoSerializationArtifacts, IDerivedKey } from './key-derivation/derived-key.js';
+import { SerializationFormat } from './serialization-versions.js';
+
+const { pki, random, util } = forge;
 
 // 65 is the version byte for encryption artefacts encoded with BSON
 const ENCRYPTION_ARTEFACTS_CURRENT_VERSION = 'A';
@@ -234,7 +237,7 @@ export function generateEncryptionVerificationArtifacts() {
 }
 
 export function keyLengthFromPublicKeyPem(publicKeyPem: string) {
-  const pk = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
+  const pk = pki.publicKeyFromPem(publicKeyPem) as ForgePki.rsa.PublicKey;
   // Undocumented functionality but was the only way I could find to get
   // key length out of the public key.
   // https://github.com/digitalbazaar/forge/blob/master/lib/rsa.js#L1244
@@ -243,7 +246,7 @@ export function keyLengthFromPublicKeyPem(publicKeyPem: string) {
 }
 
 export function keyLengthFromPrivateKeyPem(privateKey: string) {
-  const pk = pki.privateKeyFromPem(privateKey) as pki.rsa.PrivateKey;
+  const pk = pki.privateKeyFromPem(privateKey) as ForgePki.rsa.PrivateKey;
   // Undocumented functionality but was the only way I could find to get
   // key length out of the public key.
   // https://github.com/digitalbazaar/forge/blob/master/lib/rsa.js#L1244
