@@ -1,6 +1,9 @@
-import { pki } from 'node-forge';
-import { SerializationFormat } from '../serialization-versions';
-import { deSerialize, keyLengthFromPublicKeyPem, serialize } from '../util';
+import forge from 'node-forge';
+import type { pki as ForgePki } from 'node-forge';
+import { SerializationFormat } from '../serialization-versions.js';
+import { deSerialize, keyLengthFromPublicKeyPem, serialize } from '../util.js';
+
+const { pki } = forge;
 
 export function generateRSAKeyPair(
   bits = 4096
@@ -28,8 +31,8 @@ export function encryptPrivateKeyWithPassword({
   privateKeyPem: string;
   password: string;
 }) {
-  const publicKey = pki.privateKeyFromPem(privateKeyPem);
-  return pki.encryptRsaPrivateKey(publicKey, password);
+  const privateKey = pki.privateKeyFromPem(privateKeyPem);
+  return pki.encryptRsaPrivateKey(privateKey, password);
 }
 
 export async function encryptWithPublicKey(
@@ -44,7 +47,7 @@ export async function encryptWithPublicKey(
   },
   serializationFormat: SerializationFormat = SerializationFormat.latest_version
 ) {
-  const pk = pki.publicKeyFromPem(publicKeyPem) as pki.rsa.PublicKey;
+  const pk = pki.publicKeyFromPem(publicKeyPem) as ForgePki.rsa.PublicKey;
   const encrypted = pk.encrypt(data, scheme);
 
   const bitLength = keyLengthFromPublicKeyPem(publicKeyPem);
@@ -95,6 +98,6 @@ export async function decryptWithPrivateKey({
   encrypted: string;
   scheme?: RsaEncryptionScheme;
 }) {
-  const pk = pki.decryptRsaPrivateKey(privateKeyPem, password) as pki.rsa.PrivateKey;
+  const pk = pki.decryptRsaPrivateKey(privateKeyPem, password) as ForgePki.rsa.PrivateKey;
   return pk.decrypt(encrypted, scheme);
 }

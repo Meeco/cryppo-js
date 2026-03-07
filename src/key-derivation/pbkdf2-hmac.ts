@@ -1,5 +1,5 @@
-import { EncryptionKey } from '../encryption-key';
-import { DerivedKeyOptions, IRandomKeyOptions, KeyDerivationStrategy } from './derived-key';
+import { EncryptionKey } from '../encryption-key.js';
+import { DerivedKeyOptions, IRandomKeyOptions, KeyDerivationStrategy } from './derived-key.js';
 
 /**
  * Given a password/phrase, derive a fixed-length key from it using Pbkdf2Hmac.

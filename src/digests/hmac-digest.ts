@@ -1,7 +1,7 @@
-import { Hex, hmac } from 'node-forge';
+import forge from 'node-forge';
 
-export function hmacSha256Digest(key: string, message: string): Hex {
-  const hm = hmac.create();
+export function hmacSha256Digest(key: string, message: string): string {
+  const hm = forge.hmac.create();
   hm.start('sha256', key);
   hm.update(message);
   return hm.digest().toHex();

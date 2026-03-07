@@ -1,10 +1,12 @@
-import { cipher as forgeCipher, random, util } from 'node-forge';
-import { EncryptionKey } from '../encryption-key';
-import { IRandomKeyOptions } from '../key-derivation/derived-key';
-import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac';
-import { SerializationFormat } from '../serialization-versions';
-import { CipherStrategy } from '../strategies';
-import { binaryStringToBytesBuffer, serialize } from '../util';
+import forge from 'node-forge';
+import { EncryptionKey } from '../encryption-key.js';
+import { IRandomKeyOptions } from '../key-derivation/derived-key.js';
+import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac.js';
+import { SerializationFormat } from '../serialization-versions.js';
+import { CipherStrategy } from '../strategies.js';
+import { binaryStringToBytesBuffer, serialize } from '../util.js';
+
+const { cipher: forgeCipher, random, util } = forge;
 
 export interface IEncryptionOptionsWithoutKey {
   /***

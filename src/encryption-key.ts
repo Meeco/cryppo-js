@@ -1,5 +1,7 @@
-import { random } from 'node-forge';
-import { binaryStringToBytes, bytesToBinaryString, decodeSafe64, encodeSafe64 } from './util';
+import forge from 'node-forge';
+import { binaryStringToBytes, bytesToBinaryString, decodeSafe64, encodeSafe64 } from './util.js';
+
+const { random } = forge;
 
 /**
  * SymmetricKey that can be used to encrypt and decrypt data

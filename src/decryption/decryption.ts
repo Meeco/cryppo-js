@@ -1,9 +1,16 @@
-import { cipher, util } from 'node-forge';
-import { EncodingVersions } from '../encoding-versions';
-import { EncryptionKey } from '../encryption-key';
-import { DerivedKeyOptions } from '../key-derivation/derived-key';
-import { CipherStrategy, strategyToAlgorithm } from '../strategies';
-import { binaryStringToBytesBuffer, bytesToBinaryString, deSerialize, encodeUtf8 } from '../util';
+import forge from 'node-forge';
+import { EncodingVersions } from '../encoding-versions.js';
+import { EncryptionKey } from '../encryption-key.js';
+import { DerivedKeyOptions } from '../key-derivation/derived-key.js';
+import { CipherStrategy, strategyToAlgorithm } from '../strategies.js';
+import {
+  binaryStringToBytesBuffer,
+  bytesToBinaryString,
+  deSerialize,
+  encodeUtf8,
+} from '../util.js';
+
+const { cipher, util } = forge;
 
 interface IEncryptionOptions {
   iv: string;
