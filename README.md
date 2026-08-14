@@ -87,12 +87,20 @@ async function encryptData() {
 1. Decrypt with private key
 
 ```ts
-import { generateRSAKeyPair, encryptWithPublicKey, decryptWithPrivateKey, encryptPrivateKeyWithPassword } from '@meeco/cryppo'
+import {
+  generateRSAKeyPair,
+  encryptWithPublicKey,
+  decryptWithPrivateKey,
+  encryptPrivateKeyWithPassword,
+} from '@meeco/cryppo';
 
 async function encryptDecryptData() {
   const { publicKey: publicKeyPem, privateKey: privateKeyPem } = await generateRSAKeyPair();
 
-  const encryptedPrivateKeyPem = encryptPrivateKeyWithPassword({ privateKeyPem, password: 'Password123!' });
+  const encryptedPrivateKeyPem = encryptPrivateKeyWithPassword({
+    privateKeyPem,
+    password: 'Password123!',
+  });
   // can store encrypted private key
 
   // Note: unlike the symmetric encryption functions above, `data` here is a plain string, not a Uint8Array

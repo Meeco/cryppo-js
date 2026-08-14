@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.2 (14.08.2026)
+
+- README.md improved: fixed inaccurate/broken code examples, added Installation, Requirements, License, and API overview sections
+- Upgrade vitest 3 → 4, vite 7 → 8
+- Upgrade eslint 9 → 10, @eslint/js 9 → 10, typescript-eslint 8.55 → 8.67
+- Rename `vite.config.ts` → `vite.config.mts` to avoid a Vite 8 deprecation warning about loading ESM config as CommonJS
+
 ## 3.0.1 (07.03.2026)
 
 - Fix published Node ESM output
