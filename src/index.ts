@@ -12,6 +12,8 @@ export * from './key-derivation/pbkdf2-hmac.js';
 export * from './key-pairs/rsa.js';
 export * from './signing/rsa-signature.js';
 export * from './strategies.js';
+export * from './serialization-versions.js';
+export * from './encoding-versions.js';
 export * from './encryption-key.js';
 export * from './digests/hmac-digest.js';
 export {
