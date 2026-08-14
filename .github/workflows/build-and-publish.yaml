@@ -6,6 +6,9 @@ on:
      - 'releases/*'
      - '!releases/**-beta'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
