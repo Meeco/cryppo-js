@@ -1,6 +1,7 @@
 import forge from 'node-forge';
 import { EncodingVersions } from '../encoding-versions.js';
 import { EncryptionKey } from '../encryption-key.js';
+import { IEncryptionArtifacts } from '../encryption/encryption.js';
 import { DerivedKeyOptions } from '../key-derivation/derived-key.js';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies.js';
 import {
@@ -11,12 +12,6 @@ import {
 } from '../util.js';
 
 const { cipher, util } = forge;
-
-interface IEncryptionOptions {
-  iv: string;
-  at: string;
-  ad: string;
-}
 
 export async function decryptWithKeyDerivedFromString({
   serialized,
@@ -112,7 +107,7 @@ export function decryptWithKeyUsingArtefacts(
   key: EncryptionKey,
   encryptedData: any,
   strategy: CipherStrategy,
-  { iv, at, ad }: IEncryptionOptions
+  { iv, at, ad }: IEncryptionArtifacts
 ): Buffer | null {
   if (encryptedData === '') {
     return null;

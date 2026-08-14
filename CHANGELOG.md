@@ -7,6 +7,7 @@
 - Upgrade eslint 9 → 10, @eslint/js 9 → 10, typescript-eslint 8.55 → 8.67
 - Rename `vite.config.ts` → `vite.config.mts` to avoid a Vite 8 deprecation warning about loading ESM config as CommonJS
 - Fix `SerializationFormat` and `EncodingVersions` not being exported from the package root (#38)
+- Fix `IEncryptionOptions` being defined twice with incompatible shapes, breaking imports for `decryptWithKeyUsingArtefacts`'s options type; it now uses the existing `IEncryptionArtifacts` type (#35)
 
 ## 3.0.1 (07.03.2026)
 
