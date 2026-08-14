@@ -2,12 +2,24 @@
 
 TypeScript version of [Cryppo](https://github.com/Meeco/cryppo) allowing easy encryption/decryption for [Meeco](https://dev.meeco.me) in the browser or node.
 
+Works in both Node.js and the browser — a small polyfill in `src/index.ts` sets up `Buffer`/`global` on `window` so no manual polyfilling is needed when bundling for the browser (e.g. in Angular).
+
+## Requirements
+
+- Node.js `>=22.0.0`
+
+## Installation
+
+```
+npm install @meeco/cryppo
+```
+
 ## Run the demo page
 
 - `npm install`
-- `npm start`
+- `npm run demo` (alias for `npm start`)
 
-Will run the project in `demo/` using Vite. Visit [http://localhost:5173](http://localhost:5173) to show.
+Will run the project in `demo/` using Vite. Visit [http://localhost:5173](http://localhost:5173) to show a small UI demonstrating encryption/decryption with a derived key, with a generated key, and with an RSA signature.
 
 ## Encrypting Data (Symmetric Key Encryption)
 
@@ -37,13 +49,13 @@ You can do so using `encryptWithGeneratedKey`. This will return the generated ke
 
 ```ts
 async function encryptData() {
-  const result = await encryptWithGeneratedKey({
+  const result = await encryptWithGeneratedKey(
     {
       data: utf8ToBytes('My Secret Data'),
       strategy: CipherStrategy.AES_GCM,
-    }
-    SerializationFormat.latest_version,
-  });
+    },
+    SerializationFormat.latest_version
+  );
   console.log(result.serialized);
   console.log(result.generatedKey.serialize);
 }
@@ -54,15 +66,15 @@ async function encryptData() {
 You can do so using `encryptWithKey`
 
 ```ts
-
- const result = await encryptWithKey(
-        {
-          key: EncryptionKey.generateRandom(),
-          data: utf8ToBytes('This is some test data that will be encrypted'),
-          strategy: CipherStrategy.AES_GCM,
-        },
-        SerializationFormat.latest_version
-      );
+async function encryptData() {
+  const result = await encryptWithKey(
+    {
+      key: EncryptionKey.generateRandom(),
+      data: utf8ToBytes('This is some test data that will be encrypted'),
+      strategy: CipherStrategy.AES_GCM,
+    },
+    SerializationFormat.latest_version
+  );
   console.log(result.serialized);
 }
 ```
@@ -78,34 +90,36 @@ You can do so using `encryptWithKey`
 import { generateRSAKeyPair, encryptWithPublicKey, decryptWithPrivateKey, encryptPrivateKeyWithPassword } from '@meeco/cryppo'
 
 async function encryptDecryptData() {
-  const { publicKey, privateKey } = await generateRSAKeyPair();
+  const { publicKey: publicKeyPem, privateKey: privateKeyPem } = await generateRSAKeyPair();
 
-  const encryptedPrivateKey = encryptPrivateKeyWithPassword({ privateKey, password: 'Password123!' });
+  const encryptedPrivateKeyPem = encryptPrivateKeyWithPassword({ privateKeyPem, password: 'Password123!' });
   // can store encrypted private key
 
-  const encrypted = await encryptWithPublicKey({
-    publicKey,
+  // Note: unlike the symmetric encryption functions above, `data` here is a plain string, not a Uint8Array
+  const { encrypted, serialized } = await encryptWithPublicKey({
+    publicKeyPem,
     data: 'My Super Secret Data',
-    serializationFormat: SerializationFormat = SerializationFormat.latest_version
   });
 
   // Using un-encrypted private key
-  const decryptedData = await decryptWithPrivateKey(
+  const decryptedData = await decryptWithPrivateKey({
+    privateKeyPem,
     encrypted,
-    privateKey
-  )
-  console.log(decryptedData); // 'My Super Secret Data''
+  });
+  console.log(decryptedData); // 'My Super Secret Data'
 
   // Using encrypted private key and password
-  const decryptedDataWithEncryptedPrivateKey = await decryptWithPrivateKey(
+  const decryptedDataWithEncryptedPrivateKey = await decryptWithPrivateKey({
+    privateKeyPem: encryptedPrivateKeyPem,
+    password: 'Password123!',
     encrypted,
-    privateKey: encryptedPrivateKey,
-    password: 'Password123!'
-  );
+  });
 
-  console.log(decryptedDataWithEncryptedPrivateKey);  // 'My Super Secret Data''
+  console.log(decryptedDataWithEncryptedPrivateKey); // 'My Super Secret Data'
 }
 ```
+
+`serialized` is the portable string form (as produced by the symmetric functions above); to decrypt from that directly, use `decryptSerializedWithPrivateKey({ privateKeyPem, password?, serialized })` instead of extracting `encrypted` yourself.
 
 ## Decryption
 
@@ -150,3 +164,18 @@ A string containing 5 parts concatenated with a `.`. The first 3 parts are the s
 
 4. Key Derivation Strategy Name: The strategy name as defined by EncryptionStrategy#strategy_name
 5. Encoded Key Derivation Artefacts: Encryption Artefacts are serialized into a hash by EncryptionStrategy#serialize_artefact, converted to YAML for legacy & BSON for latest_version, then encoded with Base64.urlsafe_encode64
+
+## Other exports
+
+Beyond symmetric/asymmetric encryption shown above, `@meeco/cryppo` also exports:
+
+- **Signing** — `signWithPrivateKey`, `verifyWithPublicKey`, `loadRsaSignature` (see `src/signing/rsa-signature.ts`) for RSA signatures, using key pairs from `generateRSAKeyPair`.
+- **HMAC digests** — helpers in `src/digests/hmac-digest.ts`.
+- **Key derivation** — lower-level PBKDF2-HMAC helpers (`src/key-derivation/pbkdf2-hmac.ts`, `src/key-derivation/derived-key.ts`) if you need to derive/manage keys without going through the encryption functions directly.
+- **Encoding/serialization utilities** — `encode64`/`decode64`, `utf8ToBytes`/`bytesToUtf8`, `utf16ToBytes`/`bytesToUtf16`, `binaryStringToBytes`/`bytesToBinaryString`, `serialize`/`deSerialize`, and related helpers (see `src/util.ts`).
+
+See `src/index.ts` for the full list of public exports.
+
+## License
+
+MIT
