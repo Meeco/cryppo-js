@@ -1,6 +1,6 @@
 {
   "name": "@meeco/cryppo",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "In-browser encryption and decryption. Clone of Ruby Cryppo",
   "engines": {
     "node": ">=22.0.0"
