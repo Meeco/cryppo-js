@@ -60,6 +60,14 @@ export const bytesBufferToBinaryString = (val: Buffer | Uint8Array | ArrayBuffer
 export const generateRandomBytesString = (length = 32) =>
   bytesToBinaryString(crypto.getRandomValues(new Uint8Array(length)));
 
+/**
+ * @types/node's global `Uint8Array<ArrayBufferLike>` and the DOM lib's `BufferSource`
+ * (`ArrayBufferView<ArrayBuffer>`) don't structurally match, so every `Uint8Array` passed into
+ * `crypto.subtle.*` needs this cast even though it's always backed by a real `ArrayBuffer` at
+ * runtime.
+ */
+export const toBufferSource = (bytes: Uint8Array): BufferSource => bytes as unknown as BufferSource;
+
 export function serializeDerivedKeyOptions(
   strategy: string,
   artifacts: IDerivedKey | IEncryptionArtifacts | ICryppoSerializationArtifacts,

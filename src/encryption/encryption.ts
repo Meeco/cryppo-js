@@ -1,12 +1,19 @@
-import forge from 'node-forge';
 import { EncryptionKey } from '../encryption-key.js';
 import { IRandomKeyOptions } from '../key-derivation/derived-key.js';
 import { generateDerivedKey } from '../key-derivation/pbkdf2-hmac.js';
 import { SerializationFormat } from '../serialization-versions.js';
 import { CipherStrategy } from '../strategies.js';
-import { binaryStringToBytesBuffer, serialize } from '../util.js';
+import {
+  binaryStringToBytes,
+  binaryStringToBytesBuffer,
+  bytesToBinaryString,
+  generateRandomBytesString,
+  serialize,
+  toBufferSource,
+  utf8ToBytes,
+} from '../util.js';
 
-const { cipher: forgeCipher, random, util } = forge;
+const GCM_TAG_LENGTH_BYTES = 16;
 
 export interface IEncryptionOptionsWithoutKey {
   /***
@@ -101,7 +108,7 @@ export async function encryptWithKey(
     };
   }
 
-  const output: any = encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
+  const output: any = await encryptWithKeyUsingArtefacts({ key, data, strategy, iv });
 
   const { encrypted, artifacts } = output;
   const keyLengthBits = key.bytes.length * 8;
@@ -123,30 +130,51 @@ export async function encryptWithKey(
  */
 const upperWords = (val: string) => val.slice(0, 1).toUpperCase() + val.slice(1).toLowerCase();
 
-export function encryptWithKeyUsingArtefacts({ key, data, strategy, iv }: IEncryptionOptions): {
+export async function encryptWithKeyUsingArtefacts({
+  key,
+  data,
+  strategy: _strategy,
+  iv,
+}: IEncryptionOptions): Promise<{
   encrypted: string | null;
   artifacts?: any;
-} {
+}> {
   if (data.length === 0) {
     return { encrypted: null };
   }
 
-  // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
-  const cipher = forgeCipher.createCipher(strategy, util.createBuffer(key.bytes));
-  iv = iv || random.getBytesSync(12);
-  cipher.start({ iv: util.createBuffer(iv), additionalData: 'none', tagLength: 128 });
-  // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
-  cipher.update(util.createBuffer(data));
-  cipher.finish();
+  const ivBinaryString = iv || generateRandomBytesString(12);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    toBufferSource(key.bytes),
+    'AES-GCM',
+    false,
+    ['encrypt']
+  );
+  const encryptedWithTag = new Uint8Array(
+    await crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: toBufferSource(binaryStringToBytes(ivBinaryString)),
+        additionalData: toBufferSource(utf8ToBytes('none')),
+        tagLength: GCM_TAG_LENGTH_BYTES * 8,
+      },
+      cryptoKey,
+      toBufferSource(data)
+    )
+  );
+
+  const ciphertext = encryptedWithTag.slice(0, encryptedWithTag.length - GCM_TAG_LENGTH_BYTES);
+  const tag = encryptedWithTag.slice(encryptedWithTag.length - GCM_TAG_LENGTH_BYTES);
+
   const artifacts: any = {
-    iv: binaryStringToBytesBuffer(iv),
+    iv: binaryStringToBytesBuffer(ivBinaryString),
+    at: binaryStringToBytesBuffer(bytesToBinaryString(tag)),
+    ad: 'none',
   };
-  if (cipher.mode.tag) {
-    artifacts.at = binaryStringToBytesBuffer(cipher.mode.tag.data);
-  }
-  artifacts.ad = 'none';
   return {
-    encrypted: cipher.output.data,
+    encrypted: bytesToBinaryString(ciphertext),
     artifacts,
   };
 }
