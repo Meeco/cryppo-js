@@ -21,17 +21,17 @@ describe('signing', () => {
     'Sign me! 񵿁R冎𵵖HخGؼ𝕖ƶ򠈛#؉�櫙㢍̇扑󺥈揥񠥥C񫉫𐣚ˏϹ끣Ϧ{󘕌󶨇󫊶ᣏ܊㋅i͸񦉑s蹇ҏ)6Ǉ𺘘ⶴ襰Յ󠪐쵏q;kbͥ%T껕̶ݸh齉͌.瘟D־򆷦ɍéʛڴʼǭ񤻲j򑶭';
   it('can sign a message with a private key then serialize it', async () => {
     const keyPair = await generateRSAKeyPair(2048);
-    const signatureObj = signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
+    const signatureObj = await signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
     const serializedPayload = signatureObj.serialized;
     expect(serializedPayload.split('.')[3]).toEqual(encodeSafe64(util.encodeUtf8(data)));
     expect(serializedPayload).toMatch(/Rsa2048\./);
   }, 40000);
   it('can load a signature then verify it', async () => {
     const keyPair = await generateRSAKeyPair(2048);
-    const signatureObj = signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
+    const signatureObj = await signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
     const serializedPayload = signatureObj.serialized;
     const loadedSignature = loadRsaSignature(serializedPayload);
-    expect(verifyWithPublicKey(keyPair.publicKey, loadedSignature)).toEqual(true);
+    expect(await verifyWithPublicKey(keyPair.publicKey, loadedSignature)).toEqual(true);
   });
 
   // Node only
@@ -43,7 +43,7 @@ describe('signing', () => {
       );
       const bytes = binaryStringToBytes(expected);
       const keyPair = await generateRSAKeyPair(2048);
-      const signatureObj = signWithPrivateKey(keyPair.privateKey, bytes);
+      const signatureObj = await signWithPrivateKey(keyPair.privateKey, bytes);
       const serializedPayload = signatureObj.serialized;
       expect(serializedPayload.split('.')[3]).toEqual(encodeSafe64(bytesToBinaryString(bytes)));
       expect(serializedPayload).toMatch(/Rsa2048\./);
@@ -53,7 +53,7 @@ describe('signing', () => {
       const expected = readFileSync(join(__dirname, '865194.jpg'), 'binary');
       const keyPair = await generateRSAKeyPair(2048);
       const bytes = binaryStringToBytes(expected);
-      const signatureObj = signWithPrivateKey(keyPair.privateKey, bytes);
+      const signatureObj = await signWithPrivateKey(keyPair.privateKey, bytes);
       const serializedPayload = signatureObj.serialized;
       expect(serializedPayload.split('.')[3]).toEqual(encodeSafe64(bytesToBinaryString(bytes)));
       expect(serializedPayload).toMatch(/Rsa2048\./);

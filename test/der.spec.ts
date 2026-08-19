@@ -1,4 +1,12 @@
-import { derToPem, pemToDer, pkcs1ToPkcs8, pkcs8ToPkcs1 } from '../src/der';
+import {
+  derToPem,
+  pemLabel,
+  pemToDer,
+  pkcs1ToPkcs8,
+  pkcs8ToPkcs1,
+  rsaPublicKeyToSpki,
+} from '../src/der';
+import Compat from './compatibility/compat.json';
 
 // A real 2048-bit PKCS#1 RSA private key (from test/key-pairs/rsa.spec.ts), used because its DER
 // content is well over 127 bytes, exercising the long-form DER length encoding/decoding path.
@@ -91,6 +99,42 @@ describe('der', () => {
       expect(() => pkcs8ToPkcs1(Uint8Array.of(0x04, 0x01, 0x00))).toThrow(
         'Invalid PKCS#8 DER: expected SEQUENCE'
       );
+    });
+  });
+
+  describe('pemLabel', () => {
+    it('extracts the label from a PEM header', () => {
+      expect(pemLabel(PKCS1_PRIVATE_KEY_PEM)).toEqual('RSA PRIVATE KEY');
+      expect(pemLabel('-----BEGIN PUBLIC KEY-----\nAA==\n-----END PUBLIC KEY-----\n')).toEqual(
+        'PUBLIC KEY'
+      );
+    });
+
+    it('throws when there is no BEGIN header', () => {
+      expect(() => pemLabel('not a pem')).toThrow('Invalid PEM: missing BEGIN header');
+    });
+  });
+
+  describe('rsaPublicKeyToSpki', () => {
+    // Most (31/32) of the RSA signature fixtures in compat.json use PKCS#1 public key PEMs
+    // ("-----BEGIN RSA PUBLIC KEY-----"), which WebCrypto's importKey('spki', ...) cannot parse
+    // directly - this is the real-world case this helper exists for.
+    const pkcs1PublicKeyFixture = Compat.signatures.find(
+      (s) => pemLabel(s.public_pem) === 'RSA PUBLIC KEY'
+    )!;
+
+    it('produces an SPKI DER that WebCrypto can import', async () => {
+      const pkcs1Der = pemToDer(pkcs1PublicKeyFixture.public_pem);
+      const spkiDer = rsaPublicKeyToSpki(pkcs1Der);
+
+      const key = await crypto.subtle.importKey(
+        'spki',
+        spkiDer,
+        { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+        false,
+        ['verify']
+      );
+      expect((key.algorithm as RsaHashedKeyAlgorithm).modulusLength).toBeGreaterThan(0);
     });
   });
 });
