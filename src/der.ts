@@ -8,6 +8,14 @@ export function pemToDer(pem: string): Uint8Array {
   return new Uint8Array(_buffer.from(base64, 'base64'));
 }
 
+export function pemLabel(pem: string): string {
+  const match = pem.match(/-----BEGIN ([^-]+)-----/);
+  if (!match) {
+    throw new Error('Invalid PEM: missing BEGIN header');
+  }
+  return match[1];
+}
+
 export function derToPem(der: Uint8Array, label: string): string {
   const base64 = _buffer.from(der).toString('base64');
   const lines = base64.match(/.{1,64}/g) || [];
@@ -82,6 +90,18 @@ export function pkcs1ToPkcs8(pkcs1Der: Uint8Array): Uint8Array {
   const version = Uint8Array.of(0x02, 0x01, 0x00);
   const privateKey = tlv(0x04, pkcs1Der);
   const content = concatBytes(version, RSA_ALGORITHM_IDENTIFIER, privateKey);
+  return tlv(0x30, content);
+}
+
+/**
+ * Wraps a PKCS#1 RSAPublicKey (`-----BEGIN RSA PUBLIC KEY-----`, produced by e.g. Ruby/Elixir
+ * cryppo's public key export) in the SPKI structure WebCrypto's `importKey('spki', ...)` requires.
+ * SPKI's subjectPublicKey is a BIT STRING containing the PKCS#1 DER, prefixed with a zero
+ * "unused bits" byte, alongside the same fixed rsaEncryption AlgorithmIdentifier used in PKCS#8.
+ */
+export function rsaPublicKeyToSpki(pkcs1PublicKeyDer: Uint8Array): Uint8Array {
+  const subjectPublicKey = tlv(0x03, concatBytes(Uint8Array.of(0x00), pkcs1PublicKeyDer));
+  const content = concatBytes(RSA_ALGORITHM_IDENTIFIER, subjectPublicKey);
   return tlv(0x30, content);
 }
 

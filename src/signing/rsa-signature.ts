@@ -1,14 +1,11 @@
-import forge from 'node-forge';
-import type { pki as ForgePki } from 'node-forge';
+import { pemLabel, pemToDer, pkcs1ToPkcs8, rsaPublicKeyToSpki } from '../der.js';
 import {
   binaryStringToBytes,
   bytesToBinaryString,
   decodeSafe64,
   encodeSafe64,
-  keyLengthFromPrivateKeyPem,
+  toBufferSource,
 } from '../util.js';
-
-const { md, pki } = forge;
 
 export interface ISignature {
   signature: string;
@@ -17,12 +14,22 @@ export interface ISignature {
   keySize: number;
 }
 
-export function signWithPrivateKey(privateKeyPem: string, data: Uint8Array): ISignature {
-  const mdDigest = md.sha256.create();
-  const key = pki.privateKeyFromPem(privateKeyPem) as ForgePki.rsa.PrivateKey;
-  mdDigest.update(bytesToBinaryString(data));
-  const signature = key.sign(mdDigest);
-  const keySize = keyLengthFromPrivateKeyPem(privateKeyPem);
+export async function signWithPrivateKey(
+  privateKeyPem: string,
+  data: Uint8Array
+): Promise<ISignature> {
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8',
+    toBufferSource(pkcs1ToPkcs8(pemToDer(privateKeyPem))),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signatureBytes = new Uint8Array(
+    await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, toBufferSource(data))
+  );
+  const signature = bytesToBinaryString(signatureBytes);
+  const keySize = (cryptoKey.algorithm as RsaHashedKeyAlgorithm).modulusLength;
 
   const serialized = `Sign.Rsa${keySize}.${encodeSafe64(signature)}.${encodeSafe64(
     bytesToBinaryString(data)
@@ -54,9 +61,25 @@ export function loadRsaSignature(serializedPayload: string): ISignature {
   }
 }
 
-export function verifyWithPublicKey(publicKeyPem: string, signatureObj: ISignature) {
-  const key = pki.publicKeyFromPem(publicKeyPem) as ForgePki.rsa.PublicKey;
-  const mdDigest = md.sha256.create();
-  mdDigest.update(bytesToBinaryString(signatureObj.data));
-  return key.verify(mdDigest.digest().bytes(), signatureObj.signature);
+export async function verifyWithPublicKey(
+  publicKeyPem: string,
+  signatureObj: ISignature
+): Promise<boolean> {
+  const der =
+    pemLabel(publicKeyPem) === 'RSA PUBLIC KEY'
+      ? rsaPublicKeyToSpki(pemToDer(publicKeyPem))
+      : pemToDer(publicKeyPem);
+  const cryptoKey = await crypto.subtle.importKey(
+    'spki',
+    toBufferSource(der),
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['verify']
+  );
+  return crypto.subtle.verify(
+    'RSASSA-PKCS1-v1_5',
+    cryptoKey,
+    toBufferSource(binaryStringToBytes(signatureObj.signature)),
+    toBufferSource(signatureObj.data)
+  );
 }
