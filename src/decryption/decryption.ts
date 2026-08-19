@@ -1,17 +1,22 @@
-import forge from 'node-forge';
 import { EncodingVersions } from '../encoding-versions.js';
 import { EncryptionKey } from '../encryption-key.js';
 import { IEncryptionArtifacts } from '../encryption/encryption.js';
 import { DerivedKeyOptions } from '../key-derivation/derived-key.js';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies.js';
 import {
+  binaryStringToBytes,
   binaryStringToBytesBuffer,
   bytesToBinaryString,
   deSerialize,
   encodeUtf8,
+  toBufferSource,
+  utf8ToBytes,
 } from '../util.js';
 
-const { cipher, util } = forge;
+const GCM_TAG_LENGTH_BYTES = 16;
+
+const toBytes = (value: any): Uint8Array =>
+  typeof value === 'string' ? binaryStringToBytes(value) : new Uint8Array(value);
 
 export async function decryptWithKeyDerivedFromString({
   serialized,
@@ -55,7 +60,7 @@ export async function decryptWithKey({
     const strategy = strategyToAlgorithm(encryptionStrategy);
 
     try {
-      const decrypted = decryptWithKeyUsingArtefacts(
+      const decrypted = await decryptWithKeyUsingArtefacts(
         legacyKey ? legacyKey : key,
         data,
         strategy,
@@ -103,32 +108,43 @@ function _deriveKeyWithOptions({
   return derivedKeyOptions.deriveKey(key, encodingVersion);
 }
 
-export function decryptWithKeyUsingArtefacts(
+export async function decryptWithKeyUsingArtefacts(
   key: EncryptionKey,
   encryptedData: any,
   strategy: CipherStrategy,
   { iv, at, ad }: IEncryptionArtifacts
-): Buffer | null {
+): Promise<Buffer | null> {
   if (encryptedData === '') {
     return null;
   }
-  // @ts-expect-error node-forge createDecipher accepts Uint8Array at runtime
-  const decipher = cipher.createDecipher(strategy, util.createBuffer(key.bytes));
-  const tagLength = 128;
-  const tag = util.createBuffer(at); // authentication tag from encryption
-  const encrypted = util.createBuffer(encryptedData);
-  decipher.start({
-    iv: util.createBuffer(iv),
-    additionalData: ad,
-    tagLength,
-    tag,
-  });
-  decipher.update(encrypted);
-  const pass = decipher.finish();
-  // pass is false if there was a failure (eg: authentication tag didn't match)
-  if (pass) {
-    return binaryStringToBytesBuffer(decipher.output.data);
-  }
 
-  throw new Error('Decryption failed');
+  const ciphertext = binaryStringToBytes(encryptedData);
+  const tag = toBytes(at);
+  const encryptedWithTag = new Uint8Array(ciphertext.length + tag.length);
+  encryptedWithTag.set(ciphertext);
+  encryptedWithTag.set(tag, ciphertext.length);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    toBufferSource(key.bytes),
+    strategy,
+    false,
+    ['decrypt']
+  );
+
+  try {
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: strategy,
+        iv: toBufferSource(toBytes(iv)),
+        additionalData: toBufferSource(utf8ToBytes(ad)),
+        tagLength: GCM_TAG_LENGTH_BYTES * 8,
+      },
+      cryptoKey,
+      toBufferSource(encryptedWithTag)
+    );
+    return binaryStringToBytesBuffer(bytesToBinaryString(new Uint8Array(decrypted)));
+  } catch {
+    throw new Error('Decryption failed');
+  }
 }

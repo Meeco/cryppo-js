@@ -1,7 +1,10 @@
-import forge from 'node-forge';
-import { binaryStringToBytes, bytesToBinaryString, decodeSafe64, encodeSafe64 } from './util.js';
-
-const { random } = forge;
+import {
+  binaryStringToBytes,
+  bytesToBinaryString,
+  decodeSafe64,
+  encodeSafe64,
+  generateRandomBytesString,
+} from './util.js';
 
 /**
  * SymmetricKey that can be used to encrypt and decrypt data
@@ -20,7 +23,7 @@ export class EncryptionKey {
   }
 
   public static generateRandom(length: number = 32) {
-    return new EncryptionKey(binaryStringToBytes(random.getBytesSync(length)));
+    return new EncryptionKey(binaryStringToBytes(generateRandomBytesString(length)));
   }
 
   private static checkStringValue(value: string) {
