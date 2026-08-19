@@ -1,11 +1,21 @@
 # Changelog
 
-## 3.0.3 - UNRELEASED
-
-### Changed
+## 4.0.0 (19.08.2026)
 
 - Typescript upgraded from 5.9.3 to 6.0.3
-
+- **BREAKING**: Replaced `node-forge` with native WebCrypto (`globalThis.crypto.subtle`) for every cryptographic primitive — AES-256-GCM, PBKDF2-HMAC-SHA256, RSA-OAEP, RSA-PKCS1v15/SHA-256 signing, HMAC-SHA256, and random byte generation. `node-forge` and `@types/node-forge` are no longer dependencies. Works unpolyfilled in Node ≥22 and modern browsers. Verified byte-for-byte compatible with the Ruby and Elixir cryppo ports against the full `compat.json` fixture suite.
+- **BREAKING**: The following functions are now `async` (return a `Promise`) since WebCrypto's API is Promise-based, where they were previously synchronous:
+  - `signWithPrivateKey`
+  - `verifyWithPublicKey`
+  - `keyLengthFromPublicKeyPem`
+  - `keyLengthFromPrivateKeyPem`
+  - `hmacSha256Digest`
+  - `encryptWithKeyUsingArtefacts`
+  - `decryptWithKeyUsingArtefacts`
+- **BREAKING**: Removed `encryptPrivateKeyWithPassword` and the `password` parameter from `decryptWithPrivateKey`/`decryptSerializedWithPrivateKey`. This password-protected an RSA private key PEM as a PKCS#8 `EncryptedPrivateKeyInfo`/PBES2 structure, which WebCrypto has no API to build or parse. Neither the Ruby (`cryppo`) nor Elixir (`cryppo_ex`) port has an equivalent feature, so this was cryppo-js-only with no cross-port interop to preserve.
+- PBKDF2 key derivation and RSA operations (key generation, encryption, signing) are now dramatically faster, since they run on native implementations instead of forge's pure-JS ones. Measured against this repo, comparing the last pre-migration commit to this release:
+  - **`npm test`**: ~37s → ~2.9s (~12.6x faster) — dominated by PBKDF2 and RSA key generation moving off forge's pure-JS implementations.
+  - **Production bundle size** (this package's `dist/esm` bundled and minified with esbuild, as a consumer's bundler would): 499,807 bytes → 215,707 bytes (~57% smaller); gzipped, 139,927 bytes → 65,042 bytes (~54% smaller). (The unbundled `dist/` output itself is slightly larger, 152 KiB → 182 KiB, since `node-forge` lived in `node_modules` rather than `dist` and new DER-conversion code was added — the bundle size above is the number that matters for consumers.)
 
 ## 3.0.2 (14.08.2026)
 
