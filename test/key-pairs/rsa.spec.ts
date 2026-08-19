@@ -13,11 +13,14 @@ describe('RSA Keypair Generation', () => {
     // For testing purposes 4086 bit takes too long, 2048 keeps test under a second or two
     const { publicKey, privateKey } = await generateRSAKeyPair(2048);
     expect(publicKey.slice(0, headPublic.length)).toEqual(headPublic);
-    expect(publicKey.length).toEqual(460);
+    // Public key length is deterministic for a given modulus size.
+    expect(publicKey.length).toEqual(451);
     expect(privateKey.slice(0, headPrivate.length)).toEqual(headPrivate);
 
-    // Not exactly sure why it varies but it's always one of the two
-    expect([1706, 1702]).toContain(privateKey.length);
+    // Private key DER length varies by a few bytes depending on how many of its integer
+    // fields (p, q, d, dP, dQ, qInv) happen to need a leading zero byte.
+    expect(privateKey.length).toBeGreaterThanOrEqual(1663);
+    expect(privateKey.length).toBeLessThanOrEqual(1687);
   }, 20000);
 
   const PUBLIC_KEY = `

@@ -3,10 +3,13 @@ import { Buffer as _buffer } from 'buffer';
 import forge from 'node-forge';
 import type { pki as ForgePki } from 'node-forge';
 import { parse as yamlParse, stringify as yamlStringify } from 'yaml';
+import { pemToDer } from './der.js';
 import { IEncryptionArtifacts } from './encryption/encryption.js';
 import { ICryppoSerializationArtifacts, IDerivedKey } from './key-derivation/derived-key.js';
 import { SerializationFormat } from './serialization-versions.js';
 
+// keyLengthFromPrivateKeyPem below still uses forge's RSA PEM parsing; it migrates to WebCrypto
+// alongside the rest of src/signing/rsa-signature.ts.
 const { pki } = forge;
 
 // 65 is the version byte for encryption artefacts encoded with BSON
@@ -244,13 +247,15 @@ export function generateEncryptionVerificationArtifacts() {
   };
 }
 
-export function keyLengthFromPublicKeyPem(publicKeyPem: string) {
-  const pk = pki.publicKeyFromPem(publicKeyPem) as ForgePki.rsa.PublicKey;
-  // Undocumented functionality but was the only way I could find to get
-  // key length out of the public key.
-  // https://github.com/digitalbazaar/forge/blob/master/lib/rsa.js#L1244
-  const bitLength = (pk.n as any).bitLength();
-  return bitLength;
+export async function keyLengthFromPublicKeyPem(publicKeyPem: string): Promise<number> {
+  const key = await crypto.subtle.importKey(
+    'spki',
+    toBufferSource(pemToDer(publicKeyPem)),
+    { name: 'RSA-OAEP', hash: 'SHA-1' },
+    true,
+    ['encrypt']
+  );
+  return (key.algorithm as RsaHashedKeyAlgorithm).modulusLength;
 }
 
 export function keyLengthFromPrivateKeyPem(privateKey: string) {
