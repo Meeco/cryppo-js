@@ -83,25 +83,13 @@ async function encryptData() {
 
 1. Generate a new key pair
 1. Use the public key to encrypt
-1. Encrypt the private key with a password/phrase (optional)
 1. Decrypt with private key
 
 ```ts
-import {
-  generateRSAKeyPair,
-  encryptWithPublicKey,
-  decryptWithPrivateKey,
-  encryptPrivateKeyWithPassword,
-} from '@meeco/cryppo';
+import { generateRSAKeyPair, encryptWithPublicKey, decryptWithPrivateKey } from '@meeco/cryppo';
 
 async function encryptDecryptData() {
   const { publicKey: publicKeyPem, privateKey: privateKeyPem } = await generateRSAKeyPair();
-
-  const encryptedPrivateKeyPem = encryptPrivateKeyWithPassword({
-    privateKeyPem,
-    password: 'Password123!',
-  });
-  // can store encrypted private key
 
   // Note: unlike the symmetric encryption functions above, `data` here is a plain string, not a Uint8Array
   const { encrypted, serialized } = await encryptWithPublicKey({
@@ -109,25 +97,15 @@ async function encryptDecryptData() {
     data: 'My Super Secret Data',
   });
 
-  // Using un-encrypted private key
   const decryptedData = await decryptWithPrivateKey({
     privateKeyPem,
     encrypted,
   });
   console.log(decryptedData); // 'My Super Secret Data'
-
-  // Using encrypted private key and password
-  const decryptedDataWithEncryptedPrivateKey = await decryptWithPrivateKey({
-    privateKeyPem: encryptedPrivateKeyPem,
-    password: 'Password123!',
-    encrypted,
-  });
-
-  console.log(decryptedDataWithEncryptedPrivateKey); // 'My Super Secret Data'
 }
 ```
 
-`serialized` is the portable string form (as produced by the symmetric functions above); to decrypt from that directly, use `decryptSerializedWithPrivateKey({ privateKeyPem, password?, serialized })` instead of extracting `encrypted` yourself.
+`serialized` is the portable string form (as produced by the symmetric functions above); to decrypt from that directly, use `decryptSerializedWithPrivateKey({ privateKeyPem, serialized })` instead of extracting `encrypted` yourself.
 
 ## Decryption
 

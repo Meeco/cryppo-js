@@ -15,7 +15,7 @@ export enum CipherStrategy {
 
 /*
  * Convert an algorithm from a serialized payload (e.g Aes256Gcm.data.artifacts) in the ruby lib's naming
- * scheme to one that can be used by forge
+ * scheme to WebCrypto's algorithm name (e.g. AES-GCM)
  */
 export const strategyToAlgorithm = (algorithm: string): CipherStrategy =>
   algorithm
