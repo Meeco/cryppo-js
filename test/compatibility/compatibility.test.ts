@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import forge from 'node-forge';
 import { join } from 'path';
 import {
   CipherStrategy,
@@ -19,8 +18,6 @@ import {
   utf8ToBytes,
 } from '../../src/util';
 import Compat from './compat.json';
-
-const { util } = forge;
 
 describe('compatiblity test for all cryppo port', () => {
   Object.values(Compat.encryption_with_derived_key).forEach((objToValidate: any, index) => {
@@ -98,8 +95,7 @@ describe('Backwards and forwards copmatibility', () => {
     // Prints as 'Helloøã'
     const expected = decodeSafe64('SGVsbG_44wA=');
 
-    // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
-    expect(util.createBuffer(decrypted!).data).toEqual(expected);
+    expect(bytesToBinaryString(decrypted!)).toEqual(expected);
   });
 
   it('Can encrypt and derypt strings with multi-byte characters', async () => {

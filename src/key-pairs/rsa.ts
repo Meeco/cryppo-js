@@ -1,5 +1,3 @@
-import forge from 'node-forge';
-import type { pki as ForgePki } from 'node-forge';
 import { derToPem, pemToDer, pkcs1ToPkcs8, pkcs8ToPkcs1 } from '../der.js';
 import { SerializationFormat } from '../serialization-versions.js';
 import {
@@ -14,9 +12,6 @@ import {
 // RSA-OAEP hash: kept at SHA-1 (rather than a modern SHA-256) to stay byte-for-byte compatible
 // with Ruby/Elixir cryppo, which both use OpenSSL/Erlang's legacy RSA-OAEP default of SHA-1.
 const RSA_OAEP_HASH = 'SHA-1';
-
-// The password-protected private key path (below) still uses forge; it's dropped in a later step.
-const { pki } = forge;
 
 export async function generateRSAKeyPair(
   bits = 4096
@@ -42,17 +37,6 @@ export async function generateRSAKeyPair(
     publicKey: derToPem(publicKeyDer, 'PUBLIC KEY'),
     bits,
   };
-}
-
-export function encryptPrivateKeyWithPassword({
-  privateKeyPem,
-  password,
-}: {
-  privateKeyPem: string;
-  password: string;
-}) {
-  const privateKey = pki.privateKeyFromPem(privateKeyPem);
-  return pki.encryptRsaPrivateKey(privateKey, password);
 }
 
 export async function encryptWithPublicKey(
@@ -101,19 +85,16 @@ export type RsaEncryptionScheme = 'RSA-OAEP';
 // | undefined;
 
 export async function decryptSerializedWithPrivateKey({
-  password,
   privateKeyPem,
   serialized,
   scheme = 'RSA-OAEP',
 }: {
-  password?: string;
   privateKeyPem: string;
   serialized: string;
   scheme?: RsaEncryptionScheme;
 }) {
   const encrypted = deSerialize(serialized).decodedPairs[0];
   return decryptWithPrivateKey({
-    password,
     privateKeyPem,
     encrypted,
     scheme,
@@ -121,22 +102,14 @@ export async function decryptSerializedWithPrivateKey({
 }
 
 export async function decryptWithPrivateKey({
-  password,
   privateKeyPem,
   encrypted,
-  scheme = 'RSA-OAEP',
+  scheme: _scheme = 'RSA-OAEP',
 }: {
-  password?: string;
   privateKeyPem: string;
   encrypted: string;
   scheme?: RsaEncryptionScheme;
 }) {
-  if (password !== undefined) {
-    // Password-protected private key PEMs are still forge-only; dropped in a later step.
-    const pk = pki.decryptRsaPrivateKey(privateKeyPem, password) as ForgePki.rsa.PrivateKey;
-    return pk.decrypt(encrypted, scheme);
-  }
-
   const cryptoKey = await crypto.subtle.importKey(
     'pkcs8',
     toBufferSource(pkcs1ToPkcs8(pemToDer(privateKeyPem))),

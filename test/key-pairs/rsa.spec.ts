@@ -1,6 +1,5 @@
 import {
   decryptWithPrivateKey,
-  encryptPrivateKeyWithPassword,
   encryptWithPublicKey,
   generateRSAKeyPair,
 } from '../../src/key-pairs/rsa';
@@ -66,16 +65,6 @@ describe('RSA Keypair Generation', () => {
   `;
   const SECRET = `We have no potatoes`;
 
-  it('encrypts and decrypts private keys with passwords', () => {
-    const password = `I ain't sayin' nothin'`;
-    const encrypted = encryptPrivateKeyWithPassword({
-      privateKeyPem: PRIVATE_KEY,
-      password,
-    });
-    const headEncrypted = `-----BEGIN ENCRYPTED PRIVATE KEY-----`;
-    expect(encrypted.slice(0, headEncrypted.length)).toEqual(headEncrypted);
-  });
-
   Object.values(SerializationFormat).forEach((version) => {
     it(`encrypts data with public keys with ${version}`, async () => {
       const encrypted = await encryptWithPublicKey(
@@ -100,28 +89,6 @@ describe('RSA Keypair Generation', () => {
       const decrypted = await decryptWithPrivateKey({
         encrypted,
         privateKeyPem: PRIVATE_KEY,
-      });
-      expect(decrypted).toEqual(SECRET);
-    });
-
-    it(`decrypts data with private keys that have a password with ${version}`, async () => {
-      const password = `I ain't sayin' nothin'`;
-      const encryptedKey = encryptPrivateKeyWithPassword({
-        privateKeyPem: PRIVATE_KEY,
-        password,
-      });
-      const result = await encryptWithPublicKey(
-        {
-          publicKeyPem: PUBLIC_KEY,
-          data: SECRET,
-        },
-        version
-      );
-      const { encrypted } = result;
-      const decrypted = await decryptWithPrivateKey({
-        encrypted,
-        password,
-        privateKeyPem: encryptedKey,
       });
       expect(decrypted).toEqual(SECRET);
     });

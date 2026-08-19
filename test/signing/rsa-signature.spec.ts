@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import forge from 'node-forge';
 import { join } from 'path';
 import { generateRSAKeyPair } from '../../src/key-pairs/rsa';
 import {
@@ -11,10 +10,9 @@ import {
   binaryStringToBytes,
   bytesToBinaryString,
   encodeSafe64,
+  encodeUtf8,
   utf8ToBytes,
 } from '../../src/util';
-
-const { util } = forge;
 
 describe('signing', () => {
   const data =
@@ -23,7 +21,7 @@ describe('signing', () => {
     const keyPair = await generateRSAKeyPair(2048);
     const signatureObj = await signWithPrivateKey(keyPair.privateKey, utf8ToBytes(data));
     const serializedPayload = signatureObj.serialized;
-    expect(serializedPayload.split('.')[3]).toEqual(encodeSafe64(util.encodeUtf8(data)));
+    expect(serializedPayload.split('.')[3]).toEqual(encodeSafe64(encodeUtf8(data)));
     expect(serializedPayload).toMatch(/Rsa2048\./);
   }, 40000);
   it('can load a signature then verify it', async () => {
