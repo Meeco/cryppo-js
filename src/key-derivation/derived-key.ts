@@ -1,4 +1,3 @@
-import forge from 'node-forge';
 import { EncodingVersions } from '../encoding-versions.js';
 import { EncryptionKey } from '../encryption-key.js';
 import { SerializationFormat } from '../serialization-versions.js';
@@ -8,10 +7,10 @@ import {
   bytesBufferToBinaryString,
   deSerializeDerivedKeyOptions,
   encodeUtf8,
+  generateRandomBytesString,
   serializeDerivedKeyOptions,
+  toBufferSource,
 } from '../util.js';
-
-const { md, pkcs5, random } = forge;
 
 /**
  * Most of these values are copied directly from the Ruby library
@@ -72,7 +71,7 @@ export class DerivedKeyOptions implements IDerivedKey {
   }: IRandomKeyOptions) {
     const variance = Math.floor(minIterations * (iterationVariance / 100));
     const iterations = minIterations + Math.floor(Math.random() * variance);
-    const salt = useSalt || random.getBytesSync(DEFAULT_SALT_LENGTH);
+    const salt = useSalt || generateRandomBytesString(DEFAULT_SALT_LENGTH);
     return new DerivedKeyOptions({
       strategy,
       iterations,
@@ -125,27 +124,30 @@ export class DerivedKeyOptions implements IDerivedKey {
     );
   }
 
-  public deriveKey(
+  public async deriveKey(
     key: string,
     encodingVersion: EncodingVersions = EncodingVersions.latest_version
   ): Promise<EncryptionKey> {
-    const hash: string = this.hash.toLocaleLowerCase();
-    const digest = md[hash as 'sha256'].create();
-    key = encodingVersion === EncodingVersions.legacy ? key : encodeUtf8(key);
-    return new Promise((resolve, reject) => {
-      return pkcs5.pbkdf2(
-        key,
-        this.salt,
-        this.iterations,
-        this.length,
-        digest,
-        (err, derivedKey) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(EncryptionKey.fromBytes(binaryStringToBytes(derivedKey!)));
-        }
-      );
-    });
+    const hashName = this.hash.replace(/^SHA(\d+)$/i, 'SHA-$1');
+    const keyBinaryString = encodingVersion === EncodingVersions.legacy ? key : encodeUtf8(key);
+
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      toBufferSource(binaryStringToBytes(keyBinaryString)),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+    const derivedBits = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: toBufferSource(binaryStringToBytes(this.salt)),
+        iterations: this.iterations,
+        hash: hashName,
+      },
+      keyMaterial,
+      this.length * 8
+    );
+    return EncryptionKey.fromBytes(new Uint8Array(derivedBits));
   }
 }
