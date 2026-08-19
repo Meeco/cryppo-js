@@ -7,22 +7,29 @@ import { IEncryptionArtifacts } from './encryption/encryption.js';
 import { ICryppoSerializationArtifacts, IDerivedKey } from './key-derivation/derived-key.js';
 import { SerializationFormat } from './serialization-versions.js';
 
-const { pki, random, util } = forge;
+const { pki } = forge;
 
 // 65 is the version byte for encryption artefacts encoded with BSON
 const ENCRYPTION_ARTEFACTS_CURRENT_VERSION = 'A';
 // 75 is the version byte for derivation artefacts encoded with BSON
 const DERIVATION_ARTEFACTS_CURRENT_VERSION = 'K';
 
-/**
- * Wrapping some node-forge utils in case we ever need to replace it
- */
-export const encode64 = util.encode64;
-export const decode64 = util.decode64;
-export const encodeUtf8 = util.encodeUtf8;
-export const utf8ToBytes = util.text.utf8.encode;
-export const utf16ToBytes = util.text.utf16.encode;
-export const binaryStringToBytes = util.binary.raw.decode;
+export const encode64 = (data: string) => _buffer.from(data, 'binary').toString('base64');
+export const decode64 = (base64: string) => _buffer.from(base64, 'base64').toString('binary');
+export const encodeUtf8 = (data: string) => _buffer.from(data, 'utf8').toString('binary');
+export const utf8ToBytes = (data: string) => new TextEncoder().encode(data);
+
+export const utf16ToBytes = (data: string) => {
+  const bytes = new Uint8Array(data.length * 2);
+  const view = new DataView(bytes.buffer);
+  for (let i = 0; i < data.length; i++) {
+    view.setUint16(i * 2, data.charCodeAt(i), true);
+  }
+  return bytes;
+};
+
+export const binaryStringToBytes = (value: string) =>
+  Uint8Array.from(value, (c) => c.charCodeAt(0));
 
 export const bytesToBinaryString = (bytes: Uint8Array) => {
   let binary = '';
@@ -43,22 +50,15 @@ export const bytesToUtf16 = (bytes: Uint8Array) => {
   return binary;
 };
 
-export const bytesToUtf8 = (bytes: Uint8Array) => {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return util.decodeUtf8(binary);
-};
+export const bytesToUtf8 = (bytes: Uint8Array) => new TextDecoder('utf-8').decode(bytes);
 
 export const binaryStringToBytesBuffer = (value: string) =>
-  _buffer.from(util.binary.raw.decode(value));
+  _buffer.from(binaryStringToBytes(value));
 export const bytesBufferToBinaryString = (val: Buffer | Uint8Array | ArrayBuffer) =>
-  // @ts-expect-error node-forge createBuffer accepts Uint8Array at runtime
-  util.createBuffer(val).data;
+  bytesToBinaryString(val instanceof ArrayBuffer ? new Uint8Array(val) : val);
 
-export const generateRandomBytesString = (length = 32) => random.getBytesSync(length);
+export const generateRandomBytesString = (length = 32) =>
+  bytesToBinaryString(crypto.getRandomValues(new Uint8Array(length)));
 
 export function serializeDerivedKeyOptions(
   strategy: string,
@@ -228,8 +228,8 @@ export function decodeDerivationArtifacts(encoded: string): any {
  * Returns some base64 encoded random bytes that can be used for encryption verification.
  */
 export function generateEncryptionVerificationArtifacts() {
-  const token = random.getBytesSync(16);
-  const salt = random.getBytesSync(16);
+  const token = generateRandomBytesString(16);
+  const salt = generateRandomBytesString(16);
   return {
     token: encodeSafe64(token),
     salt: encodeSafe64(salt),
