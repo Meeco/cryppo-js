@@ -21,6 +21,15 @@ Works in both Node.js and the browser — a small polyfill in `src/index.ts` set
 npm install @meeco/cryppo
 ```
 
+### Upgrading from v3 to v4
+
+v4 replaced `node-forge` with native WebCrypto — see the `CHANGELOG.md` 4.0.0 entry for what
+changed. If you use [Claude Code](https://claude.com/claude-code), this package ships a skill
+that automates most of the mechanical parts of the upgrade (adding `await` at now-async call
+sites, flagging removed password-protected-key usage for manual review): copy
+`node_modules/@meeco/cryppo/.claude/skills/cryppo-migrate-v3-to-v4/` into your own project's
+`.claude/skills/`, then ask Claude to "migrate to cryppo v4".
+
 ## Run the demo page
 
 - `npm install`
