@@ -19,7 +19,11 @@ async function benchPbkdf2(iterations: number, runs: number) {
   let total = 0;
   for (let i = 0; i < runs; i++) {
     const t0 = performance.now();
-    await generateDerivedKey({ passphrase: 'correct horse battery staple', minIterations: iterations, iterationVariance: 0 });
+    await generateDerivedKey({
+      passphrase: 'correct horse battery staple',
+      minIterations: iterations,
+      iterationVariance: 0,
+    });
     total += performance.now() - t0;
   }
   const avg = total / runs;
