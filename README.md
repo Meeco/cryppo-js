@@ -6,7 +6,14 @@ Works in both Node.js and the browser — a small polyfill in `src/index.ts` set
 
 ## Requirements
 
-- Node.js `>=22.0.0`
+- Node.js `>=22.0.0` — comfortably above the `>=19.0.0` (October 2022) this library's use of `crypto.subtle` as a global actually needs (unflagged and stable there); the `>=22` requirement predates this and isn't specific to WebCrypto.
+- In the browser: the [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) (`crypto.subtle`), which this library uses directly for every cryptographic operation. Support for it is essentially universal in browsers actually in use today — per [MDN](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto)/[caniuse](https://caniuse.com/cryptography), it only excludes browsers that are a decade or more old:
+  - Chrome/Edge (Chromium) `>=37` (August 2014), Firefox `>=34` (December 2014)
+  - Safari (desktop) `>=11` (September 2017)
+  - iOS Safari `>=11` (September 2017) — this applies to all iOS browsers, since they all share WebKit/Safari's engine
+  - Android `>=5.0` "Lollipop" (November 2014), via Chrome for Android or a reasonably up-to-date WebView
+  - Not supported: Internet Explorer (its `msCrypto` implementation predates Promises)
+  - It's also only available in [secure contexts](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts) (HTTPS, or `localhost`) — routine for any modern web app.
 
 ## Installation
 
