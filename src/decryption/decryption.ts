@@ -1,3 +1,4 @@
+import { Buffer as _buffer } from 'buffer';
 import { EncodingVersions } from '../encoding-versions.js';
 import { EncryptionKey } from '../encryption-key.js';
 import { IEncryptionArtifacts } from '../encryption/encryption.js';
@@ -5,7 +6,6 @@ import { DerivedKeyOptions } from '../key-derivation/derived-key.js';
 import { CipherStrategy, strategyToAlgorithm } from '../strategies.js';
 import {
   binaryStringToBytes,
-  binaryStringToBytesBuffer,
   bytesToBinaryString,
   deSerialize,
   encodeUtf8,
@@ -143,7 +143,7 @@ export async function decryptWithKeyUsingArtefacts(
       cryptoKey,
       toBufferSource(encryptedWithTag)
     );
-    return binaryStringToBytesBuffer(bytesToBinaryString(new Uint8Array(decrypted)));
+    return _buffer.from(decrypted);
   } catch {
     throw new Error('Decryption failed');
   }
