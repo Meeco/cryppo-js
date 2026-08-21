@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.3 - UNRELEASED
+
+### Changed
+
+- Typescript upgraded from 5.9.3 to 6.0.3
+
+
 ## 3.0.2 (14.08.2026)
 
 - README.md improved: fixed inaccurate/broken code examples, added Installation, Requirements, License, and API overview sections
