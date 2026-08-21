@@ -3,7 +3,9 @@
 ## 4.0.0 (19.08.2026)
 
 - Typescript upgraded from 5.9.3 to 6.0.3
-- **BREAKING**: Replaced `node-forge` with native WebCrypto (`globalThis.crypto.subtle`) for every cryptographic primitive — AES-256-GCM, PBKDF2-HMAC-SHA256, RSA-OAEP, RSA-PKCS1v15/SHA-256 signing, HMAC-SHA256, and random byte generation. `node-forge` and `@types/node-forge` are no longer dependencies. Works unpolyfilled in Node ≥22 and modern browsers. Verified byte-for-byte compatible with the Ruby and Elixir cryppo ports against the full `compat.json` fixture suite.
+- **BREAKING**: Replaced `node-forge` with native WebCrypto (`globalThis.crypto.subtle`) for every cryptographic primitive — AES-256-GCM, PBKDF2-HMAC-SHA256, RSA-OAEP, RSA-PKCS1v15/SHA-256 signing, HMAC-SHA256, and random byte generation. `node-forge` and `@types/node-forge` are no longer dependencies. Verified byte-for-byte compatible with the Ruby and Elixir cryppo ports against the full `compat.json` fixture suite.
+- Note: as a consequence of using `crypto.subtle` directly, this now requires browser support for the Web Crypto API. In practice this is essentially every browser in current use — Chrome/Edge ≥37 (Aug 2014), Firefox ≥34 (Dec 2014), Safari/iOS Safari ≥11 (Sept 2017), Android ≥5.0 (Nov 2014) — it only excludes browsers a decade or more old (and Internet Explorer, which was never fully supported). See the README's Requirements section for details.
+- Note: on Node, `crypto.subtle` has been a stable, unflagged global since Node 19 (Oct 18, 2022) — comfortably below this package's existing `>=22.0.0` requirement, so nothing changes there.
 - **BREAKING**: The following functions are now `async` (return a `Promise`) since WebCrypto's API is Promise-based, where they were previously synchronous:
   - `signWithPrivateKey`
   - `verifyWithPublicKey`
