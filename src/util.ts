@@ -25,14 +25,24 @@ export const utf16ToBytes = (data: string) => {
   return bytes;
 };
 
-export const binaryStringToBytes = (value: string) =>
-  Uint8Array.from(value, (c) => c.charCodeAt(0));
+export const binaryStringToBytes = (value: string) => {
+  const len = value.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = value.charCodeAt(i);
+  }
+  return bytes;
+};
+
+// Chunk size kept comfortably under engines' arguments-array limits for Function.prototype.apply.
+const BYTES_TO_BINARY_STRING_CHUNK_SIZE = 0x8000;
 
 export const bytesToBinaryString = (bytes: Uint8Array) => {
   let binary = '';
   const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
+  for (let i = 0; i < len; i += BYTES_TO_BINARY_STRING_CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, i + BYTES_TO_BINARY_STRING_CHUNK_SIZE) as unknown as number[];
+    binary += String.fromCharCode.apply(null, chunk);
   }
   return binary;
 };
