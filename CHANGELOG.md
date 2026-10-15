@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.0.1 (15.10.2026)
+
+- Upgrade vitest 4 → 5, vite 8.2 → 8.3
+- Upgrade @types/node 22.20.1 → 22.20.5 (kept on the 22.x line to match the minimum supported Node version)
+- Refresh lockfile: eslint 10.8 → 10.12, typescript-eslint 8.67 → 8.71, prettier 3.9.6 → 3.9.10
+- Fix high-severity `npm audit` advisories in `brace-expansion` (dev-only, via eslint) by updating it 5.0.9 → 5.0.12
+- Deny the `fsevents` install script via `allowScripts` in `package.json` to silence npm's install-scripts warning (it ships a prebuilt binary, so no script needs to run)
+
 ## 4.0.0 (19.08.2026)
 
 - **BREAKING**: Replaced `node-forge` with native WebCrypto (`globalThis.crypto.subtle`) for every cryptographic primitive — AES-256-GCM, PBKDF2-HMAC-SHA256, RSA-OAEP, RSA-PKCS1v15/SHA-256 signing, HMAC-SHA256, and random byte generation. `node-forge` and `@types/node-forge` are no longer dependencies. Verified byte-for-byte compatible with the Ruby and Elixir cryppo ports against the full `compat.json` fixture suite.
